@@ -20,7 +20,7 @@ CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
             -Wdouble-promotion -Wshadow
 
 # Language
-CXXFLAGS += -std=c++17
+CXXFLAGS += -std=c++14
 
 # Includes
 INCLUDES += -I.. -I$(CUDA_HOME)/include
