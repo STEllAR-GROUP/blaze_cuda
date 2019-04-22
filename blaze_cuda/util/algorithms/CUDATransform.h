@@ -32,20 +32,24 @@
 */
 //=================================================================================================
 
+#ifndef _BLAZE_CUDA_UTIL_ALGORITHMS_CUDATRANSFORM_H_
+#define _BLAZE_CUDA_UTIL_ALGORITHMS_CUDATRANSFORM_H_
 
 namespace blaze{
 
    template<typename InputIt, typename OutputIt, typename F>
-   inline void __global__ _cuda_transform_impl(InputIt in_begin, OutputIt out_begin, F f)
+   inline void __global__ _cuda_transform_impl( InputIt in_begin, OutputIt out_begin, F f )
    {
       auto const id = threadIdx.x;
-      out_begin[id] = f(in_begin[id]);
+      out_begin[ id ] = f( in_begin[ id ] );
    }
 
    template<typename InputIt, typename OutputIt, typename F>
-   inline void cuda_transform(InputIt in_begin, InputIt in_end, OutputIt out_begin, F const& f)
+   inline void cuda_transform( InputIt in_begin, InputIt in_end, OutputIt out_begin, F const& f )
    {
-      _cuda_transform_impl<<<1, in_end - in_begin>>>(in_begin, out_begin, f);
+      _cuda_transform_impl<<<1, in_end - in_begin>>>( in_begin, out_begin, f );
    }
 
 }
+
+#endif
