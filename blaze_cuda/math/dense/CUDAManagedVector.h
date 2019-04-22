@@ -1624,8 +1624,8 @@ inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
    -> EnableIf_t< IsCUDAEnabled_v<VT> >
 {
    // CUDA assignment kernel
-   transform( rhs.begin(), rhs.end(), begin()
-            , [] __device__ ( auto const& elmt ){ return elmt; } );
+   cuda_transform ( rhs.begin(), rhs.end(), begin()
+                  , [] __device__ ( auto const& elmt ){ return elmt; } );
 }
 
 template< typename Type  // Data type of the vector
