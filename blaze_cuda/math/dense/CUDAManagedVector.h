@@ -1623,9 +1623,7 @@ template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
    -> EnableIf_t< IsCUDAEnabled_v<VT> >
 {
-   // CUDA assignment kernel
-   cuda_transform ( rhs.begin(), rhs.end(), begin()
-                  , [] __device__ ( auto const& elmt ){ return elmt; } );
+   cuda_copy ( rhs.begin(), rhs.end(), begin() );
 }
 
 template< typename Type  // Data type of the vector
@@ -1634,9 +1632,8 @@ template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
    -> DisableIf_t< IsCUDAEnabled_v<VT> >
 {
-   // Non-CUDA assignment kernel
-   (void)rhs;
-   // TODO
+   using std::copy;
+   copy( rhs.begin(), rhs.end(), begin() );
 }
 
 
