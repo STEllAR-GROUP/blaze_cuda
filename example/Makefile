@@ -44,7 +44,8 @@ dump: $(NAME)
 	objdump -dC $(NAME) > $(NAME).asm
 
 remote: $(NAME)
-	scp $(NAME) jpenuchot-workstation:~/.remote/$(NAME)
-	ssh jpenuchot-workstation ~/.remote/$(NAME)
+	ssh $(REMOTE_EXEC_HOST) mkdir -p $(REMOTE_EXEC_PATH)
+	scp $(NAME) $(REMOTE_EXEC_HOST):$(REMOTE_EXEC_PATH)/$(NAME)
+	ssh $(REMOTE_EXEC_HOST) $(REMOTE_EXEC_PATH)/$(NAME)
 
-.PHONY: all clean slurm run dump
+.PHONY: all clean remote run dump
