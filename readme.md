@@ -16,7 +16,7 @@ The `example` folder provides a simple `Makefile` that can be used as a referenc
 
 * [X] Implementing a base CUDA allocated vector type
 * [X] Base assign function implementation for vector type
-* [ ] Extending Blaze's type_trait library to support CUDA
+* [ ] Extending Blaze's type_trait library to integrate CUDAManagedVector into Blaze
 * [ ] Annotating existing Blaze iterators to support CUDA
 * [ ] Extending functionality to matrices
 * [ ] Extending functionality to tensors
