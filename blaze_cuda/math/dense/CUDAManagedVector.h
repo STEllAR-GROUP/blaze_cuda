@@ -263,18 +263,18 @@ class CUDAManagedVector
    //**Data access functions***********************************************************************
    /*!\name Data access functions */
    //@{
-   inline __host__ __device__ Reference              operator[]( size_t index ) noexcept;
-   inline __host__ __device__ ConstReference         operator[]( size_t index ) const noexcept;
-   inline __host__ __device__ Reference              at( size_t index );
-   inline __host__ __device__ ConstReference         at( size_t index ) const;
-   inline __host__ __device__ Pointer                data  () noexcept;
-   inline __host__ __device__ ConstPointer           data  () const noexcept;
-   inline __host__ __device__ Iterator        begin () noexcept;
-   inline __host__ __device__ ConstIterator   begin () const noexcept;
-   inline __host__ __device__ ConstIterator   cbegin() const noexcept;
-   inline __host__ __device__ Iterator        end   () noexcept;
-   inline __host__ __device__ ConstIterator   end   () const noexcept;
-   inline __host__ __device__ ConstIterator   cend  () const noexcept;
+   inline Reference              operator[]( size_t index ) noexcept;
+   inline ConstReference         operator[]( size_t index ) const noexcept;
+   inline Reference              at( size_t index );
+   inline ConstReference         at( size_t index ) const;
+   inline Pointer                data  () noexcept;
+   inline ConstPointer           data  () const noexcept;
+   inline Iterator        begin () noexcept;
+   inline ConstIterator   begin () const noexcept;
+   inline ConstIterator   cbegin() const noexcept;
+   inline Iterator        end   () noexcept;
+   inline ConstIterator   end   () const noexcept;
+   inline ConstIterator   cend  () const noexcept;
    //@}
    //**********************************************************************************************
 
@@ -302,9 +302,9 @@ class CUDAManagedVector
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline size_t __host__ __device__ size() const noexcept;
-   inline size_t __host__ __device__ spacing() const noexcept;
-   inline size_t __host__ __device__ capacity() const noexcept;
+   inline size_t size() const noexcept;
+   inline size_t spacing() const noexcept;
+   inline size_t capacity() const noexcept;
    inline size_t nonZeros() const;
    inline void   reset();
    inline void   clear();
@@ -644,7 +644,7 @@ inline CUDAManagedVector<Type,TF>::~CUDAManagedVector()
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Reference
+inline typename CUDAManagedVector<Type,TF>::Reference
    CUDAManagedVector<Type,TF>::operator[]( size_t index ) noexcept
 {
    BLAZE_USER_ASSERT( index < size_, "Invalid vector access index" );
@@ -664,7 +664,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Reference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstReference
+inline typename CUDAManagedVector<Type,TF>::ConstReference
    CUDAManagedVector<Type,TF>::operator[]( size_t index ) const noexcept
 {
    BLAZE_USER_ASSERT( index < size_, "Invalid vector access index" );
@@ -685,7 +685,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstReference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Reference
+inline typename CUDAManagedVector<Type,TF>::Reference
    CUDAManagedVector<Type,TF>::at( size_t index )
 {
    if( index >= size_ ) {
@@ -708,7 +708,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Reference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstReference
+inline typename CUDAManagedVector<Type,TF>::ConstReference
    CUDAManagedVector<Type,TF>::at( size_t index ) const
 {
    if( index >= size_ ) {
@@ -728,7 +728,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstReference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Pointer CUDAManagedVector<Type,TF>::data() noexcept
+inline typename CUDAManagedVector<Type,TF>::Pointer CUDAManagedVector<Type,TF>::data() noexcept
 {
    return v_;
 }
@@ -744,7 +744,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Pointer CUDAMana
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstPointer CUDAManagedVector<Type,TF>::data() const noexcept
+inline typename CUDAManagedVector<Type,TF>::ConstPointer CUDAManagedVector<Type,TF>::data() const noexcept
 {
    return v_;
 }
@@ -758,7 +758,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstPointer CUD
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>::begin() noexcept
+inline typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>::begin() noexcept
 {
    return Iterator( v_ );
 }
@@ -772,7 +772,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Iterator CUDAMan
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::begin() const noexcept
+inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::begin() const noexcept
 {
    return ConstIterator( v_ );
 }
@@ -786,7 +786,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CU
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::cbegin() const noexcept
+inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::cbegin() const noexcept
 {
    return ConstIterator( v_ );
 }
@@ -800,7 +800,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CU
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>::end() noexcept
+inline typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>::end() noexcept
 {
    return Iterator( v_ + size_ );
 }
@@ -814,7 +814,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::Iterator CUDAMan
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::end() const noexcept
+inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::end() const noexcept
 {
    return ConstIterator( v_ + size_ );
 }
@@ -828,7 +828,7 @@ inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CU
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::cend() const noexcept
+inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::cend() const noexcept
 {
    return ConstIterator( v_ + size_ );
 }
@@ -1197,7 +1197,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator%=( const
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ size_t CUDAManagedVector<Type,TF>::size() const noexcept
+inline size_t CUDAManagedVector<Type,TF>::size() const noexcept
 {
    return size_;
 }
@@ -1214,7 +1214,7 @@ inline __host__ __device__ size_t CUDAManagedVector<Type,TF>::size() const noexc
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ size_t CUDAManagedVector<Type,TF>::spacing() const noexcept
+inline size_t CUDAManagedVector<Type,TF>::spacing() const noexcept
 {
    return addPadding( size_ );
 }
@@ -1228,7 +1228,7 @@ inline __host__ __device__ size_t CUDAManagedVector<Type,TF>::spacing() const no
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline __host__ __device__ size_t CUDAManagedVector<Type,TF>::capacity() const noexcept
+inline size_t CUDAManagedVector<Type,TF>::capacity() const noexcept
 {
    return capacity_;
 }
@@ -2087,7 +2087,9 @@ struct MultTraitEval2< T1, T2
                      , EnableIf_t< IsDenseVector_v<T1> &&
                                    IsNumeric_v<T2> &&
                                    ( Size_v<T1,0UL> == DefaultSize_v ) &&
-                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) > >
+                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
+                                   IsCUDAEnabled_v<T1> &&
+                                   IsCUDAEnabled_v<T2> > >
 {
    using ET1 = ElementType_t<T1>;
 
@@ -2099,7 +2101,9 @@ struct MultTraitEval2< T1, T2
                      , EnableIf_t< IsNumeric_v<T1> &&
                                    IsDenseVector_v<T2> &&
                                    ( Size_v<T2,0UL> == DefaultSize_v ) &&
-                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
+                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) &&
+                                   IsCUDAEnabled_v<T1> &&
+                                   IsCUDAEnabled_v<T2> > >
 {
    using ET2 = ElementType_t<T2>;
 
@@ -2115,7 +2119,9 @@ struct MultTraitEval2< T1, T2
                                    ( Size_v<T1,0UL> == DefaultSize_v ) &&
                                    ( Size_v<T2,0UL> == DefaultSize_v ) &&
                                    ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
-                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
+                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) &&
+                                   IsCUDAEnabled_v<T1> &&
+                                   IsCUDAEnabled_v<T2> > >
 {
    using ET1 = ElementType_t<T1>;
    using ET2 = ElementType_t<T2>;
@@ -2131,7 +2137,9 @@ struct MultTraitEval2< T1, T2
                                    ( Size_v<T1,0UL> == DefaultSize_v &&
                                      ( !IsSquare_v<T1> || Size_v<T2,0UL> == DefaultSize_v ) ) &&
                                    ( MaxSize_v<T1,0UL> == DefaultMaxSize_v &&
-                                     ( !IsSquare_v<T1> || MaxSize_v<T2,0UL> == DefaultMaxSize_v ) ) > >
+                                     ( !IsSquare_v<T1> || MaxSize_v<T2,0UL> == DefaultMaxSize_v ) ) &&
+                                   IsCUDAEnabled_v<T1> &&
+                                   IsCUDAEnabled_v<T2> > >
 {
    using ET1 = ElementType_t<T1>;
    using ET2 = ElementType_t<T2>;
@@ -2147,7 +2155,9 @@ struct MultTraitEval2< T1, T2
                                    ( Size_v<T2,1UL> == DefaultSize_v &&
                                      ( !IsSquare_v<T2> || Size_v<T1,0UL> == DefaultSize_v ) ) &&
                                    ( MaxSize_v<T2,1UL> == DefaultMaxSize_v &&
-                                     ( !IsSquare_v<T2> || MaxSize_v<T1,0UL> == DefaultMaxSize_v ) ) > >
+                                     ( !IsSquare_v<T2> || MaxSize_v<T1,0UL> == DefaultMaxSize_v ) ) &&
+                                   IsCUDAEnabled_v<T1> &&
+                                   IsCUDAEnabled_v<T2> > >
 {
    using ET1 = ElementType_t<T1>;
    using ET2 = ElementType_t<T2>;
@@ -2183,10 +2193,12 @@ template< typename T1, typename T2 >
 struct DivTraitEval2< T1, T2
                     , EnableIf_t< IsDenseVector_v<T1> &&
                                   IsDenseVector_v<T2> &&
-                                  ( Size_v<T1,0UL> == DefaultSize_v ) &&
-                                  ( Size_v<T2,0UL> == DefaultSize_v ) &&
-                                  ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
-                                  ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
+                                  IsCUDAEnabled_v<T1> &&
+                                  IsCUDAEnabled_v<T2> > >
+                                  //( Size_v<T1,0UL> == DefaultSize_v ) &&
+                                  //( Size_v<T2,0UL> == DefaultSize_v ) &&
+                                  //( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
+                                  //( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
 {
    using ET1 = ElementType_t<T1>;
    using ET2 = ElementType_t<T2>;
@@ -2255,18 +2267,18 @@ struct BinaryMapTraitEval2< T1, T2, OP
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T, typename OP, size_t RF >
-struct PartialReduceTraitEval2< T, OP, RF
-                              , EnableIf_t< IsMatrix_v<T> &&
-                                            ( Size_v<T,0UL> == DefaultSize_v ||
-                                              Size_v<T,1UL> == DefaultSize_v ) &&
-                                            ( MaxSize_v<T,0UL> == DefaultMaxSize_v ||
-                                              MaxSize_v<T,1UL> == DefaultMaxSize_v ) > >
-{
-   static constexpr bool TF = ( RF == 0UL );
-
-   using Type = CUDAManagedVector< ElementType_t<T>, TF >;
-};
+//template< typename T, typename OP, size_t RF >
+//struct PartialReduceTraitEval2< T, OP, RF
+//                              , EnableIf_t< IsMatrix_v<T> &&
+//                                            ( Size_v<T,0UL> == DefaultSize_v ||
+//                                              Size_v<T,1UL> == DefaultSize_v ) &&
+//                                            ( MaxSize_v<T,0UL> == DefaultMaxSize_v ||
+//                                              MaxSize_v<T,1UL> == DefaultMaxSize_v ) > >
+//{
+//   static constexpr bool TF = ( RF == 0UL );
+//
+//   using Type = CUDAManagedVector< ElementType_t<T>, TF >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2320,14 +2332,14 @@ struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename VT >
-struct SubvectorTraitEval2< VT, inf, inf
-                                 , EnableIf_t< IsDenseVector_v<VT> &&
-                                   Size_v<VT,0UL> == DefaultSize_v &&
-                                   MaxSize_v<VT,0UL> == DefaultMaxSize_v > >
-{
-   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
-};
+//template< typename VT >
+//struct SubvectorTraitEval2< VT, inf, inf
+//                                 , EnableIf_t< IsDenseVector_v<VT> &&
+//                                   Size_v<VT,0UL> == DefaultSize_v &&
+//                                   MaxSize_v<VT,0UL> == DefaultMaxSize_v > >
+//{
+//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2342,14 +2354,14 @@ struct SubvectorTraitEval2< VT, inf, inf
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename VT >
-struct ElementsTraitEval2< VT, 0UL
-                                , EnableIf_t< IsDenseVector_v<VT> &&
-                                  Size_v<VT,0UL> == DefaultSize_v &&
-                                  MaxSize_v<VT,0UL> == DefaultMaxSize_v > >
-{
-   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
-};
+//template< typename VT >
+//struct ElementsTraitEval2< VT, 0UL
+//                                , EnableIf_t< IsDenseVector_v<VT> &&
+//                                  Size_v<VT,0UL> == DefaultSize_v &&
+//                                  MaxSize_v<VT,0UL> == DefaultMaxSize_v > >
+//{
+//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2364,14 +2376,14 @@ struct ElementsTraitEval2< VT, 0UL
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, size_t I >
-struct RowTraitEval2< MT, I
-                    , EnableIf_t< IsDenseMatrix_v<MT> &&
-                                  Size_v<MT,1UL> == DefaultSize_v &&
-                                  MaxSize_v<MT,1UL> == DefaultMaxSize_v > >
-{
-   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, true >;
-};
+//template< typename MT, size_t I >
+//struct RowTraitEval2< MT, I
+//                    , EnableIf_t< IsDenseMatrix_v<MT> &&
+//                                  Size_v<MT,1UL> == DefaultSize_v &&
+//                                  MaxSize_v<MT,1UL> == DefaultMaxSize_v > >
+//{
+//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, true >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2386,14 +2398,14 @@ struct RowTraitEval2< MT, I
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, size_t I >
-struct ColumnTraitEval2< MT, I
-                       , EnableIf_t< IsDenseMatrix_v<MT> &&
-                                     Size_v<MT,0UL> == DefaultSize_v &&
-                                     MaxSize_v<MT,0UL> == DefaultMaxSize_v > >
-{
-   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, false >;
-};
+//template< typename MT, size_t I >
+//struct ColumnTraitEval2< MT, I
+//                       , EnableIf_t< IsDenseMatrix_v<MT> &&
+//                                     Size_v<MT,0UL> == DefaultSize_v &&
+//                                     MaxSize_v<MT,0UL> == DefaultMaxSize_v > >
+//{
+//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, false >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2408,16 +2420,16 @@ struct ColumnTraitEval2< MT, I
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename MT, ptrdiff_t I >
-struct BandTraitEval2< MT, I
-                     , EnableIf_t< IsDenseMatrix_v<MT> &&
-                                   ( Size_v<MT,0UL> == DefaultSize_v ||
-                                     Size_v<MT,1UL> == DefaultSize_v ) &&
-                                   ( MaxSize_v<MT,0UL> == DefaultMaxSize_v ||
-                                     MaxSize_v<MT,1UL> == DefaultMaxSize_v ) > >
-{
-   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, defaultTransposeFlag >;
-};
+//template< typename MT, ptrdiff_t I >
+//struct BandTraitEval2< MT, I
+//                     , EnableIf_t< IsDenseMatrix_v<MT> &&
+//                                   ( Size_v<MT,0UL> == DefaultSize_v ||
+//                                     Size_v<MT,1UL> == DefaultSize_v ) &&
+//                                   ( MaxSize_v<MT,0UL> == DefaultMaxSize_v ||
+//                                     MaxSize_v<MT,1UL> == DefaultMaxSize_v ) > >
+//{
+//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, defaultTransposeFlag >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 

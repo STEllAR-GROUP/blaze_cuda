@@ -13,11 +13,7 @@ int main(int, char const *[])
    using vtype = blaze::CUDAManagedVector<float>;
    //using vtype = blaze::DynamicVector<float>;
 
-   //vtype a(1024, 10), b(1024, 10);
-
-   //operator+(a, b);
-
-   //vtype c(1024);
+   vtype a(1024, 10), b(1024, 10), c(1024);
    //c = a + b;
 
    return 0;

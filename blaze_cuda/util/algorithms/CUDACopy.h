@@ -38,7 +38,7 @@
 namespace blaze{
 
    template< typename InputIt, typename OutputIt >
-   inline void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin )
+   void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin )
    {
       auto const id = threadIdx.x;
       out_begin[ id ] = in_begin[ id ];
