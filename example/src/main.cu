@@ -3,13 +3,8 @@
 #include <vector>
 #include <algorithm>
 
-#ifdef __CUDACC__
-   #define ANNOT __host__ __device__
-#else
-   #define ANNOT
-#endif
-
 #include <blaze/Blaze.h>
+
 #include <blaze_cuda/Blaze.h>
 #include <blaze_cuda/math/dense/CUDAManagedVector.h>
 

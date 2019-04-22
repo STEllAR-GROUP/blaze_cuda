@@ -1,4 +1,4 @@
-#ifndef _BLAZECUDA_UTIL_H_
-#define _BLAZECUDA_UTIL_H_
+#ifndef _BLAZE_CUDA_UTIL_H_
+#define _BLAZE_CUDA_UTIL_H_
 
 #endif

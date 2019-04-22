@@ -33,8 +33,8 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_MATH_DENSE_CUDAMANAGEDVECTOR_H_
-#define _BLAZE_MATH_DENSE_CUDAMANAGEDVECTOR_H_
+#ifndef _BLAZE_CUDA_MATH_DENSE_CUDAMANAGEDVECTOR_H_
+#define _BLAZE_CUDA_MATH_DENSE_CUDAMANAGEDVECTOR_H_
 
 
 //*************************************************************************************************
@@ -115,6 +115,7 @@
 #include <blaze/util/typetraits/RemoveConst.h>
 
 #include <blaze_cuda/math/typetraits/IsCUDAEnabled.h>
+#include <blaze_cuda/util/algorithms/CUDATransform.h>
 
 #include <cuda_runtime.h>
 
@@ -160,9 +161,9 @@ namespace blaze {
 // CUDAManagedVector:
 
    \code
-   using CUDAManagedVector;
-   using CompressedVector;
-   using DynamicMatrix;
+   using blaze::CUDAManagedVector;
+   using blaze::CompressedVector;
+   using blaze::DynamicMatrix;
 
    CUDAManagedVector<double> a( 2 );  // Non-initialized 2D vector of size 2
    a[0] = 1.0;                    // Initialization of the first element
@@ -338,6 +339,11 @@ class CUDAManagedVector
 
    inline bool isAligned   () const noexcept;
    inline bool canSMPAssign() const noexcept;
+
+   template< typename VT >  // Type of the right-hand side dense vector
+   inline auto assign( const DenseVector<VT,TF>& rhs ) -> EnableIf_t< IsCUDAEnabled_v<VT> >;
+   template< typename VT >  // Type of the right-hand side dense vector
+   inline auto assign( const DenseVector<VT,TF>& rhs ) -> DisableIf_t< IsCUDAEnabled_v<VT> >;
 
    template< typename VT > inline void assign( const SparseVector<VT,TF>& rhs );
    template< typename VT > inline void addAssign( const SparseVector<VT,TF>& rhs );
@@ -1602,13 +1608,36 @@ inline bool CUDAManagedVector<Type,TF>::isAligned() const noexcept
 // function additionally provides runtime information (as for instance the current size of the
 // vector).
 */
+//template< typename Type  // Data type of the vector
+//        , bool TF >      // Transpose flag
+//inline bool CUDAManagedVector<Type,TF>::canSMPAssign() const noexcept
+//{
+//   return ( size() > SMP_DVECASSIGN_THRESHOLD );
+//}
+//*************************************************************************************************
+
+
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline bool CUDAManagedVector<Type,TF>::canSMPAssign() const noexcept
+template< typename VT >  // Type of the right-hand side dense vector
+inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
+   -> EnableIf_t< IsCUDAEnabled_v<VT> >
 {
-   return ( size() > SMP_DVECASSIGN_THRESHOLD );
+   // CUDA assignment kernel
+   transform( rhs.begin(), rhs.end(), begin()
+            , [] __device__ ( auto const& elmt ){ return elmt; } );
 }
-//*************************************************************************************************
+
+template< typename Type  // Data type of the vector
+        , bool TF >      // Transpose flag
+template< typename VT >  // Type of the right-hand side dense vector
+inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
+   -> DisableIf_t< IsCUDAEnabled_v<VT> >
+{
+   // Non-CUDA assignment kernel
+   (void)rhs;
+   // TODO
+}
 
 
 //*************************************************************************************************

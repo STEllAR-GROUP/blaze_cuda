@@ -5,6 +5,6 @@
 #include <blaze_cuda/system/Version.h>
 #include <blaze_cuda/Util.h>
 
-namespace blaze_cuda {}
+namespace blaze {}
 
 #endif

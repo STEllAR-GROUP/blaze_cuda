@@ -4,6 +4,7 @@
 //  \brief Header file for the IsCUDAEnabled type trait
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Pénuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -32,8 +33,8 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_TENSOR_MATH_TYPETRAITS_ISCUDAENABLED_H_
-#define _BLAZE_TENSOR_MATH_TYPETRAITS_ISCUDAENABLED_H_
+#ifndef _BLAZE_CUDA_MATH_TYPETRAITS_ISCUDAENABLED_H_
+#define _BLAZE_CUDA_MATH_TYPETRAITS_ISCUDAENABLED_H_
 
 
 //*************************************************************************************************
