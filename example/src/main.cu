@@ -8,8 +8,6 @@
 #include <blaze_cuda/Blaze.h>
 #include <blaze_cuda/math/dense/CUDAManagedVector.h>
 
-void ANNOT fun() {}
-
 int main(int, char const *[])
 {
    using vtype = blaze::CUDAManagedVector<float>;
