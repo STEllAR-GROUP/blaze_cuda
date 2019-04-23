@@ -194,7 +194,7 @@ namespace blaze {
 template< typename Type                     // Data type of the vector
         , bool TF = defaultTransposeFlag >  // Transpose flag
 class CUDAManagedVector
-   //: public DenseVector< CUDAManagedVector<Type,TF>, TF >
+   : public DenseVector< CUDAManagedVector<Type,TF>, TF >
 {
  public:
    //**Type definitions****************************************************************************
@@ -339,6 +339,9 @@ class CUDAManagedVector
 
    inline bool isAligned   () const noexcept;
    inline bool canSMPAssign() const noexcept;
+
+   static bool constexpr simdEnabled   = false;
+   static bool constexpr smpAssignable = false;
 
    template< typename VT >  // Type of the right-hand side dense vector
    inline auto assign( const DenseVector<VT,TF>& rhs ) -> EnableIf_t< IsCUDAEnabled_v<VT> >;
@@ -1608,12 +1611,13 @@ inline bool CUDAManagedVector<Type,TF>::isAligned() const noexcept
 // function additionally provides runtime information (as for instance the current size of the
 // vector).
 */
-//template< typename Type  // Data type of the vector
-//        , bool TF >      // Transpose flag
-//inline bool CUDAManagedVector<Type,TF>::canSMPAssign() const noexcept
-//{
-//   return ( size() > SMP_DVECASSIGN_THRESHOLD );
-//}
+template< typename Type  // Data type of the vector
+        , bool TF >      // Transpose flag
+inline bool CUDAManagedVector<Type,TF>::canSMPAssign() const noexcept
+{
+   //return ( size() > SMP_DVECASSIGN_THRESHOLD );
+   return false;
+}
 //*************************************************************************************************
 
 
