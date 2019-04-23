@@ -10,11 +10,21 @@
 
 int main(int, char const *[])
 {
-   using vtype = blaze::CUDAManagedVector<float>;
-   //using vtype = blaze::DynamicVector<float>;
+   bool        constexpr using_cuda = true;
+   std::size_t constexpr vecsize    = 32;
 
-   vtype a(1024, 10), b(1024, 10), c(1024);
-   c = a + b;
+   using vtype = std::conditional< using_cuda
+                                 , blaze::CUDAManagedVector<float>
+                                 , blaze::DynamicVector<float> >::type;
 
-   return 0;
+
+   vtype a(vecsize, 10), b(vecsize, 10);
+
+   vtype c = a + b;
+
+   cudaDeviceSynchronize();
+
+   //[](void a){}(c);
+
+   std::cout << c;
 }
