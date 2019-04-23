@@ -41,6 +41,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <iostream> // REMOVE ME
 #include <algorithm>
 #include <utility>
 #include <blaze/math/Aliases.h>
@@ -114,7 +115,7 @@
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
 
-#include <blaze_cuda/math/typetraits/IsCUDAEnabled.h>
+#include <blaze/math/typetraits/IsCUDAEnabled.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 
 #include <cuda_runtime.h>
@@ -359,7 +360,7 @@ class CUDAManagedVector
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline size_t addPadding( size_t value ) const noexcept;
+   //inline size_t addPadding( size_t value ) const noexcept;
    //@}
    //**********************************************************************************************
 
@@ -424,7 +425,7 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n )
    , capacity_( n )              // The maximum capacity of the vector
    //, v_       ( allocate<Type>( capacity_ ) )  // The vector elements
 {
-   cudaMallocManaged((void**)v_, n * sizeof(Type));   // TODO: Make an allocator, maybe..?
+   cudaMallocManaged((void**)&v_, n * sizeof(Type));   // TODO: Make an allocator, maybe..?
 }
 //*************************************************************************************************
 
@@ -1219,7 +1220,7 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline size_t CUDAManagedVector<Type,TF>::spacing() const noexcept
 {
-   return addPadding( size_ );
+   return size_;
 }
 //*************************************************************************************************
 
@@ -1271,7 +1272,7 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline void CUDAManagedVector<Type,TF>::reset()
 {
-   //using clear;
+   using blaze::clear;
    for( size_t i=0UL; i<size_; ++i )
       clear( v_[i] );
 }
@@ -1332,9 +1333,9 @@ inline void CUDAManagedVector<Type,TF>::resize( size_t n, bool preserve )
    if( n > capacity_ )
    {
       // Allocating a new array
-      const size_t newCapacity( addPadding( n ) );
-      //Type* BLAZE_RESTRICT tmp = allocate<Type>( newCapacity );
-      Type* tmp;
+      const size_t newCapacity( n );
+      Type* BLAZE_RESTRICT tmp = allocate<Type>( newCapacity );
+
       cudaMallocManaged( (void**)&tmp, newCapacity );
 
       // Initializing the new array
@@ -1402,13 +1403,18 @@ inline void CUDAManagedVector<Type,TF>::reserve( size_t n )
    if( n > capacity_ )
    {
       // Allocating a new array
-      const size_t newCapacity( addPadding( n ) );
-      Type* BLAZE_RESTRICT tmp = allocate<Type>( newCapacity );
+      const size_t newCapacity( n );
+      Type* BLAZE_RESTRICT tmp = [&]()
+      {
+         Type* ptr;
+         cudaMallocManaged((void**)&ptr, n * sizeof(Type));
+         return ptr;
+      }();
 
       // Initializing the new array
       transfer( v_, v_+size_, tmp );
 
-      if( IsVectorizable_v<Type> ) {
+      if ( IsVectorizable_v<Type> ) {
          for( size_t i=size_; i<newCapacity; ++i )
             tmp[i] = Type();
       }
@@ -1627,7 +1633,8 @@ template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
    -> EnableIf_t< IsCUDAEnabled_v<VT> >
 {
-   cuda_copy ( rhs.begin(), rhs.end(), begin() );
+   std::cout << "GPU\n";
+   cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
 }
 
 template< typename Type  // Data type of the vector
@@ -1636,8 +1643,9 @@ template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
    -> DisableIf_t< IsCUDAEnabled_v<VT> >
 {
+   std::cout << "CPU\n";
    using std::copy;
-   copy( rhs.begin(), rhs.end(), begin() );
+   copy( (~rhs).begin(), (~rhs).end(), begin() );
 }
 
 
