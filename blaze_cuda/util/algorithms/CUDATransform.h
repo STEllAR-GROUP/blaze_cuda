@@ -47,6 +47,7 @@ namespace blaze{
    template<typename InputIt, typename OutputIt, typename F>
    inline void cuda_transform( InputIt in_begin, InputIt in_end, OutputIt out_begin, F const& f )
    {
+      // TODO: Kernel param size tuning
       _cuda_transform_impl<<<1, in_end - in_begin>>>( in_begin, out_begin, f );
    }
 
