@@ -35,20 +35,23 @@
 #ifndef _BLAZE_CUDA_UTIL_ALGORITHMS_CUDACOPY_H_
 #define _BLAZE_CUDA_UTIL_ALGORITHMS_CUDACOPY_H_
 
-namespace blaze{
+namespace blaze {
 
-   template< typename InputIt, typename OutputIt >
-   void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin )
-   {
-      auto const id = threadIdx.x;
-      *(out_begin + id) = *(in_begin + id);
+   namespace detail {
+
+      template< typename InputIt, typename OutputIt >
+      void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin )
+      {
+         auto const id = threadIdx.x;
+         *(out_begin + id) = *(in_begin + id);
+      }
+
    }
-
    template< typename InputIt, typename OutputIt >
    inline void cuda_copy( InputIt in_begin, InputIt in_end, OutputIt out_begin )
    {
       // TODO: Kernel param size tuning
-      _cuda_copy_impl<<<1, in_end - in_begin>>>( in_begin, out_begin );
+      detail::_cuda_copy_impl<<<1, in_end - in_begin>>>( in_begin, out_begin );
    }
 
 }
