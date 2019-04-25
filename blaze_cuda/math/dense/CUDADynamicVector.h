@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/dense/CUDAManagedVector.h
+//  \file blaze/math/dense/CUDADynamicVector.h
 //  \brief Header file for the implementation of an arbitrarily sized vector
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
@@ -33,15 +33,14 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_CUDA_MATH_DENSE_CUDAMANAGEDVECTOR_H_
-#define _BLAZE_CUDA_MATH_DENSE_CUDAMANAGEDVECTOR_H_
+#ifndef _BLAZE_CUDA_MATH_DENSE_CUDADYNAMICVECTOR_H_
+#define _BLAZE_CUDA_MATH_DENSE_CUDADYNAMICVECTOR_H_
 
 
 //*************************************************************************************************
 // Includes
 //*************************************************************************************************
 
-#include <iostream> // REMOVE ME
 #include <algorithm>
 #include <utility>
 #include <blaze/math/Aliases.h>
@@ -115,10 +114,12 @@
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
 
-#include <blaze/math/typetraits/IsCUDAEnabled.h>
+#include <blaze_cuda/util/algorithms/CUDACopy.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 
 #include <cuda_runtime.h>
+
+#include <iostream>
 
 namespace blaze {
 
@@ -129,22 +130,22 @@ namespace blaze {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup dynamic_vector CUDAManagedVector
+/*!\defgroup dynamic_vector CUDADynamicVector
 // \ingroup dense_vector
 */
 /*!\brief Efficient implementation of an arbitrary sized vector.
 // \ingroup dynamic_vector
 //
-// The CUDAManagedVector class template is the representation of an arbitrary sized vector with
+// The CUDADynamicVector class template is the representation of an arbitrary sized vector with
 // dynamically allocated elements of arbitrary type. The type of the elements and the transpose
 // flag of the vector can be specified via the two template parameters:
 
    \code
    template< typename Type, bool TF >
-   class CUDAManagedVector;
+   class CUDADynamicVector;
    \endcode
 
-//  - Type: specifies the type of the vector elements. CUDAManagedVector can be used with any
+//  - Type: specifies the type of the vector elements. CUDADynamicVector can be used with any
 //          non-cv-qualified, non-reference, non-pointer element type.
 //  - TF  : specifies whether the vector is a row vector (\a rowVector) or a column
 //          vector (\a columnVector). The default value is \a columnVector.
@@ -156,23 +157,23 @@ namespace blaze {
                              0 & 1 & 2 & \cdots & N-1 \\
                              \end{array}\right)\f]
 
-// The use of CUDAManagedVector is very natural and intuitive. All operations (addition, subtraction,
+// The use of CUDADynamicVector is very natural and intuitive. All operations (addition, subtraction,
 // multiplication, scaling, ...) can be performed on all possible combinations of dense and sparse
 // vectors with fitting element types. The following example gives an impression of the use of
-// CUDAManagedVector:
+// CUDADynamicVector:
 
    \code
-   using blaze::CUDAManagedVector;
+   using blaze::CUDADynamicVector;
    using blaze::CompressedVector;
    using blaze::DynamicMatrix;
 
-   CUDAManagedVector<double> a( 2 );  // Non-initialized 2D vector of size 2
+   CUDADynamicVector<double> a( 2 );  // Non-initialized 2D vector of size 2
    a[0] = 1.0;                    // Initialization of the first element
    a[1] = 2.0;                    // Initialization of the second element
 
-   CUDAManagedVector<double>   b( 2, 2.0  );  // Directly, homogeneously initialized 2D vector
+   CUDADynamicVector<double>   b( 2, 2.0  );  // Directly, homogeneously initialized 2D vector
    CompressedVector<float> c( 2 );        // Empty sparse single precision vector
-   CUDAManagedVector<double>   d;             // Default constructed dynamic vector
+   CUDADynamicVector<double>   d;             // Default constructed dynamic vector
    DynamicMatrix<double>   A;             // Default constructed row-major matrix
 
    d = a + b;  // Vector addition between vectors of equal element type
@@ -194,18 +195,18 @@ namespace blaze {
 */
 template< typename Type                     // Data type of the vector
         , bool TF = defaultTransposeFlag >  // Transpose flag
-class CUDAManagedVector
-   : public DenseVector< CUDAManagedVector<Type,TF>, TF >
+class CUDADynamicVector
+   : public DenseVector< CUDADynamicVector<Type,TF>, TF >
 {
  public:
    //**Type definitions****************************************************************************
-   using This          = CUDAManagedVector<Type,TF>;    //!< Type of this CUDAManagedVector instance.
-   using BaseType      = DenseVector<This,TF>;      //!< Base type of this CUDAManagedVector instance.
+   using This          = CUDADynamicVector<Type,TF>;    //!< Type of this CUDADynamicVector instance.
+   using BaseType      = DenseVector<This,TF>;      //!< Base type of this CUDADynamicVector instance.
    using ResultType    = This;                      //!< Result type for expression template evaluations.
-   using TransposeType = CUDAManagedVector<Type,!TF>;   //!< Transpose type for expression template evaluations.
+   using TransposeType = CUDADynamicVector<Type,!TF>;   //!< Transpose type for expression template evaluations.
    using ElementType   = Type;                      //!< Type of the vector elements.
    using ReturnType    = const Type&;               //!< Return type for expression template evaluations
-   using CompositeType = const CUDAManagedVector&;      //!< Data type for composite expression templates.
+   using CompositeType = const CUDADynamicVector&;      //!< Data type for composite expression templates.
 
    using Reference      = Type&;        //!< Reference to a non-constant vector value.
    using ConstReference = const Type&;  //!< Reference to a constant vector value.
@@ -217,47 +218,47 @@ class CUDAManagedVector
    //**********************************************************************************************
 
    //**Rebind struct definition********************************************************************
-   /*!\brief Rebind mechanism to obtain a CUDAManagedVector with different data/element type.
+   /*!\brief Rebind mechanism to obtain a CUDADynamicVector with different data/element type.
    */
    template< typename NewType >  // Data type of the other vector
    struct Rebind {
-      using Other = CUDAManagedVector<NewType,TF>;  //!< The type of the other CUDAManagedVector.
+      using Other = CUDADynamicVector<NewType,TF>;  //!< The type of the other CUDADynamicVector.
    };
    //**********************************************************************************************
 
    //**Resize struct definition********************************************************************
-   /*!\brief Resize mechanism to obtain a CUDAManagedVector with a different fixed number of elements.
+   /*!\brief Resize mechanism to obtain a CUDADynamicVector with a different fixed number of elements.
    */
    template< size_t NewN >  // Number of elements of the other vector
    struct Resize {
-      using Other = CUDAManagedVector<Type,TF>;  //!< The type of the other CUDAManagedVector.
+      using Other = CUDADynamicVector<Type,TF>;  //!< The type of the other CUDADynamicVector.
    };
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline CUDAManagedVector() noexcept;
-   explicit inline CUDAManagedVector( size_t n );
-   explicit inline CUDAManagedVector( size_t n, const Type& init );
-   explicit inline CUDAManagedVector( std::initializer_list<Type> list );
+   explicit inline CUDADynamicVector() noexcept;
+   explicit inline CUDADynamicVector( size_t n );
+   explicit inline CUDADynamicVector( size_t n, const Type& init );
+   explicit inline CUDADynamicVector( std::initializer_list<Type> list );
 
    template< typename Other >
-   explicit inline CUDAManagedVector( size_t n, const Other* array );
+   explicit inline CUDADynamicVector( size_t n, const Other* array );
 
    template< typename Other, size_t Dim >
-   explicit inline CUDAManagedVector( const Other (&array)[Dim] );
+   explicit inline CUDADynamicVector( const Other (&array)[Dim] );
 
-                           inline CUDAManagedVector( const CUDAManagedVector& v );
-                           inline CUDAManagedVector( CUDAManagedVector&& v ) noexcept;
-   template< typename VT > inline CUDAManagedVector( const Vector<VT,TF>& v );
+                           inline CUDADynamicVector( const CUDADynamicVector& v );
+                           inline CUDADynamicVector( CUDADynamicVector&& v ) noexcept;
+   template< typename VT > inline CUDADynamicVector( const Vector<VT,TF>& v );
    //@}
    //**********************************************************************************************
 
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   inline ~CUDAManagedVector();
+   inline ~CUDADynamicVector();
    //@}
    //**********************************************************************************************
 
@@ -282,21 +283,21 @@ class CUDAManagedVector
    //**Assignment operators************************************************************************
    /*!\name Assignment operators */
    //@{
-   inline CUDAManagedVector& operator=( const Type& rhs );
-   inline CUDAManagedVector& operator=( std::initializer_list<Type> list );
+   inline CUDADynamicVector& operator=( const Type& rhs );
+   inline CUDADynamicVector& operator=( std::initializer_list<Type> list );
 
    template< typename Other, size_t Dim >
-   inline CUDAManagedVector& operator=( const Other (&array)[Dim] );
+   inline CUDADynamicVector& operator=( const Other (&array)[Dim] );
 
-   inline CUDAManagedVector& operator=( const CUDAManagedVector& rhs );
-   inline CUDAManagedVector& operator=( CUDAManagedVector&& rhs ) noexcept;
+   inline CUDADynamicVector& operator=( const CUDADynamicVector& rhs );
+   inline CUDADynamicVector& operator=( CUDADynamicVector&& rhs ) noexcept;
 
-   template< typename VT > inline CUDAManagedVector& operator= ( const Vector<VT,TF>& rhs );
-   template< typename VT > inline CUDAManagedVector& operator+=( const Vector<VT,TF>& rhs );
-   template< typename VT > inline CUDAManagedVector& operator-=( const Vector<VT,TF>& rhs );
-   template< typename VT > inline CUDAManagedVector& operator*=( const Vector<VT,TF>& rhs );
-   template< typename VT > inline CUDAManagedVector& operator/=( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline CUDAManagedVector& operator%=( const Vector<VT,TF>& rhs );
+   template< typename VT > inline CUDADynamicVector& operator= ( const Vector<VT,TF>& rhs );
+   template< typename VT > inline CUDADynamicVector& operator+=( const Vector<VT,TF>& rhs );
+   template< typename VT > inline CUDADynamicVector& operator-=( const Vector<VT,TF>& rhs );
+   template< typename VT > inline CUDADynamicVector& operator*=( const Vector<VT,TF>& rhs );
+   template< typename VT > inline CUDADynamicVector& operator/=( const DenseVector<VT,TF>& rhs );
+   template< typename VT > inline CUDADynamicVector& operator%=( const Vector<VT,TF>& rhs );
    //@}
    //**********************************************************************************************
 
@@ -313,14 +314,14 @@ class CUDAManagedVector
    inline void   extend( size_t n, bool preserve=true );
    inline void   reserve( size_t n );
    inline void   shrinkToFit();
-   inline void   swap( CUDAManagedVector& v ) noexcept;
+   inline void   swap( CUDADynamicVector& v ) noexcept;
    //@}
    //**********************************************************************************************
 
    //**Numeric functions***************************************************************************
    /*!\name Numeric functions */
    //@{
-   template< typename Other > inline CUDAManagedVector& scale( const Other& scalar );
+   template< typename Other > inline CUDADynamicVector& scale( const Other& scalar );
    //@}
    //**********************************************************************************************
 
@@ -344,15 +345,20 @@ class CUDAManagedVector
    static bool constexpr simdEnabled   = false;
    static bool constexpr smpAssignable = false;
 
-   template< typename VT >  // Type of the right-hand side dense vector
-   inline auto assign( const DenseVector<VT,TF>& rhs ) -> EnableIf_t< IsCUDAEnabled_v<VT> >;
-   template< typename VT >  // Type of the right-hand side dense vector
-   inline auto assign( const DenseVector<VT,TF>& rhs ) -> DisableIf_t< IsCUDAEnabled_v<VT> >;
-
+   template< typename VT > inline auto assign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void assign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline void addAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void addAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline void subAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void subAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline void multAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void multAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline void divAssign( const DenseVector<VT,TF>& rhs );
+   template< typename VT > inline void divAssign( const SparseVector<VT,TF>& rhs );
    //@}
    //**********************************************************************************************
 
@@ -398,11 +404,11 @@ class CUDAManagedVector
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief The default constructor for CUDAManagedVector.
+/*!\brief The default constructor for CUDADynamicVector.
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector() noexcept
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector() noexcept
    : size_    ( 0UL )      // The current size/dimension of the vector
    , capacity_( 0UL )      // The maximum capacity of the vector
    , v_       ( nullptr )  // The vector elements
@@ -420,7 +426,7 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector() noexcept
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n )
    : size_    ( n )                            // The current size/dimension of the vector
    , capacity_( n )              // The maximum capacity of the vector
    //, v_       ( allocate<Type>( capacity_ ) )  // The vector elements
@@ -440,8 +446,8 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n )
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n, const Type& init )
-   : CUDAManagedVector( n )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Type& init )
+   : CUDADynamicVector( n )
 {
    for( size_t i=0UL; i<size_; ++i )
       v_[i] = init;
@@ -460,7 +466,7 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n, const Type& init
 // within a constructor call:
 
    \code
-   CUDAManagedVector<double> v1{ 4.2, 6.3, -1.2 };
+   CUDADynamicVector<double> v1{ 4.2, 6.3, -1.2 };
    \endcode
 
 // The vector is sized according to the size of the initializer list and all its elements are
@@ -468,8 +474,8 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n, const Type& init
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( std::initializer_list<Type> list )
-   : CUDAManagedVector( list.size() )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( std::initializer_list<Type> list )
+   : CUDADynamicVector( list.size() )
 {
    std::fill( std::copy( list.begin(), list.end(), begin() ), end(), Type() );
 
@@ -490,7 +496,7 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( std::initializer_list<Type
    \code
    double* array = new double[4];
    // ... Initialization of the dynamic array
-   CUDAManagedVector<double> v( array, 4UL );
+   CUDADynamicVector<double> v( array, 4UL );
    delete[] array;
    \endcode
 
@@ -501,8 +507,8 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( std::initializer_list<Type
 template< typename Type     // Data type of the vector
         , bool TF >         // Transpose flag
 template< typename Other >  // Data type of the initialization array
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n, const Other* array )
-   : CUDAManagedVector( n )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Other* array )
+   : CUDADynamicVector( n )
 {
    for( size_t i=0UL; i<n; ++i )
       v_[i] = array[i];
@@ -522,7 +528,7 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( size_t n, const Other* arr
 
    \code
    const int init[4] = { 1, 2, 3 };
-   CUDAManagedVector<int> v( init );
+   CUDADynamicVector<int> v( init );
    \endcode
 
 // The vector is sized according to the size of the array and initialized with the values from the
@@ -533,8 +539,8 @@ template< typename Type   // Data type of the vector
         , bool TF >       // Transpose flag
 template< typename Other  // Data type of the initialization array
         , size_t Dim >    // Dimension of the initialization array
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const Other (&array)[Dim] )
-   : CUDAManagedVector( Dim )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( const Other (&array)[Dim] )
+   : CUDADynamicVector( Dim )
 {
    for( size_t i=0UL; i<Dim; ++i )
       v_[i] = array[i];
@@ -545,7 +551,7 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const Other (&array)[Dim] 
 
 
 //*************************************************************************************************
-/*!\brief The copy constructor for CUDAManagedVector.
+/*!\brief The copy constructor for CUDADynamicVector.
 //
 // \param v Vector to be copied.
 //
@@ -554,12 +560,12 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const Other (&array)[Dim] 
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const CUDAManagedVector& v )
-   : CUDAManagedVector( v.size_ )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( const CUDADynamicVector& v )
+   : CUDADynamicVector( v.size_ )
 {
    BLAZE_INTERNAL_ASSERT( capacity_ <= v.capacity_, "Invalid capacity estimation" );
 
-   cudaAssign( *this, ~v );
+   smpAssign( *this, ~v );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -567,13 +573,13 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const CUDAManagedVector& v
 
 
 //*************************************************************************************************
-/*!\brief The move constructor for CUDAManagedVector.
+/*!\brief The move constructor for CUDADynamicVector.
 //
 // \param v The vector to be moved into this instance.
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( CUDAManagedVector&& v ) noexcept
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( CUDADynamicVector&& v ) noexcept
    : size_    ( v.size_     )  // The current size/dimension of the vector
    , capacity_( v.capacity_ )  // The maximum capacity of the vector
    , v_       ( v.v_        )  // The vector elements
@@ -593,8 +599,8 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( CUDAManagedVector&& v ) no
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the foreign vector
-inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const Vector<VT,TF>& v )
-   : CUDAManagedVector( (~v).size() )
+inline CUDADynamicVector<Type,TF>::CUDADynamicVector( const Vector<VT,TF>& v )
+   : CUDADynamicVector( (~v).size() )
 {
    if( IsSparseVector_v<VT> ) {
       for( size_t i=0UL; i<size_; ++i ) {
@@ -618,13 +624,13 @@ inline CUDAManagedVector<Type,TF>::CUDAManagedVector( const Vector<VT,TF>& v )
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief The destructor for CUDAManagedVector.
+/*!\brief The destructor for CUDADynamicVector.
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>::~CUDAManagedVector()
+inline CUDADynamicVector<Type,TF>::~CUDADynamicVector()
 {
-   cudaFree(v_);
+   cudaFree( v_ );
 }
 //*************************************************************************************************
 
@@ -648,8 +654,8 @@ inline CUDAManagedVector<Type,TF>::~CUDAManagedVector()
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::Reference
-   CUDAManagedVector<Type,TF>::operator[]( size_t index ) noexcept
+inline typename CUDADynamicVector<Type,TF>::Reference
+   CUDADynamicVector<Type,TF>::operator[]( size_t index ) noexcept
 {
    BLAZE_USER_ASSERT( index < size_, "Invalid vector access index" );
    return v_[index];
@@ -668,8 +674,8 @@ inline typename CUDAManagedVector<Type,TF>::Reference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstReference
-   CUDAManagedVector<Type,TF>::operator[]( size_t index ) const noexcept
+inline typename CUDADynamicVector<Type,TF>::ConstReference
+   CUDADynamicVector<Type,TF>::operator[]( size_t index ) const noexcept
 {
    BLAZE_USER_ASSERT( index < size_, "Invalid vector access index" );
    return v_[index];
@@ -689,8 +695,8 @@ inline typename CUDAManagedVector<Type,TF>::ConstReference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::Reference
-   CUDAManagedVector<Type,TF>::at( size_t index )
+inline typename CUDADynamicVector<Type,TF>::Reference
+   CUDADynamicVector<Type,TF>::at( size_t index )
 {
    if( index >= size_ ) {
       BLAZE_THROW_OUT_OF_RANGE( "Invalid vector access index" );
@@ -712,8 +718,8 @@ inline typename CUDAManagedVector<Type,TF>::Reference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstReference
-   CUDAManagedVector<Type,TF>::at( size_t index ) const
+inline typename CUDADynamicVector<Type,TF>::ConstReference
+   CUDADynamicVector<Type,TF>::at( size_t index ) const
 {
    if( index >= size_ ) {
       BLAZE_THROW_OUT_OF_RANGE( "Invalid vector access index" );
@@ -732,7 +738,7 @@ inline typename CUDAManagedVector<Type,TF>::ConstReference
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::Pointer CUDAManagedVector<Type,TF>::data() noexcept
+inline typename CUDADynamicVector<Type,TF>::Pointer CUDADynamicVector<Type,TF>::data() noexcept
 {
    return v_;
 }
@@ -748,7 +754,7 @@ inline typename CUDAManagedVector<Type,TF>::Pointer CUDAManagedVector<Type,TF>::
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstPointer CUDAManagedVector<Type,TF>::data() const noexcept
+inline typename CUDADynamicVector<Type,TF>::ConstPointer CUDADynamicVector<Type,TF>::data() const noexcept
 {
    return v_;
 }
@@ -762,7 +768,7 @@ inline typename CUDAManagedVector<Type,TF>::ConstPointer CUDAManagedVector<Type,
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>::begin() noexcept
+inline typename CUDADynamicVector<Type,TF>::Iterator CUDADynamicVector<Type,TF>::begin() noexcept
 {
    return Iterator( v_ );
 }
@@ -776,7 +782,7 @@ inline typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>:
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::begin() const noexcept
+inline typename CUDADynamicVector<Type,TF>::ConstIterator CUDADynamicVector<Type,TF>::begin() const noexcept
 {
    return ConstIterator( v_ );
 }
@@ -790,7 +796,7 @@ inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::cbegin() const noexcept
+inline typename CUDADynamicVector<Type,TF>::ConstIterator CUDADynamicVector<Type,TF>::cbegin() const noexcept
 {
    return ConstIterator( v_ );
 }
@@ -804,7 +810,7 @@ inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>::end() noexcept
+inline typename CUDADynamicVector<Type,TF>::Iterator CUDADynamicVector<Type,TF>::end() noexcept
 {
    return Iterator( v_ + size_ );
 }
@@ -818,7 +824,7 @@ inline typename CUDAManagedVector<Type,TF>::Iterator CUDAManagedVector<Type,TF>:
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::end() const noexcept
+inline typename CUDADynamicVector<Type,TF>::ConstIterator CUDADynamicVector<Type,TF>::end() const noexcept
 {
    return ConstIterator( v_ + size_ );
 }
@@ -832,7 +838,7 @@ inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type,TF>::cend() const noexcept
+inline typename CUDADynamicVector<Type,TF>::ConstIterator CUDADynamicVector<Type,TF>::cend() const noexcept
 {
    return ConstIterator( v_ + size_ );
 }
@@ -855,7 +861,7 @@ inline typename CUDAManagedVector<Type,TF>::ConstIterator CUDAManagedVector<Type
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const Type& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator=( const Type& rhs )
 {
    for( size_t i=0UL; i<size_; ++i )
       v_[i] = rhs;
@@ -873,7 +879,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const 
 // by means of an initializer list:
 
    \code
-   CUDAManagedVector<double> v;
+   CUDADynamicVector<double> v;
    v = { 4.2, 6.3, -1.2 };
    \endcode
 
@@ -882,7 +888,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const 
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( std::initializer_list<Type> list )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator=( std::initializer_list<Type> list )
 {
    resize( list.size(), false );
    std::copy( list.begin(), list.end(), v_ );
@@ -902,7 +908,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( std::i
 
    \code
    const int init[4] = { 1, 2, 3 };
-   CUDAManagedVector<int> v;
+   CUDADynamicVector<int> v;
    v = init;
    \endcode
 
@@ -914,7 +920,7 @@ template< typename Type   // Data type of the vector
         , bool TF >       // Transpose flag
 template< typename Other  // Data type of the initialization array
         , size_t Dim >    // Dimension of the initialization array
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const Other (&array)[Dim] )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator=( const Other (&array)[Dim] )
 {
    resize( Dim, false );
 
@@ -927,7 +933,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const 
 
 
 //*************************************************************************************************
-/*!\brief Copy assignment operator for CUDAManagedVector.
+/*!\brief Copy assignment operator for CUDADynamicVector.
 //
 // \param rhs Vector to be copied.
 // \return Reference to the assigned vector.
@@ -937,7 +943,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const 
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const CUDAManagedVector& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator=( const CUDADynamicVector& rhs )
 {
    if( &rhs == this ) return *this;
 
@@ -952,14 +958,14 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const 
 
 
 //*************************************************************************************************
-/*!\brief Move assignment operator for CUDAManagedVector.
+/*!\brief Move assignment operator for CUDADynamicVector.
 //
 // \param rhs The vector to be moved into this instance.
 // \return Reference to the assigned vector.
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( CUDAManagedVector&& rhs ) noexcept
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator=( CUDADynamicVector&& rhs ) noexcept
 {
    cudaFree( v_ );
 
@@ -987,10 +993,10 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( CUDAMa
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side vector
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const Vector<VT,TF>& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator=( const Vector<VT,TF>& rhs )
 {
    if( (~rhs).canAlias( this ) ) {
-      CUDAManagedVector tmp( ~rhs );
+      CUDADynamicVector tmp( ~rhs );
       swap( tmp );
    }
    else {
@@ -1020,7 +1026,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator=( const 
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side vector
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator+=( const Vector<VT,TF>& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator+=( const Vector<VT,TF>& rhs )
 {
    if( (~rhs).size() != size_ ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
@@ -1055,7 +1061,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator+=( const
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side vector
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator-=( const Vector<VT,TF>& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator-=( const Vector<VT,TF>& rhs )
 {
    if( (~rhs).size() != size_ ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
@@ -1090,14 +1096,14 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator-=( const
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side vector
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator*=( const Vector<VT,TF>& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator*=( const Vector<VT,TF>& rhs )
 {
    if( (~rhs).size() != size_ ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
    if( IsSparseVector_v<VT> || (~rhs).canAlias( this ) ) {
-      CUDAManagedVector<Type,TF> tmp( *this * (~rhs) );
+      CUDADynamicVector<Type,TF> tmp( *this * (~rhs) );
       swap( tmp );
    }
    else {
@@ -1124,14 +1130,14 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator*=( const
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side vector
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator/=( const DenseVector<VT,TF>& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator/=( const DenseVector<VT,TF>& rhs )
 {
    if( (~rhs).size() != size_ ) {
       BLAZE_THROW_INVALID_ARGUMENT( "Vector sizes do not match" );
    }
 
    if( (~rhs).canAlias( this ) ) {
-      CUDAManagedVector<Type,TF> tmp( *this / (~rhs) );
+      CUDADynamicVector<Type,TF> tmp( *this / (~rhs) );
       swap( tmp );
    }
    else {
@@ -1159,7 +1165,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator/=( const
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side vector
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator%=( const Vector<VT,TF>& rhs )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::operator%=( const Vector<VT,TF>& rhs )
 {
    //using assign;
 
@@ -1201,7 +1207,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::operator%=( const
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline size_t CUDAManagedVector<Type,TF>::size() const noexcept
+inline size_t CUDADynamicVector<Type,TF>::size() const noexcept
 {
    return size_;
 }
@@ -1218,7 +1224,7 @@ inline size_t CUDAManagedVector<Type,TF>::size() const noexcept
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline size_t CUDAManagedVector<Type,TF>::spacing() const noexcept
+inline size_t CUDADynamicVector<Type,TF>::spacing() const noexcept
 {
    return size_;
 }
@@ -1232,7 +1238,7 @@ inline size_t CUDAManagedVector<Type,TF>::spacing() const noexcept
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline size_t CUDAManagedVector<Type,TF>::capacity() const noexcept
+inline size_t CUDADynamicVector<Type,TF>::capacity() const noexcept
 {
    return capacity_;
 }
@@ -1249,7 +1255,7 @@ inline size_t CUDAManagedVector<Type,TF>::capacity() const noexcept
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline size_t CUDAManagedVector<Type,TF>::nonZeros() const
+inline size_t CUDADynamicVector<Type,TF>::nonZeros() const
 {
    size_t nonzeros( 0 );
 
@@ -1270,7 +1276,7 @@ inline size_t CUDAManagedVector<Type,TF>::nonZeros() const
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::reset()
+inline void CUDADynamicVector<Type,TF>::reset()
 {
    using blaze::clear;
    for( size_t i=0UL; i<size_; ++i )
@@ -1288,7 +1294,7 @@ inline void CUDAManagedVector<Type,TF>::reset()
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::clear()
+inline void CUDADynamicVector<Type,TF>::clear()
 {
    resize( 0UL, false );
 }
@@ -1326,7 +1332,7 @@ inline void CUDAManagedVector<Type,TF>::clear()
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::resize( size_t n, bool preserve )
+inline void CUDADynamicVector<Type,TF>::resize( size_t n, bool preserve )
 {
    using std::swap;
 
@@ -1378,7 +1384,7 @@ inline void CUDAManagedVector<Type,TF>::resize( size_t n, bool preserve )
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::extend( size_t n, bool preserve )
+inline void CUDADynamicVector<Type,TF>::extend( size_t n, bool preserve )
 {
    resize( size_+n, preserve );
 }
@@ -1396,7 +1402,7 @@ inline void CUDAManagedVector<Type,TF>::extend( size_t n, bool preserve )
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::reserve( size_t n )
+inline void CUDADynamicVector<Type,TF>::reserve( size_t n )
 {
    using std::swap;
 
@@ -1440,10 +1446,10 @@ inline void CUDAManagedVector<Type,TF>::reserve( size_t n )
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::shrinkToFit()
+inline void CUDADynamicVector<Type,TF>::shrinkToFit()
 {
    if( spacing() < capacity_ ) {
-      CUDAManagedVector( *this ).swap( *this );
+      CUDADynamicVector( *this ).swap( *this );
    }
 }
 //*************************************************************************************************
@@ -1457,7 +1463,7 @@ inline void CUDAManagedVector<Type,TF>::shrinkToFit()
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void CUDAManagedVector<Type,TF>::swap( CUDAManagedVector& v ) noexcept
+inline void CUDADynamicVector<Type,TF>::swap( CUDADynamicVector& v ) noexcept
 {
    using std::swap;
 
@@ -1487,7 +1493,7 @@ inline void CUDAManagedVector<Type,TF>::swap( CUDAManagedVector& v ) noexcept
 // multiplication assignment operator:
 
    \code
-   CUDAManagedVector<int> a;
+   CUDADynamicVector<int> a;
    // ... Initialization
    a *= 4;        // Scaling of the vector
    a.scale( 4 );  // Same effect as above
@@ -1496,7 +1502,7 @@ inline void CUDAManagedVector<Type,TF>::swap( CUDAManagedVector& v ) noexcept
 template< typename Type     // Data type of the vector
         , bool TF >         // Transpose flag
 template< typename Other >  // Data type of the scalar value
-inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::scale( const Other& scalar )
+inline CUDADynamicVector<Type,TF>& CUDADynamicVector<Type,TF>::scale( const Other& scalar )
 {
    for( size_t i=0UL; i<size_; ++i )
       v_[i] *= scalar;
@@ -1524,7 +1530,7 @@ inline CUDAManagedVector<Type,TF>& CUDAManagedVector<Type,TF>::scale( const Othe
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline bool CUDAManagedVector<Type,TF>::isIntact() const noexcept
+inline bool CUDADynamicVector<Type,TF>::isIntact() const noexcept
 {
    if( size_ > capacity_ )
       return false;
@@ -1562,7 +1568,7 @@ inline bool CUDAManagedVector<Type,TF>::isIntact() const noexcept
 template< typename Type     // Data type of the vector
         , bool TF >         // Transpose flag
 template< typename Other >  // Data type of the foreign expression
-inline bool CUDAManagedVector<Type,TF>::canAlias( const Other* alias ) const noexcept
+inline bool CUDADynamicVector<Type,TF>::canAlias( const Other* alias ) const noexcept
 {
    return static_cast<const void*>( this ) == static_cast<const void*>( alias );
 }
@@ -1582,7 +1588,7 @@ inline bool CUDAManagedVector<Type,TF>::canAlias( const Other* alias ) const noe
 template< typename Type     // Data type of the vector
         , bool TF >         // Transpose flag
 template< typename Other >  // Data type of the foreign expression
-inline bool CUDAManagedVector<Type,TF>::isAliased( const Other* alias ) const noexcept
+inline bool CUDADynamicVector<Type,TF>::isAliased( const Other* alias ) const noexcept
 {
    return static_cast<const void*>( this ) == static_cast<const void*>( alias );
 }
@@ -1600,7 +1606,7 @@ inline bool CUDAManagedVector<Type,TF>::isAliased( const Other* alias ) const no
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline bool CUDAManagedVector<Type,TF>::isAligned() const noexcept
+inline bool CUDADynamicVector<Type,TF>::isAligned() const noexcept
 {
    return true;
 }
@@ -1619,7 +1625,7 @@ inline bool CUDAManagedVector<Type,TF>::isAligned() const noexcept
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline bool CUDAManagedVector<Type,TF>::canSMPAssign() const noexcept
+inline bool CUDADynamicVector<Type,TF>::canSMPAssign() const noexcept
 {
    //return ( size() > SMP_DVECASSIGN_THRESHOLD );
    return false;
@@ -1630,24 +1636,11 @@ inline bool CUDAManagedVector<Type,TF>::canSMPAssign() const noexcept
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side dense vector
-inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
-   -> EnableIf_t< IsCUDAEnabled_v<VT> >
+inline auto CUDADynamicVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
 {
-   std::cout << "GPU\n";
    cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
+   cudaDeviceSynchronize();
 }
-
-template< typename Type  // Data type of the vector
-        , bool TF >      // Transpose flag
-template< typename VT >  // Type of the right-hand side dense vector
-inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
-   -> DisableIf_t< IsCUDAEnabled_v<VT> >
-{
-   std::cout << "CPU\n";
-   using std::copy;
-   copy( (~rhs).begin(), (~rhs).end(), begin() );
-}
-
 
 //*************************************************************************************************
 /*!\brief Default implementation of the assignment of a sparse vector.
@@ -1663,7 +1656,7 @@ inline auto CUDAManagedVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side sparse vector
-inline void CUDAManagedVector<Type,TF>::assign( const SparseVector<VT,TF>& rhs )
+inline void CUDADynamicVector<Type,TF>::assign( const SparseVector<VT,TF>& rhs )
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
@@ -1671,6 +1664,33 @@ inline void CUDAManagedVector<Type,TF>::assign( const SparseVector<VT,TF>& rhs )
       v_[element->index()] = element->value();
 }
 //*************************************************************************************************
+
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a dense vector.
+//
+// \param rhs The right-hand side dense vector to be added.
+// \return void
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the vector
+        , bool TF >      // Transpose flag
+template< typename VT >  // Type of the right-hand side dense vector
+inline void CUDADynamicVector<Type,TF>::addAssign( const DenseVector<VT,TF>& rhs )
+{
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
+                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v + rhs_v; } );
+   cudaDeviceSynchronize();
+}
+//*************************************************************************************************
+
 
 
 //*************************************************************************************************
@@ -1687,14 +1707,43 @@ inline void CUDAManagedVector<Type,TF>::assign( const SparseVector<VT,TF>& rhs )
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side sparse vector
-inline void CUDAManagedVector<Type,TF>::addAssign( const SparseVector<VT,TF>& rhs )
+inline void CUDADynamicVector<Type,TF>::addAssign( const SparseVector<VT,TF>& rhs )
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   // TODO
 
    for( auto element=(~rhs).begin(); element!=(~rhs).end(); ++element )
       v_[element->index()] += element->value();
 }
 //*************************************************************************************************
+
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a dense vector.
+//
+// \param rhs The right-hand side dense vector to be added.
+// \return void
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the vector
+        , bool TF >      // Transpose flag
+template< typename VT >  // Type of the right-hand side dense vector
+inline void CUDADynamicVector<Type,TF>::subAssign( const DenseVector<VT,TF>& rhs )
+{
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
+                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v - rhs_v; } );
+   cudaDeviceSynchronize();
+}
+//*************************************************************************************************
+
 
 
 //*************************************************************************************************
@@ -1711,12 +1760,38 @@ inline void CUDAManagedVector<Type,TF>::addAssign( const SparseVector<VT,TF>& rh
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side sparse vector
-inline void CUDAManagedVector<Type,TF>::subAssign( const SparseVector<VT,TF>& rhs )
+inline void CUDADynamicVector<Type,TF>::subAssign( const SparseVector<VT,TF>& rhs )
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
    for( auto element=(~rhs).begin(); element!=(~rhs).end(); ++element )
       v_[element->index()] -= element->value();
+}
+//*************************************************************************************************
+
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a dense vector.
+//
+// \param rhs The right-hand side dense vector to be added.
+// \return void
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the vector
+        , bool TF >      // Transpose flag
+template< typename VT >  // Type of the right-hand side dense vector
+inline void CUDADynamicVector<Type,TF>::multAssign( const DenseVector<VT,TF>& rhs )
+{
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
+                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v * rhs_v; } );
+   cudaDeviceSynchronize();
 }
 //*************************************************************************************************
 
@@ -1736,11 +1811,11 @@ inline void CUDAManagedVector<Type,TF>::subAssign( const SparseVector<VT,TF>& rh
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 template< typename VT >  // Type of the right-hand side sparse vector
-inline void CUDAManagedVector<Type,TF>::multAssign( const SparseVector<VT,TF>& rhs )
+inline void CUDADynamicVector<Type,TF>::multAssign( const SparseVector<VT,TF>& rhs )
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   const CUDAManagedVector tmp( serial( *this ) );
+   const CUDADynamicVector tmp( serial( *this ) );
 
    reset();
 
@@ -1751,30 +1826,55 @@ inline void CUDAManagedVector<Type,TF>::multAssign( const SparseVector<VT,TF>& r
 
 
 
+//*************************************************************************************************
+/*!\brief Default implementation of the division assignment of a dense vector.
+//
+// \param rhs The right-hand side dense vector divisior.
+// \return void
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the vector
+        , bool TF >      // Transpose flag
+template< typename VT >  // Type of the right-hand side dense vector
+inline void CUDADynamicVector<Type,TF>::divAssign( const DenseVector<VT,TF>& rhs )
+{
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
+                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v / rhs_v; } );
+   cudaDeviceSynchronize();
+}
+//*************************************************************************************************
+
+
 
 //=================================================================================================
 //
-//  CUDAMANAGEDVECTOR OPERATORS
+//  CUDADYNAMICVECTOR OPERATORS
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\name CUDAManagedVector operators */
+/*!\name CUDADynamicVector operators */
 //@{
 template< typename Type, bool TF >
-void reset( CUDAManagedVector<Type,TF>& v );
+void reset( CUDADynamicVector<Type,TF>& v );
 
 template< typename Type, bool TF >
-void clear( CUDAManagedVector<Type,TF>& v );
+void clear( CUDADynamicVector<Type,TF>& v );
 
 template< bool RF, typename Type, bool TF >
-bool isDefault( const CUDAManagedVector<Type,TF>& v );
+bool isDefault( const CUDADynamicVector<Type,TF>& v );
 
 template< typename Type, bool TF >
-bool isIntact( const CUDAManagedVector<Type,TF>& v ) noexcept;
+bool isIntact( const CUDADynamicVector<Type,TF>& v ) noexcept;
 
 template< typename Type, bool TF >
-void swap( CUDAManagedVector<Type,TF>& a, CUDAManagedVector<Type,TF>& b ) noexcept;
+void swap( CUDADynamicVector<Type,TF>& a, CUDADynamicVector<Type,TF>& b ) noexcept;
 //@}
 //*************************************************************************************************
 
@@ -1788,7 +1888,7 @@ void swap( CUDAManagedVector<Type,TF>& a, CUDAManagedVector<Type,TF>& b ) noexce
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void reset( CUDAManagedVector<Type,TF>& v )
+inline void reset( CUDADynamicVector<Type,TF>& v )
 {
    v.reset();
 }
@@ -1804,7 +1904,7 @@ inline void reset( CUDAManagedVector<Type,TF>& v )
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void clear( CUDAManagedVector<Type,TF>& v )
+inline void clear( CUDADynamicVector<Type,TF>& v )
 {
    v.clear();
 }
@@ -1823,7 +1923,7 @@ inline void clear( CUDAManagedVector<Type,TF>& v )
 // return \a false. The following example demonstrates the use of the \a isDefault() function:
 
    \code
-   CUDAManagedVector<int> a;
+   CUDADynamicVector<int> a;
    // ... Resizing and initialization
    if( isDefault( a ) ) { ... }
    \endcode
@@ -1838,7 +1938,7 @@ inline void clear( CUDAManagedVector<Type,TF>& v )
 template< bool RF        // Relaxation flag
         , typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline bool isDefault( const CUDAManagedVector<Type,TF>& v )
+inline bool isDefault( const CUDADynamicVector<Type,TF>& v )
 {
    return ( v.size() == 0UL );
 }
@@ -1858,14 +1958,14 @@ inline bool isDefault( const CUDAManagedVector<Type,TF>& v )
 // function:
 
    \code
-   CUDAManagedVector<int> a;
+   CUDADynamicVector<int> a;
    // ... Resizing and initialization
    if( isIntact( a ) ) { ... }
    \endcode
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline bool isIntact( const CUDAManagedVector<Type,TF>& v ) noexcept
+inline bool isIntact( const CUDADynamicVector<Type,TF>& v ) noexcept
 {
    return v.isIntact();
 }
@@ -1882,7 +1982,7 @@ inline bool isIntact( const CUDAManagedVector<Type,TF>& v ) noexcept
 */
 template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
-inline void swap( CUDAManagedVector<Type,TF>& a, CUDAManagedVector<Type,TF>& b ) noexcept
+inline void swap( CUDADynamicVector<Type,TF>& a, CUDADynamicVector<Type,TF>& b ) noexcept
 {
    a.swap( b );
 }
@@ -1898,24 +1998,7 @@ inline void swap( CUDAManagedVector<Type,TF>& a, CUDAManagedVector<Type,TF>& b )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct HasConstDataAccess< CUDAManagedVector<T,TF> >
-   : public TrueType
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-
-//=================================================================================================
-//
-//  ISCUDAENABLED SPECIALIZATIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T, bool TF >
-struct IsCUDAEnabled< CUDAManagedVector<T,TF> >
+struct HasConstDataAccess< CUDADynamicVector<T,TF> >
    : public TrueType
 {};
 /*! \endcond */
@@ -1933,7 +2016,7 @@ struct IsCUDAEnabled< CUDAManagedVector<T,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct HasMutableDataAccess< CUDAManagedVector<T,TF> >
+struct HasMutableDataAccess< CUDADynamicVector<T,TF> >
    : public TrueType
 {};
 /*! \endcond */
@@ -1951,7 +2034,7 @@ struct HasMutableDataAccess< CUDAManagedVector<T,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct IsAligned< CUDAManagedVector<T,TF> >
+struct IsAligned< CUDADynamicVector<T,TF> >
    : public TrueType
 {};
 /*! \endcond */
@@ -1969,7 +2052,7 @@ struct IsAligned< CUDAManagedVector<T,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct IsContiguous< CUDAManagedVector<T,TF> >
+struct IsContiguous< CUDADynamicVector<T,TF> >
    : public TrueType
 {};
 /*! \endcond */
@@ -1987,7 +2070,7 @@ struct IsContiguous< CUDAManagedVector<T,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct IsPadded< CUDAManagedVector<T,TF> >
+struct IsPadded< CUDADynamicVector<T,TF> >
    : public BoolConstant<usePadding>
 {};
 /*! \endcond */
@@ -2005,7 +2088,7 @@ struct IsPadded< CUDAManagedVector<T,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct IsResizable< CUDAManagedVector<T,TF> >
+struct IsResizable< CUDADynamicVector<T,TF> >
    : public TrueType
 {};
 /*! \endcond */
@@ -2023,7 +2106,7 @@ struct IsResizable< CUDAManagedVector<T,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool TF >
-struct IsShrinkable< CUDAManagedVector<T,TF> >
+struct IsShrinkable< CUDADynamicVector<T,TF> >
    : public TrueType
 {};
 /*! \endcond */
@@ -2040,22 +2123,13 @@ struct IsShrinkable< CUDAManagedVector<T,TF> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T1, typename T2 >
-struct AddTraitEval2< T1, T2
-                    , EnableIf_t< IsVector_v<T1> &&
-                                  IsVector_v<T2> &&
-                                  ( IsDenseVector_v<T1> || IsDenseVector_v<T2> ) &&
-                                  IsCUDAEnabled_v<T1> &&
-                                  IsCUDAEnabled_v<T2> > >
+template< typename T1, typename T2 , bool TF >
+struct AddTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
 {
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< AddTrait_t<ET1,ET2>, TransposeFlag_v<T1> >;
+   using Type = CUDADynamicVector< AddTrait_t<T1,T2>, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
-
 
 
 
@@ -2067,18 +2141,10 @@ struct AddTraitEval2< T1, T2
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T1, typename T2 >
-struct SubTraitEval2< T1, T2
-                    , EnableIf_t< IsVector_v<T1> &&
-                                  IsVector_v<T2> &&
-                                  ( IsDenseVector_v<T1> || IsDenseVector_v<T2> ) &&
-                                  IsCUDAEnabled_v<T1> &&
-                                  IsCUDAEnabled_v<T2> > >
+template< typename T1, typename T2 , bool TF >
+struct SubTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
 {
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< SubTrait_t<ET1,ET2>, TransposeFlag_v<T1> >;
+   using Type = CUDADynamicVector< SubTrait_t<T1,T2>, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -2092,90 +2158,96 @@ struct SubTraitEval2< T1, T2
 //
 //=================================================================================================
 
+template< typename T1, typename T2 , bool TF >
+struct MultTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
+{
+   using Type = CUDADynamicVector< typename MultTrait<T1,T2>::Type, TF >;
+};
+
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T1, typename T2 >
-struct MultTraitEval2< T1, T2
-                     , EnableIf_t< IsDenseVector_v<T1> &&
-                                   IsNumeric_v<T2> &&
-                                   ( Size_v<T1,0UL> == DefaultSize_v ) &&
-                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
-                                   IsCUDAEnabled_v<T1> &&
-                                   IsCUDAEnabled_v<T2> > >
-{
-   using ET1 = ElementType_t<T1>;
-
-   using Type = CUDAManagedVector< MultTrait_t<ET1,T2>, TransposeFlag_v<T1> >;
-};
-
-template< typename T1, typename T2 >
-struct MultTraitEval2< T1, T2
-                     , EnableIf_t< IsNumeric_v<T1> &&
-                                   IsDenseVector_v<T2> &&
-                                   ( Size_v<T2,0UL> == DefaultSize_v ) &&
-                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) &&
-                                   IsCUDAEnabled_v<T1> &&
-                                   IsCUDAEnabled_v<T2> > >
-{
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< MultTrait_t<T1,ET2>, TransposeFlag_v<T2> >;
-};
-
-template< typename T1, typename T2 >
-struct MultTraitEval2< T1, T2
-                     , EnableIf_t< ( ( IsRowVector_v<T1> && IsRowVector_v<T2> ) ||
-                                     ( IsColumnVector_v<T1> && IsColumnVector_v<T2> ) ) &&
-                                   IsDenseVector_v<T1> &&
-                                   IsDenseVector_v<T2> &&
-                                   ( Size_v<T1,0UL> == DefaultSize_v ) &&
-                                   ( Size_v<T2,0UL> == DefaultSize_v ) &&
-                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
-                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) &&
-                                   IsCUDAEnabled_v<T1> &&
-                                   IsCUDAEnabled_v<T2> > >
-{
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< MultTrait_t<ET1,ET2>, TransposeFlag_v<T1> >;
-};
-
-template< typename T1, typename T2 >
-struct MultTraitEval2< T1, T2
-                     , EnableIf_t< IsMatrix_v<T1> &&
-                                   IsColumnVector_v<T2> &&
-                                   ( IsDenseMatrix_v<T1> || IsDenseVector_v<T2> ) &&
-                                   ( Size_v<T1,0UL> == DefaultSize_v &&
-                                     ( !IsSquare_v<T1> || Size_v<T2,0UL> == DefaultSize_v ) ) &&
-                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v &&
-                                     ( !IsSquare_v<T1> || MaxSize_v<T2,0UL> == DefaultMaxSize_v ) ) &&
-                                   IsCUDAEnabled_v<T1> &&
-                                   IsCUDAEnabled_v<T2> > >
-{
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< MultTrait_t<ET1,ET2>, false >;
-};
-
-template< typename T1, typename T2 >
-struct MultTraitEval2< T1, T2
-                     , EnableIf_t< IsRowVector_v<T1> &&
-                                   IsMatrix_v<T2> &&
-                                   ( IsDenseVector_v<T1> || IsDenseMatrix_v<T2> ) &&
-                                   ( Size_v<T2,1UL> == DefaultSize_v &&
-                                     ( !IsSquare_v<T2> || Size_v<T1,0UL> == DefaultSize_v ) ) &&
-                                   ( MaxSize_v<T2,1UL> == DefaultMaxSize_v &&
-                                     ( !IsSquare_v<T2> || MaxSize_v<T1,0UL> == DefaultMaxSize_v ) ) &&
-                                   IsCUDAEnabled_v<T1> &&
-                                   IsCUDAEnabled_v<T2> > >
-{
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< MultTrait_t<ET1,ET2>, true >;
-};
+//template< typename T1, typename T2 >
+//struct MultTraitEval2< T1, T2
+//                     , EnableIf_t< IsDenseVector_v<T1> &&
+//                                   IsNumeric_v<T2> &&
+//                                   ( Size_v<T1,0UL> == DefaultSize_v ) &&
+//                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) > >
+//                                   // IsCUDAEnabled_v<T1> &&
+//                                   // IsCUDAEnabled_v<T2>
+//{
+//   using ET1 = ElementType_t<T1>;
+//
+//   using Type = CUDADynamicVector< MultTrait_t<ET1,T2>, TransposeFlag_v<T1> >;
+//};
+//
+//template< typename T1, typename T2 >
+//struct MultTraitEval2< T1, T2
+//                     , EnableIf_t< IsNumeric_v<T1> &&
+//                                   IsDenseVector_v<T2> &&
+//                                   ( Size_v<T2,0UL> == DefaultSize_v ) &&
+//                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
+//                                   // IsCUDAEnabled_v<T1> &&
+//                                   // IsCUDAEnabled_v<T2>
+//{
+//   using ET2 = ElementType_t<T2>;
+//
+//   using Type = CUDADynamicVector< MultTrait_t<T1,ET2>, TransposeFlag_v<T2> >;
+//};
+//
+//template< typename T1, typename T2 >
+//struct MultTraitEval2< T1, T2
+//                     , EnableIf_t< ( ( IsRowVector_v<T1> && IsRowVector_v<T2> ) ||
+//                                     ( IsColumnVector_v<T1> && IsColumnVector_v<T2> ) ) &&
+//                                   IsDenseVector_v<T1> &&
+//                                   IsDenseVector_v<T2> &&
+//                                   ( Size_v<T1,0UL> == DefaultSize_v ) &&
+//                                   ( Size_v<T2,0UL> == DefaultSize_v ) &&
+//                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
+//                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
+//                                   // IsCUDAEnabled_v<T1> &&
+//                                   // IsCUDAEnabled_v<T2>
+//{
+//   using ET1 = ElementType_t<T1>;
+//   using ET2 = ElementType_t<T2>;
+//
+//   using Type = CUDADynamicVector< MultTrait_t<ET1,ET2>, TransposeFlag_v<T1> >;
+//};
+//
+//template< typename T1, typename T2 >
+//struct MultTraitEval2< T1, T2
+//                     , EnableIf_t< IsMatrix_v<T1> &&
+//                                   IsColumnVector_v<T2> &&
+//                                   ( IsDenseMatrix_v<T1> || IsDenseVector_v<T2> ) &&
+//                                   ( Size_v<T1,0UL> == DefaultSize_v &&
+//                                     ( !IsSquare_v<T1> || Size_v<T2,0UL> == DefaultSize_v ) ) &&
+//                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v &&
+//                                     ( !IsSquare_v<T1> || MaxSize_v<T2,0UL> == DefaultMaxSize_v ) ) > >
+//                                   // IsCUDAEnabled_v<T1> &&
+//                                   // IsCUDAEnabled_v<T2>
+//{
+//   using ET1 = ElementType_t<T1>;
+//   using ET2 = ElementType_t<T2>;
+//
+//   using Type = CUDADynamicVector< MultTrait_t<ET1,ET2>, false >;
+//};
+//
+//template< typename T1, typename T2 >
+//struct MultTraitEval2< T1, T2
+//                     , EnableIf_t< IsRowVector_v<T1> &&
+//                                   IsMatrix_v<T2> &&
+//                                   ( IsDenseVector_v<T1> || IsDenseMatrix_v<T2> ) &&
+//                                   ( Size_v<T2,1UL> == DefaultSize_v &&
+//                                     ( !IsSquare_v<T2> || Size_v<T1,0UL> == DefaultSize_v ) ) &&
+//                                   ( MaxSize_v<T2,1UL> == DefaultMaxSize_v &&
+//                                     ( !IsSquare_v<T2> || MaxSize_v<T1,0UL> == DefaultMaxSize_v ) ) > >
+//                                   // IsCUDAEnabled_v<T1> &&
+//                                   // IsCUDAEnabled_v<T2>
+//{
+//   using ET1 = ElementType_t<T1>;
+//   using ET2 = ElementType_t<T2>;
+//
+//   using Type = CUDADynamicVector< MultTrait_t<ET1,ET2>, true >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2190,32 +2262,10 @@ struct MultTraitEval2< T1, T2
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T1, typename T2 >
-struct DivTraitEval2< T1, T2
-                           , EnableIf_t< IsDenseVector_v<T1> &&
-                                                IsNumeric_v<T2> &&
-                                                IsCUDAEnabled_v<T1> > >
+template< typename T1, typename T2 , bool TF >
+struct DivTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
 {
-   using ET1 = ElementType_t<T1>;
-
-   using Type = CUDAManagedVector< DivTrait_t<ET1,T2>, TransposeFlag_v<T1> >;
-};
-
-template< typename T1, typename T2 >
-struct DivTraitEval2< T1, T2
-                    , EnableIf_t< IsDenseVector_v<T1> &&
-                                  IsDenseVector_v<T2> &&
-                                  IsCUDAEnabled_v<T1> &&
-                                  IsCUDAEnabled_v<T2> > >
-                                  //( Size_v<T1,0UL> == DefaultSize_v ) &&
-                                  //( Size_v<T2,0UL> == DefaultSize_v ) &&
-                                  //( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
-                                  //( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
-{
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< DivTrait_t<ET1,ET2>, TransposeFlag_v<T1> >;
+   using Type = CUDADynamicVector< DivTrait_t<T1,T2>, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -2231,16 +2281,10 @@ struct DivTraitEval2< T1, T2
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T, typename OP >
-struct UnaryMapTraitEval2< T, OP
-                            , EnableIf_t< IsDenseVector_v<T> &&
-                                          IsCUDAEnabled_v<T> > >
-
-                                       //Size_v<T,0UL> == DefaultSize_v &&
-                                       //MaxSize_v<T,0UL> == DefaultMaxSize_v > >
+template< typename T, bool TF, typename OP >
+struct MapTrait< CUDADynamicVector<T, TF>, OP >
 {
-   using ET = ElementType_t<T>;
-   using Type = CUDAManagedVector< MapTrait_t<ET,OP>, TransposeFlag_v<T> >;
+   using Type = CUDADynamicVector< MapTrait_t<T,OP>, TransposeFlag_v<T> >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -2248,23 +2292,11 @@ struct UnaryMapTraitEval2< T, OP
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T1, typename T2, typename OP >
-struct BinaryMapTraitEval2< T1, T2, OP
-                                 , EnableIf_t< IsVector_v<T1> &&
-                                                      IsVector_v<T2> &&
-                                                      IsCUDAEnabled_v<T1> &&
-                                                      IsCUDAEnabled_v<T2> > >
-
-                                        //Size_v<T1,0UL> == DefaultSize_v &&
-                                        //Size_v<T2,0UL> == DefaultSize_v &&
-                                        //MaxSize_v<T1,0UL> == DefaultMaxSize_v &&
-                                        //MaxSize_v<T2,0UL> == DefaultMaxSize_v > >
-{
-   using ET1 = ElementType_t<T1>;
-   using ET2 = ElementType_t<T2>;
-
-   using Type = CUDAManagedVector< MapTrait_t<ET1,ET2,OP>, TransposeFlag_v<T1> >;
-};
+//template< typename T1, typename T2, bool TF, typename OP >
+//struct BinaryMap< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF>, OP >
+//{
+//   using Type = CUDADynamicVector< MapTrait_t<T1,T2,OP>, TransposeFlag_v<T1> >;
+//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2279,18 +2311,13 @@ struct BinaryMapTraitEval2< T1, T2, OP
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-//template< typename T, typename OP, size_t RF >
-//struct PartialReduceTraitEval2< T, OP, RF
-//                              , EnableIf_t< IsMatrix_v<T> &&
-//                                            ( Size_v<T,0UL> == DefaultSize_v ||
-//                                              Size_v<T,1UL> == DefaultSize_v ) &&
-//                                            ( MaxSize_v<T,0UL> == DefaultMaxSize_v ||
-//                                              MaxSize_v<T,1UL> == DefaultMaxSize_v ) > >
-//{
-//   static constexpr bool TF = ( RF == 0UL );
-//
-//   using Type = CUDAManagedVector< ElementType_t<T>, TF >;
-//};
+template< typename T, typename OP, size_t RF >
+struct ReduceTrait< T, OP, RF >
+{
+   static constexpr bool TF = ( RF == 0UL );
+
+   using Type = CUDADynamicVector< ElementType_t<T>, TF >;
+};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2307,9 +2334,9 @@ struct BinaryMapTraitEval2< T1, T2, OP
 
 /*! \cond BLAZE_INTERNAL */
 template< typename T1, bool TF, typename T2 >
-struct HighType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
+struct HighType< CUDADynamicVector<T1,TF>, CUDADynamicVector<T2,TF> >
 {
-   using Type = CUDAManagedVector< typename HighType<T1,T2>::Type, TF >;
+   using Type = CUDADynamicVector< typename HighType<T1,T2>::Type, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -2326,9 +2353,9 @@ struct HighType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T1, bool TF, typename T2 >
-struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
+struct LowType< CUDADynamicVector<T1,TF>, CUDADynamicVector<T2,TF> >
 {
-   using Type = CUDAManagedVector< typename LowType<T1,T2>::Type, TF >;
+   using Type = CUDADynamicVector< typename LowType<T1,T2>::Type, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -2350,7 +2377,7 @@ struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 //                                   Size_v<VT,0UL> == DefaultSize_v &&
 //                                   MaxSize_v<VT,0UL> == DefaultMaxSize_v > >
 //{
-//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
+//   using Type = CUDADynamicVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
 //};
 /*! \endcond */
 //*************************************************************************************************
@@ -2372,7 +2399,7 @@ struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 //                                  Size_v<VT,0UL> == DefaultSize_v &&
 //                                  MaxSize_v<VT,0UL> == DefaultMaxSize_v > >
 //{
-//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
+//   using Type = CUDADynamicVector< RemoveConst_t< ElementType_t<VT> >, TransposeFlag_v<VT> >;
 //};
 /*! \endcond */
 //*************************************************************************************************
@@ -2394,7 +2421,7 @@ struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 //                                  Size_v<MT,1UL> == DefaultSize_v &&
 //                                  MaxSize_v<MT,1UL> == DefaultMaxSize_v > >
 //{
-//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, true >;
+//   using Type = CUDADynamicVector< RemoveConst_t< ElementType_t<MT> >, true >;
 //};
 /*! \endcond */
 //*************************************************************************************************
@@ -2416,7 +2443,7 @@ struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 //                                     Size_v<MT,0UL> == DefaultSize_v &&
 //                                     MaxSize_v<MT,0UL> == DefaultMaxSize_v > >
 //{
-//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, false >;
+//   using Type = CUDADynamicVector< RemoveConst_t< ElementType_t<MT> >, false >;
 //};
 /*! \endcond */
 //*************************************************************************************************
@@ -2440,7 +2467,7 @@ struct LowType< CUDAManagedVector<T1,TF>, CUDAManagedVector<T2,TF> >
 //                                   ( MaxSize_v<MT,0UL> == DefaultMaxSize_v ||
 //                                     MaxSize_v<MT,1UL> == DefaultMaxSize_v ) > >
 //{
-//   using Type = CUDAManagedVector< RemoveConst_t< ElementType_t<MT> >, defaultTransposeFlag >;
+//   using Type = CUDADynamicVector< RemoveConst_t< ElementType_t<MT> >, defaultTransposeFlag >;
 //};
 /*! \endcond */
 //*************************************************************************************************
