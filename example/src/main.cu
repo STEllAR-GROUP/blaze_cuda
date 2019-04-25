@@ -18,13 +18,10 @@ int main(int, char const *[])
                                  , blaze::DynamicVector<float> >::type;
 
 
-   vtype a(vecsize, 10), b(vecsize, 10);
-
-   vtype c = a + b;
+   vtype a(vecsize, 10), b(vecsize, 10), c;
+   c = a + b;
 
    cudaDeviceSynchronize();
-
-   //[](void a){}(c);
 
    std::cout << c;
 }
