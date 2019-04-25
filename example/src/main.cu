@@ -11,7 +11,7 @@
 
 int main(int, char const *[])
 {
-   std::size_t constexpr vecsize    = 32;
+   std::size_t constexpr vecsize = 32;
 
    using vtype = blaze::CUDADynamicVector<float>;
    vtype a(vecsize, 10), b(vecsize, 10);
