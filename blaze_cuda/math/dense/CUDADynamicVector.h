@@ -2281,10 +2281,10 @@ struct DivTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-template< typename T, bool TF, typename OP >
-struct MapTrait< CUDADynamicVector<T, TF>, OP >
+template< typename T, typename OP, bool TF >
+struct MapTrait< CUDADynamicVector<T,TF>, OP >
 {
-   using Type = CUDADynamicVector< MapTrait_t<T,OP>, TransposeFlag_v<T> >;
+   using Type = CUDADynamicVector< typename MapTrait<T,OP>::Type, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
