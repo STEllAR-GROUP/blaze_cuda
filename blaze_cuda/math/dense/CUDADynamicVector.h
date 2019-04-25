@@ -2158,96 +2158,13 @@ struct SubTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
 //
 //=================================================================================================
 
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
 template< typename T1, typename T2 , bool TF >
 struct MultTrait< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF> >
 {
    using Type = CUDADynamicVector< typename MultTrait<T1,T2>::Type, TF >;
 };
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-//template< typename T1, typename T2 >
-//struct MultTraitEval2< T1, T2
-//                     , EnableIf_t< IsDenseVector_v<T1> &&
-//                                   IsNumeric_v<T2> &&
-//                                   ( Size_v<T1,0UL> == DefaultSize_v ) &&
-//                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) > >
-//                                   // IsCUDAEnabled_v<T1> &&
-//                                   // IsCUDAEnabled_v<T2>
-//{
-//   using ET1 = ElementType_t<T1>;
-//
-//   using Type = CUDADynamicVector< MultTrait_t<ET1,T2>, TransposeFlag_v<T1> >;
-//};
-//
-//template< typename T1, typename T2 >
-//struct MultTraitEval2< T1, T2
-//                     , EnableIf_t< IsNumeric_v<T1> &&
-//                                   IsDenseVector_v<T2> &&
-//                                   ( Size_v<T2,0UL> == DefaultSize_v ) &&
-//                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
-//                                   // IsCUDAEnabled_v<T1> &&
-//                                   // IsCUDAEnabled_v<T2>
-//{
-//   using ET2 = ElementType_t<T2>;
-//
-//   using Type = CUDADynamicVector< MultTrait_t<T1,ET2>, TransposeFlag_v<T2> >;
-//};
-//
-//template< typename T1, typename T2 >
-//struct MultTraitEval2< T1, T2
-//                     , EnableIf_t< ( ( IsRowVector_v<T1> && IsRowVector_v<T2> ) ||
-//                                     ( IsColumnVector_v<T1> && IsColumnVector_v<T2> ) ) &&
-//                                   IsDenseVector_v<T1> &&
-//                                   IsDenseVector_v<T2> &&
-//                                   ( Size_v<T1,0UL> == DefaultSize_v ) &&
-//                                   ( Size_v<T2,0UL> == DefaultSize_v ) &&
-//                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v ) &&
-//                                   ( MaxSize_v<T2,0UL> == DefaultMaxSize_v ) > >
-//                                   // IsCUDAEnabled_v<T1> &&
-//                                   // IsCUDAEnabled_v<T2>
-//{
-//   using ET1 = ElementType_t<T1>;
-//   using ET2 = ElementType_t<T2>;
-//
-//   using Type = CUDADynamicVector< MultTrait_t<ET1,ET2>, TransposeFlag_v<T1> >;
-//};
-//
-//template< typename T1, typename T2 >
-//struct MultTraitEval2< T1, T2
-//                     , EnableIf_t< IsMatrix_v<T1> &&
-//                                   IsColumnVector_v<T2> &&
-//                                   ( IsDenseMatrix_v<T1> || IsDenseVector_v<T2> ) &&
-//                                   ( Size_v<T1,0UL> == DefaultSize_v &&
-//                                     ( !IsSquare_v<T1> || Size_v<T2,0UL> == DefaultSize_v ) ) &&
-//                                   ( MaxSize_v<T1,0UL> == DefaultMaxSize_v &&
-//                                     ( !IsSquare_v<T1> || MaxSize_v<T2,0UL> == DefaultMaxSize_v ) ) > >
-//                                   // IsCUDAEnabled_v<T1> &&
-//                                   // IsCUDAEnabled_v<T2>
-//{
-//   using ET1 = ElementType_t<T1>;
-//   using ET2 = ElementType_t<T2>;
-//
-//   using Type = CUDADynamicVector< MultTrait_t<ET1,ET2>, false >;
-//};
-//
-//template< typename T1, typename T2 >
-//struct MultTraitEval2< T1, T2
-//                     , EnableIf_t< IsRowVector_v<T1> &&
-//                                   IsMatrix_v<T2> &&
-//                                   ( IsDenseVector_v<T1> || IsDenseMatrix_v<T2> ) &&
-//                                   ( Size_v<T2,1UL> == DefaultSize_v &&
-//                                     ( !IsSquare_v<T2> || Size_v<T1,0UL> == DefaultSize_v ) ) &&
-//                                   ( MaxSize_v<T2,1UL> == DefaultMaxSize_v &&
-//                                     ( !IsSquare_v<T2> || MaxSize_v<T1,0UL> == DefaultMaxSize_v ) ) > >
-//                                   // IsCUDAEnabled_v<T1> &&
-//                                   // IsCUDAEnabled_v<T2>
-//{
-//   using ET1 = ElementType_t<T1>;
-//   using ET2 = ElementType_t<T2>;
-//
-//   using Type = CUDADynamicVector< MultTrait_t<ET1,ET2>, true >;
-//};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2286,17 +2203,6 @@ struct MapTrait< CUDADynamicVector<T,TF>, OP >
 {
    using Type = CUDADynamicVector< typename MapTrait<T,OP>::Type, TF >;
 };
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-//template< typename T1, typename T2, bool TF, typename OP >
-//struct BinaryMap< CUDADynamicVector<T1, TF>, CUDADynamicVector<T2, TF>, OP >
-//{
-//   using Type = CUDADynamicVector< MapTrait_t<T1,T2,OP>, TransposeFlag_v<T1> >;
-//};
 /*! \endcond */
 //*************************************************************************************************
 
