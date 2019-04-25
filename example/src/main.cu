@@ -6,22 +6,17 @@
 #include <blaze/Blaze.h>
 
 #include <blaze_cuda/Blaze.h>
-#include <blaze_cuda/math/dense/CUDAManagedVector.h>
+#include <blaze_cuda/math/dense/CUDADynamicVector.h>
+#include <blaze_cuda/util/algorithms/CUDATransform.h>
 
 int main(int, char const *[])
 {
-   bool        constexpr using_cuda = true;
    std::size_t constexpr vecsize    = 32;
 
-   using vtype = std::conditional< using_cuda
-                                 , blaze::CUDAManagedVector<float>
-                                 , blaze::DynamicVector<float> >::type;
+   using vtype = blaze::CUDADynamicVector<float>;
+   vtype a(vecsize, 10), b(vecsize, 10);
 
+   a = a * b;
 
-   vtype a(vecsize, 10), b(vecsize, 10), c;
-   c = a + b;
-
-   cudaDeviceSynchronize();
-
-   std::cout << c;
+   std::cout << "a:\n" << a;
 }
