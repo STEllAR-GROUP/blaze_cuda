@@ -39,15 +39,16 @@ namespace blaze {
 
    namespace detail {
 
-      template<typename InputIt, typename OutputIt, typename F>
+      template< typename InputIt, typename OutputIt, typename F >
       void __global__ _cuda_transform_impl( InputIt in_begin, OutputIt out_begin, F f )
       {
          auto const id = threadIdx.x;
          *(out_begin + id) = f( *(in_begin + id) );
       }
 
-      template<typename InputIt1, typename InputIt2, typename OutputIt, typename F>
-      void __global__ _cuda_zip_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin, OutputIt out_begin, F f )
+      template< typename InputIt1, typename InputIt2, typename OutputIt, typename F >
+      void __global__ _cuda_zip_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin
+                                              , OutputIt out_begin, F f )
       {
          auto const id = threadIdx.x;
          *(out_begin + id) = f( *(in1_begin + id), *(in2_begin + id) );
@@ -55,23 +56,22 @@ namespace blaze {
 
    }  // namespace detail
 
-   template<typename InputIt, typename OutputIt, typename F>
+   template< typename InputIt, typename OutputIt, typename F >
    inline void cuda_transform ( InputIt in_begin, InputIt in_end
                               , OutputIt out_begin
                               , F const& f ) {
       // TODO: Kernel param size tuning
-      detail::_cuda_transform_impl <<< 1, in_end - in_begin >>>
-         ( in_begin, out_begin, f );
+      detail::_cuda_transform_impl <<< 1, in_end - in_begin >>> ( in_begin, out_begin, f );
    }
 
-   template<typename InputIt1, typename InputIt2, typename OutputIt, typename F>
+   template< typename InputIt1, typename InputIt2, typename OutputIt, typename F >
    inline void cuda_zip_transform( InputIt1 in1_begin, InputIt1 in1_end
                                  , InputIt2 in2_begin
                                  , OutputIt out_begin
                                  , F const& f ) {
       // TODO: Kernel param size tuning
-      detail::_cuda_zip_transform_impl <<< 1, in1_end - in1_begin >>>
-         ( in1_begin, in2_begin , out_begin, f );
+      detail::_cuda_zip_transform_impl <<< 1, in1_end - in1_begin >>> ( in1_begin, in2_begin
+                                                                      , out_begin, f );
    }
 
 }  // namespace blaze
