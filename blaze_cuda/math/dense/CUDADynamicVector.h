@@ -449,8 +449,8 @@ template< typename Type  // Data type of the vector
 inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Type& init )
    : CUDADynamicVector( n )
 {
-   for( size_t i=0UL; i<size_; ++i )
-      v_[i] = init;
+   cuda_transform(begin(), end(), begin(), [=] __device__ (auto const&){ return init; });
+   cudaDeviceSynchronize();
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -513,7 +513,7 @@ inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Other* arr
    for( size_t i=0UL; i<n; ++i )
       v_[i] = array[i];
 
-   //BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
+   BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
 //*************************************************************************************************
 
@@ -545,7 +545,7 @@ inline CUDADynamicVector<Type,TF>::CUDADynamicVector( const Other (&array)[Dim] 
    for( size_t i=0UL; i<Dim; ++i )
       v_[i] = array[i];
 
-   //BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
+   BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
 //*************************************************************************************************
 
