@@ -52,7 +52,7 @@
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/TransposeFlag.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/functors/Add.h>
 #include <blaze/math/traits/ReduceTrait.h>
 #include <blaze/math/typetraits/IsUniform.h>
@@ -115,7 +115,7 @@ class OperationTest
    using RT = blaze::DynamicMatrix<ET,false>;  //!< Reference type.
 
    //! Reference result type for column-wise reduction operations
-   using RRE = blaze::DynamicVector<DET,true>;
+   using RRE = blaze::CUDADynamicVector<DET,true>;
 
    //! Transpose reference result type for column-wise reduction operations
    using TRRE = blaze::TransposeType_t<RRE>;

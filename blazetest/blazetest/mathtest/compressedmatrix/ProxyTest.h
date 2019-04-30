@@ -47,7 +47,7 @@
 #include <blaze/math/constraints/StorageOrder.h>
 #include <blaze/math/CompressedMatrix.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blaze/util/constraints/SameType.h>
 #include <blazetest/system/Types.h>
@@ -151,7 +151,7 @@ class ProxyTest
    //**********************************************************************************************
 
    //**Type definitions****************************************************************************
-   using DV = blaze::DynamicVector<int,blaze::rowVector>;     //!< Type of the dense vector elements.
+   using DV = blaze::CUDADynamicVector<int,blaze::rowVector>;     //!< Type of the dense vector elements.
    using SV = blaze::CompressedVector<int,blaze::rowVector>;  //!< Type of the sparse vector elements.
    using DM = blaze::DynamicMatrix<int,blaze::rowMajor>;      //!< Type of the dense matrix elements.
    using SM = blaze::CompressedMatrix<int,blaze::rowMajor>;   //!< Type of the sparse matrix elements.

@@ -51,7 +51,7 @@
 #include <blaze/math/constraints/DenseVector.h>
 #include <blaze/math/constraints/SparseVector.h>
 #include <blaze/math/constraints/TransposeFlag.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/Functors.h>
 #include <blaze/math/shims/Equal.h>
 #include <blaze/math/shims/IsDivisor.h>
@@ -119,7 +119,7 @@ class OperationTest
    using TSRE = blaze::TransposeType_t<SRE>;      //!< Transpose sparse result type
    using SET  = blaze::ElementType_t<SRE>;        //!< Element type of the sparse result
 
-   using RT  = blaze::DynamicVector<blaze::ElementType_t<DRE>,TF>;  //!< Reference type
+   using RT  = blaze::CUDADynamicVector<blaze::ElementType_t<DRE>,TF>;  //!< Reference type
    using TRT = blaze::TransposeType_t<RT>;                          //!< Transpose reference type
 
    //! Type of the vector/vector minimum expression

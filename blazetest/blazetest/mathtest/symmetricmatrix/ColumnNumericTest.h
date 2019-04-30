@@ -47,7 +47,7 @@
 #include <blaze/math/CompressedVector.h>
 #include <blaze/math/Column.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/SymmetricMatrix.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blazetest/system/Types.h>
@@ -168,7 +168,7 @@ void ColumnNumericTest::testAssignment()
    {
       test_ = "Dense vector assignment test";
 
-      blaze::DynamicVector<int,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<int,blaze::columnVector> vec( 3UL );
       vec[0] = 2;
       vec[1] = 8;
       vec[2] = 4;
@@ -280,7 +280,7 @@ void ColumnNumericTest::testAddAssign()
    {
       test_ = "Dense vector addition assignment test";
 
-      blaze::DynamicVector<int,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<int,blaze::columnVector> vec( 3UL );
       vec[0] = 6;
       vec[1] = 6;
       vec[2] = 4;
@@ -392,7 +392,7 @@ void ColumnNumericTest::testSubAssign()
    {
       test_ = "Dense vector subtraction assignment test";
 
-      blaze::DynamicVector<int,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<int,blaze::columnVector> vec( 3UL );
       vec[0] = -6;
       vec[1] = -6;
       vec[2] = -4;
@@ -504,7 +504,7 @@ void ColumnNumericTest::testMultAssign()
    {
       test_ = "Dense vector multiplication assignment test";
 
-      blaze::DynamicVector<int,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<int,blaze::columnVector> vec( 3UL );
       vec[0] = -2;
       vec[1] =  3;
       vec[2] = -4;

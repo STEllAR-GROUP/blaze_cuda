@@ -117,12 +117,12 @@ class OperationTest
    using TSRE = blaze::TransposeType_t<SRE>;  //!< Transpose sparse result type
 
    //! Dense result type
-   using DRE = blaze::DynamicVector<SET,true>;
+   using DRE = blaze::CUDADynamicVector<SET,true>;
 
    using DET  = blaze::ElementType_t<DRE>;    //!< Element type of the dense result
    using TDRE = blaze::TransposeType_t<DRE>;  //!< Transpose dense result type
 
-   using VRT  = blaze::DynamicVector<VET,true>;   //!< Vector reference type
+   using VRT  = blaze::CUDADynamicVector<VET,true>;   //!< Vector reference type
    using MRT  = blaze::DynamicMatrix<MET,false>;  //!< Matrix reference type
    using RRE  = blaze::MultTrait_t<VRT,MRT>;      //!< Reference result type
    using TRRE = blaze::TransposeType_t<RRE>;      //!< Transpose reference result type

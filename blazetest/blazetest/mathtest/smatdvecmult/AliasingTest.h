@@ -45,7 +45,7 @@
 #include <string>
 #include <blaze/math/CompressedMatrix.h>
 #include <blaze/math/CompressedVector.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/StaticVector.h>
 
 
@@ -72,7 +72,7 @@ class AliasingTest
 {
  private:
    //**Type definitions****************************************************************************
-   using DVec  = blaze::DynamicVector<int,blaze::columnVector>;     //!< Dense column vector type.
+   using DVec  = blaze::CUDADynamicVector<int,blaze::columnVector>;     //!< Dense column vector type.
    using SVec  = blaze::CompressedVector<int,blaze::columnVector>;  //!< Sparse column vector type.
    using SMat  = blaze::CompressedMatrix<int,blaze::rowMajor>;      //!< Row-major sparse matrix type.
    using TSMat = blaze::CompressedMatrix<int,blaze::columnMajor>;   //!< Column-major sparse matrix type.

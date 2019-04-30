@@ -44,7 +44,7 @@
 #include <stdexcept>
 #include <string>
 #include <blaze/math/constraints/DenseVector.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/Subvector.h>
 #include <blazetest/system/Types.h>
 
@@ -120,7 +120,7 @@ class DenseAlignedTest
    //**********************************************************************************************
 
    //**Type definitions****************************************************************************
-   using VT   = blaze::DynamicVector<int,blaze::rowVector>;  //!< Dynamic row vector type
+   using VT   = blaze::CUDADynamicVector<int,blaze::rowVector>;  //!< Dynamic row vector type
    using ASVT = blaze::Subvector<VT,blaze::aligned>;         //!< Aligned subvector type for dynamic row vectors.
    using USVT = blaze::Subvector<VT,blaze::unaligned>;       //!< Unaligned subvector type for dynamic row vectors.
    //**********************************************************************************************

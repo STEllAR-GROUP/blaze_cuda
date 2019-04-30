@@ -40,7 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blazetest/mathtest/creator/Default.h>
 #include <blazetest/mathtest/creator/Policies.h>
 #include <blazetest/system/Types.h>
@@ -62,11 +62,11 @@ namespace blazetest {
 */
 template< typename T  // Element type of the N-dimensional vector
         , bool TF >   // Transpose flag of the N-dimensional vector
-class Creator< blaze::DynamicVector<T,TF> >
+class Creator< blaze::CUDADynamicVector<T,TF> >
 {
  public:
    //**Type definitions****************************************************************************
-   using Type = blaze::DynamicVector<T,TF>;  //!< Type to be created by the Creator.
+   using Type = blaze::CUDADynamicVector<T,TF>;  //!< Type to be created by the Creator.
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
@@ -87,10 +87,10 @@ class Creator< blaze::DynamicVector<T,TF> >
    //@{
    // No explicitly declared copy assignment operator.
 
-   blaze::DynamicVector<T,TF> operator()() const;
+   blaze::CUDADynamicVector<T,TF> operator()() const;
 
    template< typename CP >
-   blaze::DynamicVector<T,TF> operator()( const CP& policy ) const;
+   blaze::CUDADynamicVector<T,TF> operator()( const CP& policy ) const;
    //@}
    //**********************************************************************************************
 
@@ -121,7 +121,7 @@ class Creator< blaze::DynamicVector<T,TF> >
 */
 template< typename T  // Element type of the N-dimensional vector
         , bool TF >   // Transpose flag of the N-dimensional vector
-inline Creator< blaze::DynamicVector<T,TF> >::Creator( const Creator<T>& elementCreator )
+inline Creator< blaze::CUDADynamicVector<T,TF> >::Creator( const Creator<T>& elementCreator )
    : size_( 3UL )           // The size for the N-dimensional vector
    , ec_( elementCreator )  // Creator for the elements of the N-dimensional vector
 {}
@@ -136,7 +136,7 @@ inline Creator< blaze::DynamicVector<T,TF> >::Creator( const Creator<T>& element
 */
 template< typename T  // Element type of the N-dimensional vector
         , bool TF >   // Transpose flag of the N-dimensional vector
-inline Creator< blaze::DynamicVector<T,TF> >::Creator( size_t size, const Creator<T>& elementCreator )
+inline Creator< blaze::CUDADynamicVector<T,TF> >::Creator( size_t size, const Creator<T>& elementCreator )
    : size_( size )          // The size for the N-dimensional vector
    , ec_( elementCreator )  // Creator for the elements of the N-dimensional vector
 {}
@@ -158,7 +158,7 @@ inline Creator< blaze::DynamicVector<T,TF> >::Creator( size_t size, const Creato
 */
 template< typename T  // Element type of the N-dimensional vector
         , bool TF >   // Transpose flag of the N-dimensional vector
-inline blaze::DynamicVector<T,TF> Creator< blaze::DynamicVector<T,TF> >::operator()() const
+inline blaze::CUDADynamicVector<T,TF> Creator< blaze::DynamicVector<T,TF> >::operator()() const
 {
    return (*this)( Default() );
 }
@@ -174,10 +174,10 @@ inline blaze::DynamicVector<T,TF> Creator< blaze::DynamicVector<T,TF> >::operato
 template< typename T     // Element type of the N-dimensional vector
         , bool TF >      // Transpose flag of the N-dimensional vector
 template< typename CP >  // Creation policy
-inline blaze::DynamicVector<T,TF>
-   Creator< blaze::DynamicVector<T,TF> >::operator()( const CP& policy ) const
+inline blaze::CUDADynamicVector<T,TF>
+   Creator< blaze::CUDADynamicVector<T,TF> >::operator()( const CP& policy ) const
 {
-   blaze::DynamicVector<T,TF> vector( size_ );
+   blaze::CUDADynamicVector<T,TF> vector( size_ );
    for( size_t i=0UL; i<size_; ++i )
       vector[i] = ec_( policy );
    return vector;

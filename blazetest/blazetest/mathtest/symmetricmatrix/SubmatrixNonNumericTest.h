@@ -74,7 +74,7 @@ class SubmatrixNonNumericTest
  private:
    //**Type definitions****************************************************************************
    //! Type of a resizable, non-numeric element.
-   using VT = blaze::DynamicVector<int,blaze::rowVector>;
+   using VT = blaze::CUDADynamicVector<int,blaze::rowVector>;
 
    //! Type of the dense non-numeric symmetric matrix.
    using DST = blaze::SymmetricMatrix< blaze::DynamicMatrix<VT,blaze::rowMajor> >;

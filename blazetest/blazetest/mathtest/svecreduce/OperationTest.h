@@ -47,7 +47,7 @@
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/DenseVector.h>
 #include <blaze/math/constraints/SparseVector.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/functors/Add.h>
 #include <blaze/math/traits/ReduceTrait.h>
 #include <blaze/math/typetraits/UnderlyingBuiltin.h>
@@ -87,7 +87,7 @@ class OperationTest
 
    using RE = blaze::ReduceTrait_t<VT,blaze::Add>;  //!< Result type of the reduction operation.
 
-   using RT = blaze::DynamicVector<ET,false>;  //!< Reference type.
+   using RT = blaze::CUDADynamicVector<ET,false>;  //!< Reference type.
    //**********************************************************************************************
 
  public:

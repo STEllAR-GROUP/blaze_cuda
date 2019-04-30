@@ -57,7 +57,7 @@
 #include <blaze/math/constraints/SparseMatrix.h>
 #include <blaze/math/constraints/SparseVector.h>
 #include <blaze/math/constraints/StorageOrder.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/Functors.h>
 #include <blaze/math/StaticVector.h>
 #include <blaze/math/traits/MultTrait.h>
@@ -129,7 +129,7 @@ class OperationTest
    using TSRE  = blaze::TransposeType_t<SRE>;   //!< Transpose sparse result type
    using TOSRE = blaze::TransposeType_t<OSRE>;  //!< Transpose sparse result type with opposite storage order
 
-   using RT1 = blaze::DynamicVector<ET1,false>;    //!< Reference type 1
+   using RT1 = blaze::CUDADynamicVector<ET1,false>;    //!< Reference type 1
    using RT2 = blaze::CompressedVector<ET2,true>;  //!< Reference type 2
    using RRE = blaze::MultTrait_t<RT1,RT2>;        //!< Reference result type
 

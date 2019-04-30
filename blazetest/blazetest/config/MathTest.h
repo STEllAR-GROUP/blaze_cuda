@@ -166,7 +166,7 @@ typedef double  TypeB;
 // addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    c = a + b;  // Basic vector addition
    \endcode
 
@@ -188,7 +188,7 @@ typedef double  TypeB;
 // The following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    c = -( a + b );  // Negated vector addition
    \endcode
 
@@ -211,7 +211,7 @@ typedef double  TypeB;
 // vector addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    c = 1.1 * ( a + b );  // Left-multiplied vector addition
    c = ( a + b ) * 1.1;  // Right-multiplied vector addition
    c = ( a + b ) / 1.1;  // Scalar-divided vector addition
@@ -235,8 +235,8 @@ typedef double  TypeB;
 // operation. The following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<double,false> a, b;
-   blaze::DynamicVector<double,true> c;
+   blaze::CUDADynamicVector<double,false> a, b;
+   blaze::CUDADynamicVector<double,true> c;
    c = trans( a + b );  // Transpose vector addition
    \endcode
 
@@ -259,8 +259,8 @@ typedef double  TypeB;
 // addition:
 
    \code
-   blaze::DynamicVector< complex<double>, false > a, b;
-   blaze::DynamicVector< complex<double>, true > c;
+   blaze::CUDADynamicVector< complex<double>, false > a, b;
+   blaze::CUDADynamicVector< complex<double>, true > c;
    c = ctrans( a + b );  // Conjugate transpose vector addition
    \endcode
 
@@ -282,7 +282,7 @@ typedef double  TypeB;
 // following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<int> a, b, c;
+   blaze::CUDADynamicVector<int> a, b, c;
    c = abs( a + b );  // Absolute value vector addition
    \endcode
 
@@ -305,7 +305,7 @@ typedef double  TypeB;
 // addition:
 
    \code
-   blaze::DynamicVector< complex<double> > a, b, c;
+   blaze::CUDADynamicVector< complex<double> > a, b, c;
    c = conj( a + b );  // Complex conjugate vector addition
    \endcode
 
@@ -327,7 +327,7 @@ typedef double  TypeB;
 // following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<int> a, b, c;
+   blaze::CUDADynamicVector<int> a, b, c;
    c = real( a + b );  // Real part vector addition
    \endcode
 
@@ -349,7 +349,7 @@ typedef double  TypeB;
 // following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<int> a, b, c;
+   blaze::CUDADynamicVector<int> a, b, c;
    c = imag( a + b );  // Imaginary part vector addition
    \endcode
 
@@ -396,7 +396,7 @@ typedef double  TypeB;
 // following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    c = eval( a + b );  // Explicit evaluation of the vector addition
    \endcode
 
@@ -418,7 +418,7 @@ typedef double  TypeB;
 // following example demonstrates this by means of the vector addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    c = serial( a + b );  // Explicit serialization of the vector addition
    \endcode
 
@@ -551,7 +551,7 @@ typedef double  TypeB;
 // vector addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    for( ... )
       subvector( c, ... ) = subvector( a + b, ... );  // Subvector-wise vector addition
    \endcode
@@ -575,7 +575,7 @@ typedef double  TypeB;
 // of the vector addition:
 
    \code
-   blaze::DynamicVector<double> a, b, c;
+   blaze::CUDADynamicVector<double> a, b, c;
    for( ... )
       elements( c, ... ) = elements( a + b, ... );  // Element-wise vector addition
    \endcode

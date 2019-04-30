@@ -48,7 +48,7 @@
 #include <blaze/math/CompressedVector.h>
 #include <blaze/math/constraints/DenseVector.h>
 #include <blaze/math/constraints/SparseVector.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/StaticVector.h>
 #include <blaze/math/traits/MultTrait.h>
 #include <blaze/util/constraints/Numeric.h>
@@ -91,7 +91,7 @@ class OperationTest
    using TVT2 = blaze::TransposeType_t<VT2>;   //!< Transpose vector type 2
    using RE   = blaze::MultTrait_t<TVT1,VT2>;  //!< Result type
 
-   using RT1 = blaze::DynamicVector<ET1,true>;      //!< Reference type 1
+   using RT1 = blaze::CUDADynamicVector<ET1,true>;      //!< Reference type 1
    using RT2 = blaze::CompressedVector<ET2,false>;  //!< Reference type 2
    //**********************************************************************************************
 

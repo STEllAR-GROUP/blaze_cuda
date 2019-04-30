@@ -49,7 +49,7 @@
 #include <blaze/math/constraints/DenseVector.h>
 #include <blaze/math/constraints/RequiresEvaluation.h>
 #include <blaze/math/constraints/RowVector.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/util/AlignedAllocator.h>
 #include <blaze/util/constraints/SameType.h>
 #include <blaze/util/typetraits/AlignmentOf.h>
@@ -71,7 +71,7 @@ namespace dynamicvector {
 //*************************************************************************************************
 /*!\brief Auxiliary class for all tests of the DynamicVector class template.
 //
-// This class represents a test suite for the blaze::DynamicVector class template. It performs
+// This class represents a test suite for the blaze::CUDADynamicVector class template. It performs
 // a series of both compile time as well as runtime tests.
 */
 class ClassTest
@@ -136,8 +136,8 @@ class ClassTest
    //**********************************************************************************************
 
    //**Type definitions****************************************************************************
-   using VT  = blaze::DynamicVector<int,blaze::rowVector>;     //!< Type of the dynamic vector.
-   using TVT = blaze::DynamicVector<int,blaze::columnVector>;  //!< Transpose dynamic vector type.
+   using VT  = blaze::CUDADynamicVector<int,blaze::rowVector>;     //!< Type of the dynamic vector.
+   using TVT = blaze::CUDADynamicVector<int,blaze::columnVector>;  //!< Transpose dynamic vector type.
 
    using RVT  = VT::Rebind<double>::Other;   //!< Rebound dynamic vector type.
    using TRVT = TVT::Rebind<double>::Other;  //!< Transpose rebound dynamic vector type.
@@ -215,7 +215,7 @@ class ClassTest
 template< typename Type >
 void ClassTest::testAlignment( const std::string& type )
 {
-   using VectorType = blaze::DynamicVector<Type,blaze::rowVector>;
+   using VectorType = blaze::CUDADynamicVector<Type,blaze::rowVector>;
 
    const size_t alignment( blaze::AlignmentOf<Type>::value );
 

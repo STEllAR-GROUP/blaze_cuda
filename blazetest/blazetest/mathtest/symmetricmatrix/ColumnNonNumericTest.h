@@ -47,7 +47,7 @@
 #include <blaze/math/CompressedVector.h>
 #include <blaze/math/Column.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/SymmetricMatrix.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blazetest/system/Types.h>
@@ -76,7 +76,7 @@ class ColumnNonNumericTest
  private:
    //**Type definitions****************************************************************************
    //! Type of a resizable, non-numeric element.
-   using VT = blaze::DynamicVector<int,blaze::rowVector>;
+   using VT = blaze::CUDADynamicVector<int,blaze::rowVector>;
 
    //! Type of the dense non-numeric symmetric matrix.
    using DST = blaze::SymmetricMatrix< blaze::DynamicMatrix<VT,blaze::rowMajor> >;
@@ -169,7 +169,7 @@ void ColumnNonNumericTest::testAssignment()
    {
       test_ = "Dense vector assignment test";
 
-      blaze::DynamicVector<VT,blaze::columnVector> tmp( 3UL );
+      blaze::CUDADynamicVector<VT,blaze::columnVector> tmp( 3UL );
       tmp[0] = vec( 2 );
       tmp[1] = vec( 8 );
       tmp[2] = vec( 4 );

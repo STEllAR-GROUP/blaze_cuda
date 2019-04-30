@@ -48,7 +48,7 @@
 #include <blaze/math/constraints/RequiresEvaluation.h>
 #include <blaze/math/constraints/RowMajorMatrix.h>
 #include <blaze/math/constraints/Symmetric.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/SymmetricMatrix.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blaze/util/constraints/SameType.h>
@@ -143,7 +143,7 @@ class DenseNonNumericTest
 
    //**Type definitions****************************************************************************
    //! Type of a resizable, non-numeric element.
-   using VT = blaze::DynamicVector<int,blaze::rowVector>;
+   using VT = blaze::CUDADynamicVector<int,blaze::rowVector>;
 
    //! Type of the non-numeric row-major symmetric matrix.
    using ST = blaze::SymmetricMatrix< blaze::DynamicMatrix<VT,blaze::rowMajor> >;

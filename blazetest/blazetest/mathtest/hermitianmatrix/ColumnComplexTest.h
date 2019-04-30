@@ -47,7 +47,7 @@
 #include <blaze/math/CompressedVector.h>
 #include <blaze/math/Column.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/HermitianMatrix.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blazetest/system/Types.h>
@@ -171,7 +171,7 @@ void ColumnComplexTest::testAssignment()
    {
       test_ = "Dense vector assignment test 1";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(2, 1);
       vec[1] = cplx(8, 0);
       vec[2] = cplx(4,-2);
@@ -217,7 +217,7 @@ void ColumnComplexTest::testAssignment()
    {
       test_ = "Dense vector assignment test 2";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(2, 1);
       vec[1] = cplx(8, 9);
       vec[2] = cplx(4,-2);
@@ -345,7 +345,7 @@ void ColumnComplexTest::testAddAssign()
    {
       test_ = "Dense vector addition assignment test 1";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(6, 2);
       vec[1] = cplx(6, 0);
       vec[2] = cplx(4,-2);
@@ -391,7 +391,7 @@ void ColumnComplexTest::testAddAssign()
    {
       test_ = "Dense vector addition assignment test 2";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(6, 2);
       vec[1] = cplx(6, 9);
       vec[2] = cplx(4,-2);
@@ -519,7 +519,7 @@ void ColumnComplexTest::testSubAssign()
    {
       test_ = "Dense vector subtraction assignment test 1";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(-6,-2);
       vec[1] = cplx(-6, 0);
       vec[2] = cplx(-4, 2);
@@ -565,7 +565,7 @@ void ColumnComplexTest::testSubAssign()
    {
       test_ = "Dense vector subtraction assignment test 2";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(-6,-2);
       vec[1] = cplx(-6,-9);
       vec[2] = cplx(-4, 2);
@@ -693,7 +693,7 @@ void ColumnComplexTest::testMultAssign()
    {
       test_ = "Dense vector multiplication assignment test 1";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(-2, 0);
       vec[1] = cplx( 3, 0);
       vec[2] = cplx( 4,-2);
@@ -739,7 +739,7 @@ void ColumnComplexTest::testMultAssign()
    {
       test_ = "Dense vector multiplication assignment test 2";
 
-      blaze::DynamicVector<cplx,blaze::columnVector> vec( 3UL );
+      blaze::CUDADynamicVector<cplx,blaze::columnVector> vec( 3UL );
       vec[0] = cplx(-2, 0);
       vec[1] = cplx( 3, 2);
       vec[2] = cplx( 4,-2);

@@ -46,7 +46,7 @@
 #include <blaze/math/Aliases.h>
 #include <blaze/math/CompressedVector.h>
 #include <blaze/math/constraints/Vector.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/StaticVector.h>
 #include <blaze/math/Subvector.h>
 #include <blaze/math/typetraits/IsDenseVector.h>
@@ -225,12 +225,12 @@ void ClassTest::runDynamicVectorTests( const VT& src )
    using ET = blaze::ElementType_t<VT>;
 
    {
-      blaze::DynamicVector<ET> dst;
+      blaze::CUDADynamicVector<ET> dst;
       runTest( src, dst );
    }
 
    {
-      blaze::DynamicVector<ET> dst( 43UL );
+      blaze::CUDADynamicVector<ET> dst( 43UL );
       randomize( dst );
       runTest( src, dst );
    }
@@ -256,7 +256,7 @@ void ClassTest::runDenseSubvectorTests( const VT& src )
    BLAZE_CONSTRAINT_MUST_BE_VECTOR_TYPE( VT );
 
    using ET = blaze::ElementType_t<VT>;
-   using DV = blaze::DynamicVector<ET>;
+   using DV = blaze::CUDADynamicVector<ET>;
 
    {
       DV vec( N );

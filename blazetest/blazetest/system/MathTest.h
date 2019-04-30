@@ -45,7 +45,7 @@
 #include <blaze/math/typetraits/IsMatrix.h>
 #include <blaze/math/typetraits/IsVector.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/StaticMatrix.h>
 #include <blaze/math/StaticVector.h>
 #include <blaze/math/typetraits/HasAdd.h>
@@ -82,7 +82,7 @@ using blaze::columnMajor;
 using blaze::CompressedMatrix;
 using blaze::CompressedVector;
 using blaze::DynamicMatrix;
-using blaze::DynamicVector;
+using blaze::CUDADynamicVector;
 using blaze::StaticMatrix;
 using blaze::StaticVector;
 /*! \endcond */

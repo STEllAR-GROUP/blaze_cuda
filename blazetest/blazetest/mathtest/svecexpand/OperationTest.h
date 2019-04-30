@@ -58,7 +58,7 @@
 #include <blaze/math/constraints/SparseVector.h>
 #include <blaze/math/constraints/StorageOrder.h>
 #include <blaze/math/DynamicMatrix.h>
-#include <blaze/math/DynamicVector.h>
+#include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blaze/math/shims/Equal.h>
 #include <blaze/math/traits/ExpandTrait.h>
 #include <blaze/math/typetraits/IsRowVector.h>
@@ -115,7 +115,7 @@ class OperationTest
    using TDRE  = blaze::TransposeType_t<DRE>;     //!< Transpose dense result type
    using TODRE = blaze::TransposeType_t<ODRE>;    //!< Transpose dense result type with opposite storage order
 
-   using RT  = blaze::DynamicVector<ET,false>;  //!< Reference type.
+   using RT  = blaze::CUDADynamicVector<ET,false>;  //!< Reference type.
    using RRE = blaze::ExpandTrait_t<RT,E>;      //!< Reference result type.
 
    using TRT  = blaze::TransposeType_t<RT>;   //!< Transpose reference type.
