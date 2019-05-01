@@ -262,7 +262,7 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = StaticVector<int,3UL,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
             using RT = StaticVector<double,3UL,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -272,7 +272,7 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = StaticVector<int,3UL,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
             using RT = StaticVector<double,3UL,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -457,7 +457,7 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = HybridVector<int,5UL,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
             using RT = HybridVector<double,5UL,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -467,7 +467,7 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = HybridVector<int,5UL,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
             using RT = HybridVector<double,5UL,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -598,12 +598,12 @@ void ClassTest::testVectorAddition()
       }
    }
 
-   // DynamicVector/...
+   // CUDADynamicVector/...
    {
       // .../StaticVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = StaticVector<double,3UL,columnVector>;
             using RT = StaticVector<double,3UL,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -613,7 +613,7 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = StaticVector<double,3UL,rowVector>;
             using RT = StaticVector<double,3UL,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -627,7 +627,7 @@ void ClassTest::testVectorAddition()
       // .../HybridVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = HybridVector<double,7UL,columnVector>;
             using RT = HybridVector<double,7UL,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -637,7 +637,7 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = HybridVector<double,7UL,rowVector>;
             using RT = HybridVector<double,7UL,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -651,9 +651,9 @@ void ClassTest::testVectorAddition()
       // .../DynamicVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -661,9 +661,9 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -675,9 +675,9 @@ void ClassTest::testVectorAddition()
       // .../CustomVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -685,9 +685,9 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = CustomVector<double,unaligned,unpadded,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -699,9 +699,9 @@ void ClassTest::testVectorAddition()
       // .../UniformVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = UniformVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -709,9 +709,9 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = UniformVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -723,9 +723,9 @@ void ClassTest::testVectorAddition()
       // .../InitializerVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = InitializerVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -733,9 +733,9 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = InitializerVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -747,9 +747,9 @@ void ClassTest::testVectorAddition()
       // .../CompressedVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = CompressedVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -757,9 +757,9 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = CompressedVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -771,9 +771,9 @@ void ClassTest::testVectorAddition()
       // .../ZeroVector
       {
          {
-            using T1 = DynamicVector<int,columnVector>;
+            using T1 = CUDADynamicVector<int,columnVector>;
             using T2 = ZeroVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -781,9 +781,9 @@ void ClassTest::testVectorAddition()
             static_assert( TransposeFlag_v<Expr> == TransposeFlag_v<RT>, "Non-matching transpose flag detected" );
          }
          {
-            using T1 = DynamicVector<int,rowVector>;
+            using T1 = CUDADynamicVector<int,rowVector>;
             using T2 = ZeroVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -847,8 +847,8 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -857,8 +857,8 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = CustomVector<int,unaligned,unpadded,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -872,7 +872,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
             using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -882,7 +882,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,rowVector>;
             using T2 = CustomVector<double,unaligned,unpadded,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -896,7 +896,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
             using T2 = UniformVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -906,7 +906,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,rowVector>;
             using T2 = UniformVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -920,7 +920,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
             using T2 = InitializerVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -930,7 +930,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,rowVector>;
             using T2 = InitializerVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -944,7 +944,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
             using T2 = CompressedVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -954,7 +954,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,rowVector>;
             using T2 = CompressedVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -968,7 +968,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
             using T2 = ZeroVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -978,7 +978,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CustomVector<int,unaligned,unpadded,rowVector>;
             using T2 = ZeroVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1042,8 +1042,8 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = UniformVector<int,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1052,8 +1052,8 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = UniformVector<int,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1067,7 +1067,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = UniformVector<int,columnVector>;
             using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1077,7 +1077,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = UniformVector<int,rowVector>;
             using T2 = CustomVector<double,unaligned,unpadded,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1115,7 +1115,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = UniformVector<int,columnVector>;
             using T2 = InitializerVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1125,7 +1125,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = UniformVector<int,rowVector>;
             using T2 = InitializerVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1139,7 +1139,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = UniformVector<int,columnVector>;
             using T2 = CompressedVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1149,7 +1149,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = UniformVector<int,rowVector>;
             using T2 = CompressedVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1237,8 +1237,8 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = InitializerVector<int,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1247,8 +1247,8 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = InitializerVector<int,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1262,7 +1262,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,columnVector>;
             using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1272,7 +1272,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,rowVector>;
             using T2 = CustomVector<double,unaligned,unpadded,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1286,7 +1286,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,columnVector>;
             using T2 = UniformVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1296,7 +1296,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,rowVector>;
             using T2 = UniformVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1310,7 +1310,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,columnVector>;
             using T2 = InitializerVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1320,7 +1320,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,rowVector>;
             using T2 = InitializerVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1334,7 +1334,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,columnVector>;
             using T2 = CompressedVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1344,7 +1344,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,rowVector>;
             using T2 = CompressedVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1358,7 +1358,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,columnVector>;
             using T2 = ZeroVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1368,7 +1368,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = InitializerVector<int,rowVector>;
             using T2 = ZeroVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1432,8 +1432,8 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = CompressedVector<int,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1442,8 +1442,8 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = CompressedVector<int,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1457,7 +1457,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CompressedVector<int,columnVector>;
             using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1467,7 +1467,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CompressedVector<int,rowVector>;
             using T2 = CustomVector<double,unaligned,unpadded,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1481,7 +1481,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CompressedVector<int,columnVector>;
             using T2 = UniformVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1491,7 +1491,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CompressedVector<int,rowVector>;
             using T2 = UniformVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1505,7 +1505,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CompressedVector<int,columnVector>;
             using T2 = InitializerVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1515,7 +1515,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = CompressedVector<int,rowVector>;
             using T2 = InitializerVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1627,8 +1627,8 @@ void ClassTest::testVectorAddition()
       {
          {
             using T1 = ZeroVector<int,columnVector>;
-            using T2 = DynamicVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using T2 = CUDADynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1637,8 +1637,8 @@ void ClassTest::testVectorAddition()
          }
          {
             using T1 = ZeroVector<int,rowVector>;
-            using T2 = DynamicVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using T2 = CUDADynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1652,7 +1652,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = ZeroVector<int,columnVector>;
             using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1662,7 +1662,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = ZeroVector<int,rowVector>;
             using T2 = CustomVector<double,unaligned,unpadded,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1700,7 +1700,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = ZeroVector<int,columnVector>;
             using T2 = InitializerVector<double,columnVector>;
-            using RT = DynamicVector<double,columnVector>;
+            using RT = CUDADynamicVector<double,columnVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;
@@ -1710,7 +1710,7 @@ void ClassTest::testVectorAddition()
          {
             using T1 = ZeroVector<int,rowVector>;
             using T2 = InitializerVector<double,rowVector>;
-            using RT = DynamicVector<double,rowVector>;
+            using RT = CUDADynamicVector<double,rowVector>;
             static_assert( IsSame_v< AddTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
             using Expr = Decay_t< decltype( std::declval<T1>() + std::declval<T2>() ) >;

@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
 //  \file src/mathtest/dynamicvector/IncludeTest.cpp
-//  \brief Source file for the DynamicVector include test
+//  \brief Source file for the CUDADynamicVector include test
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //

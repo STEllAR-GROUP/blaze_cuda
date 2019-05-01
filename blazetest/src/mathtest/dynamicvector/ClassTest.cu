@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
 //  \file src/mathtest/dynamicvector/ClassTest.cpp
-//  \brief Source file for the DynamicVector class test
+//  \brief Source file for the CUDADynamicVector class test
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //
@@ -68,7 +68,7 @@ namespace dynamicvector {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Constructor for the DynamicVector class test.
+/*!\brief Constructor for the CUDADynamicVector class test.
 //
 // \exception std::runtime_error Operation error detected.
 */
@@ -131,12 +131,12 @@ ClassTest::ClassTest()
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector constructors.
+/*!\brief Test of the CUDADynamicVector constructors.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of all constructors of the DynamicVector class template.
+// This function performs a test of all constructors of the CUDADynamicVector class template.
 // In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testConstructors()
@@ -461,12 +461,12 @@ void ClassTest::testConstructors()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector assignment operators.
+/*!\brief Test of the CUDADynamicVector assignment operators.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of all assignment operators of the DynamicVector class template.
+// This function performs a test of all assignment operators of the CUDADynamicVector class template.
 // In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testAssignment()
@@ -815,12 +815,12 @@ void ClassTest::testAssignment()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector addition assignment operators.
+/*!\brief Test of the CUDADynamicVector addition assignment operators.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the addition assignment operators of the DynamicVector class
+// This function performs a test of the addition assignment operators of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testAddAssign()
@@ -955,12 +955,12 @@ void ClassTest::testAddAssign()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector subtraction assignment operators.
+/*!\brief Test of the CUDADynamicVector subtraction assignment operators.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the subtraction assignment operators of the DynamicVector class
+// This function performs a test of the subtraction assignment operators of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testSubAssign()
@@ -1095,12 +1095,12 @@ void ClassTest::testSubAssign()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector multiplication assignment operators.
+/*!\brief Test of the CUDADynamicVector multiplication assignment operators.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the multiplication assignment operators of the DynamicVector
+// This function performs a test of the multiplication assignment operators of the CUDADynamicVector
 // class template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testMultAssign()
@@ -1235,12 +1235,12 @@ void ClassTest::testMultAssign()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector division assignment operators.
+/*!\brief Test of the CUDADynamicVector division assignment operators.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the division assignment operators of the DynamicVector
+// This function performs a test of the division assignment operators of the CUDADynamicVector
 // class template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testDivAssign()
@@ -1344,12 +1344,12 @@ void ClassTest::testDivAssign()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector cross product assignment operators.
+/*!\brief Test of the CUDADynamicVector cross product assignment operators.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the cross product assignment operators of the DynamicVector
+// This function performs a test of the cross product assignment operators of the CUDADynamicVector
 // class template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testCrossAssign()
@@ -1479,12 +1479,12 @@ void ClassTest::testCrossAssign()
 
 
 //*************************************************************************************************
-/*!\brief Test of all DynamicVector (self-)scaling operations.
+/*!\brief Test of all CUDADynamicVector (self-)scaling operations.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of all available ways to scale an instance of the DynamicVector
+// This function performs a test of all available ways to scale an instance of the CUDADynamicVector
 // class template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testScaling()
@@ -1625,7 +1625,7 @@ void ClassTest::testScaling()
 
 
    //=====================================================================================
-   // DynamicVector::scale()
+   // CUDADynamicVector::scale()
    //=====================================================================================
 
    {
@@ -1712,13 +1712,13 @@ void ClassTest::testScaling()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector subscript operator.
+/*!\brief Test of the CUDADynamicVector subscript operator.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
 // This function performs a test of adding and accessing elements via the subscript operator
-// of the DynamicVector class template. In case an error is detected, a \a std::runtime_error
+// of the CUDADynamicVector class template. In case an error is detected, a \a std::runtime_error
 // exception is thrown.
 */
 void ClassTest::testSubscript()
@@ -1865,13 +1865,13 @@ void ClassTest::testSubscript()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c at() member function of the DynamicVector class template.
+/*!\brief Test of the \c at() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
 // This function performs a test of adding and accessing elements via the \c at() member function
-// of the DynamicVector class template. In case an error is detected, a \a std::runtime_error
+// of the CUDADynamicVector class template. In case an error is detected, a \a std::runtime_error
 // exception is thrown.
 */
 void ClassTest::testAt()
@@ -2032,12 +2032,12 @@ void ClassTest::testAt()
 
 
 //*************************************************************************************************
-/*!\brief Test of the DynamicVector iterator implementation.
+/*!\brief Test of the CUDADynamicVector iterator implementation.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the iterator implementation of the DynamicVector class
+// This function performs a test of the iterator implementation of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testIterator()
@@ -2361,12 +2361,12 @@ void ClassTest::testIterator()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c nonZeros() member function of the DynamicVector class template.
+/*!\brief Test of the \c nonZeros() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c nonZeros() member function of the DynamicVector class
+// This function performs a test of the \c nonZeros() member function of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testNonZeros()
@@ -2413,12 +2413,12 @@ void ClassTest::testNonZeros()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c reset() member function of the DynamicVector class template.
+/*!\brief Test of the \c reset() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c reset() member function of the DynamicVector class
+// This function performs a test of the \c reset() member function of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testReset()
@@ -2499,12 +2499,12 @@ void ClassTest::testReset()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c clear() member function of the DynamicVector class template.
+/*!\brief Test of the \c clear() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c clear() member function of the DynamicVector class
+// This function performs a test of the \c clear() member function of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testClear()
@@ -2570,12 +2570,12 @@ void ClassTest::testClear()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c resize() member function of the DynamicVector class template.
+/*!\brief Test of the \c resize() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c resize() member function of the DynamicVector class
+// This function performs a test of the \c resize() member function of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testResize()
@@ -2652,12 +2652,12 @@ void ClassTest::testResize()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c extend() member function of the DynamicVector class template.
+/*!\brief Test of the \c extend() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c extend() member function of the DynamicVector class
+// This function performs a test of the \c extend() member function of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testExtend()
@@ -2705,12 +2705,12 @@ void ClassTest::testExtend()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c reserve() member function of the DynamicVector class template.
+/*!\brief Test of the \c reserve() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c reserve() member function of the DynamicVector class
+// This function performs a test of the \c reserve() member function of the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testReserve()
@@ -2741,12 +2741,12 @@ void ClassTest::testReserve()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c shrinkToFit() member function of the DynamicVector class template.
+/*!\brief Test of the \c shrinkToFit() member function of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c shrinkToFit() member function of the DynamicVector
+// This function performs a test of the \c shrinkToFit() member function of the CUDADynamicVector
 // class template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testShrinkToFit()
@@ -2820,12 +2820,12 @@ void ClassTest::testShrinkToFit()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c swap() functionality of the DynamicVector class template.
+/*!\brief Test of the \c swap() functionality of the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c swap() function of the DynamicVector class template.
+// This function performs a test of the \c swap() function of the CUDADynamicVector class template.
 // In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testSwap()
@@ -2869,12 +2869,12 @@ void ClassTest::testSwap()
 
 
 //*************************************************************************************************
-/*!\brief Test of the \c isDefault() function with the DynamicVector class template.
+/*!\brief Test of the \c isDefault() function with the CUDADynamicVector class template.
 //
 // \return void
 // \exception std::runtime_error Error detected.
 //
-// This function performs a test of the \c isDefault() function with the DynamicVector class
+// This function performs a test of the \c isDefault() function with the CUDADynamicVector class
 // template. In case an error is detected, a \a std::runtime_error exception is thrown.
 */
 void ClassTest::testIsDefault()
@@ -2963,14 +2963,14 @@ void ClassTest::testIsDefault()
 //*************************************************************************************************
 int main()
 {
-   std::cout << "   Running DynamicVector class test..." << std::endl;
+   std::cout << "   Running CUDADynamicVector class test..." << std::endl;
 
    try
    {
       RUN_DYNAMICVECTOR_CLASS_TEST;
    }
    catch( std::exception& ex ) {
-      std::cerr << "\n\n ERROR DETECTED during DynamicVector class test:\n"
+      std::cerr << "\n\n ERROR DETECTED during CUDADynamicVector class test:\n"
                 << ex.what() << "\n";
       return EXIT_FAILURE;
    }

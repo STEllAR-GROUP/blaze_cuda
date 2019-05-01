@@ -131,7 +131,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = StaticVector<int,3UL,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -222,7 +222,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = HybridVector<int,5UL,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -286,11 +286,11 @@ void ClassTest::testCrossProduct()
       }
    }
 
-   // DynamicVector/...
+   // CUDADynamicVector/...
    {
       // .../StaticVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = StaticVector<double,3UL,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -301,7 +301,7 @@ void ClassTest::testCrossProduct()
 
       // .../HybridVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = HybridVector<double,7UL,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -312,8 +312,8 @@ void ClassTest::testCrossProduct()
 
       // .../DynamicVector
       {
-         using T1 = DynamicVector<int,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -323,7 +323,7 @@ void ClassTest::testCrossProduct()
 
       // .../CustomVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = CustomVector<double,unaligned,unpadded,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -334,7 +334,7 @@ void ClassTest::testCrossProduct()
 
       // .../UniformVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = UniformVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -345,7 +345,7 @@ void ClassTest::testCrossProduct()
 
       // .../InitializerVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = InitializerVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -356,7 +356,7 @@ void ClassTest::testCrossProduct()
 
       // .../CompressedVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = CompressedVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -367,7 +367,7 @@ void ClassTest::testCrossProduct()
 
       // .../ZeroVector
       {
-         using T1 = DynamicVector<int,columnVector>;
+         using T1 = CUDADynamicVector<int,columnVector>;
          using T2 = ZeroVector<double,columnVector>;
          using RT = ZeroVector<double,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
@@ -404,7 +404,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = CustomVector<int,unaligned,unpadded,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -495,7 +495,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = UniformVector<int,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -586,7 +586,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = InitializerVector<int,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -677,7 +677,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = CompressedVector<int,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = StaticVector<double,3UL,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 
@@ -768,7 +768,7 @@ void ClassTest::testCrossProduct()
       // .../DynamicVector
       {
          using T1 = ZeroVector<int,columnVector>;
-         using T2 = DynamicVector<double,columnVector>;
+         using T2 = CUDADynamicVector<double,columnVector>;
          using RT = ZeroVector<double,columnVector>;
          static_assert( IsSame_v< CrossTrait_t<T1,T2>, RT >, "Non-matching type detected" );
 

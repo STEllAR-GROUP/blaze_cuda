@@ -181,10 +181,10 @@ void ClassTest::testVectorExpansion()
       }
    }
 
-   // DynamicVector
+   // CUDADynamicVector
    {
       {
-         using VT = DynamicVector<int,columnVector>;
+         using VT = CUDADynamicVector<int,columnVector>;
          using RT = DynamicMatrix<int,columnMajor>;
          static_assert( IsSame_v< ExpandTrait_t<VT>, RT >, "Non-matching type detected" );
 
@@ -192,7 +192,7 @@ void ClassTest::testVectorExpansion()
          static_assert( StorageOrder_v<Expr> == StorageOrder_v<RT>, "Non-matching storage order detected" );
       }
       {
-         using VT = DynamicVector<int,rowVector>;
+         using VT = CUDADynamicVector<int,rowVector>;
          using RT = DynamicMatrix<int,rowMajor>;
          static_assert( IsSame_v< ExpandTrait_t<VT>, RT >, "Non-matching type detected" );
 
@@ -200,7 +200,7 @@ void ClassTest::testVectorExpansion()
          static_assert( StorageOrder_v<Expr> == StorageOrder_v<RT>, "Non-matching storage order detected" );
       }
       {
-         using VT = DynamicVector<int,columnVector>;
+         using VT = CUDADynamicVector<int,columnVector>;
          using RT = DynamicMatrix<int,columnMajor>;
          static_assert( IsSame_v< ExpandTrait_t<VT,5UL>, RT >, "Non-matching type detected" );
 
@@ -208,7 +208,7 @@ void ClassTest::testVectorExpansion()
          static_assert( StorageOrder_v<Expr> == StorageOrder_v<RT>, "Non-matching storage order detected" );
       }
       {
-         using VT = DynamicVector<int,rowVector>;
+         using VT = CUDADynamicVector<int,rowVector>;
          using RT = DynamicMatrix<int,rowMajor>;
          static_assert( IsSame_v< ExpandTrait_t<VT,5UL>, RT >, "Non-matching type detected" );
 

@@ -1081,14 +1081,14 @@ void OperationTest::testRemoveAdaptor()
    using Source2 = const SymmetricMatrix< CompressedMatrix<float> >;
    using Source3 = volatile SymmetricMatrix< DynamicMatrix<double> >;
    using Source4 = int;
-   using Source5 = const DynamicVector<int>;
+   using Source5 = const CUDADynamicVector<int>;
    using Source6 = volatile DynamicMatrix<int>;
 
    using Result1 = DynamicMatrix<int>;
    using Result2 = const CompressedMatrix<float>;
    using Result3 = volatile DynamicMatrix<double>;
    using Result4 = int;
-   using Result5 = const DynamicVector<int>;
+   using Result5 = const CUDADynamicVector<int>;
    using Result6 = volatile DynamicMatrix<int>;
 
    BLAZE_CONSTRAINT_MUST_BE_STRICTLY_SAME_TYPE( RemoveAdaptor<Source1>::Type, Result1 );
@@ -1126,7 +1126,7 @@ void OperationTest::testUnderlyingBuiltin()
    using Type1 = double;                                    // Built-in data type
    using Type2 = complex<float>;                            // Complex data type
    using Type3 = StaticVector<int,3UL>;                     // Vector with built-in element type
-   using Type4 = CompressedVector< DynamicVector<float> >;  // Vector with vector element type
+   using Type4 = CompressedVector< CUDADynamicVector<float> >;  // Vector with vector element type
 
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingBuiltin<Type1>::Type, double );
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingBuiltin<Type2>::Type, float );
@@ -1161,12 +1161,12 @@ void OperationTest::testUnderlyingElement()
    using Type1 = double;                                    // Built-in data type
    using Type2 = complex<float>;                            // Complex data type
    using Type3 = StaticVector<int,3UL>;                     // Vector with built-in element type
-   using Type4 = CompressedVector< DynamicVector<float> >;  // Vector with vector element type
+   using Type4 = CompressedVector< CUDADynamicVector<float> >;  // Vector with vector element type
 
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingElement<Type1>::Type, double );
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingElement<Type2>::Type, float );
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingElement<Type3>::Type, int );
-   BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingElement<Type4>::Type, DynamicVector<float> );
+   BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingElement<Type4>::Type, CUDADynamicVector<float> );
 }
 //*************************************************************************************************#
 
@@ -1196,7 +1196,7 @@ void OperationTest::testUnderlyingNumeric()
    using Type1 = double;                                    // Built-in data type
    using Type2 = complex<float>;                            // Complex data type
    using Type3 = StaticVector<int,3UL>;                     // Vector with built-in element type
-   using Type4 = CompressedVector< DynamicVector<float> >;  // Vector with vector element type
+   using Type4 = CompressedVector< CUDADynamicVector<float> >;  // Vector with vector element type
 
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingNumeric<Type1>::Type, double );
    BLAZE_CONSTRAINT_MUST_BE_SAME_TYPE( UnderlyingNumeric<Type2>::Type, complex<float> );

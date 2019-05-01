@@ -120,8 +120,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<double,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          svd( A1, s1 );
          svd( A2, s2 );
@@ -145,8 +145,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<complex<double>,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          svd( A1, s1 );
          svd( A2, s2 );
@@ -175,8 +175,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<double,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          DynamicMatrix<double,columnMajor> U1;
          DynamicMatrix<double,columnMajor> V1;
@@ -221,8 +221,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<complex<double>,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          DynamicMatrix<complex<double>,columnMajor> U1;
          DynamicMatrix<complex<double>,columnMajor> V1;
@@ -276,8 +276,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<double,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          svd( A1, s1, 0.0, 0.5 );
          svd( A2, s2, 0.0, 0.5 );
@@ -301,8 +301,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<complex<double>,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          svd( A1, s1, 0.0, 0.5 );
          svd( A2, s2, 0.0, 0.5 );
@@ -331,8 +331,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<double,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          svd( A1, s1, 0, 1 );
          svd( A2, s2, 0, 1 );
@@ -356,8 +356,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<complex<double>,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          svd( A1, s1, 0, 1 );
          svd( A2, s2, 0, 1 );
@@ -386,8 +386,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<double,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          DynamicMatrix<double,columnMajor> U1;
          DynamicMatrix<double,columnMajor> V1;
@@ -421,8 +421,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<complex<double>,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          DynamicMatrix<complex<double>,columnMajor> U1;
          DynamicMatrix<complex<double>,columnMajor> V1;
@@ -461,8 +461,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<double,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          DynamicMatrix<double,columnMajor> U1;
          DynamicMatrix<double,columnMajor> V1;
@@ -496,8 +496,8 @@ void DenseTest::testGeneral()
          randomize( A1 );
          DynamicMatrix<complex<double>,rowMajor> A2( A1 );
 
-         DynamicVector<double,rowVector> s1;
-         DynamicVector<double,rowVector> s2;
+         CUDADynamicVector<double,rowVector> s1;
+         CUDADynamicVector<double,rowVector> s2;
 
          DynamicMatrix<complex<double>,columnMajor> U1;
          DynamicMatrix<complex<double>,columnMajor> V1;

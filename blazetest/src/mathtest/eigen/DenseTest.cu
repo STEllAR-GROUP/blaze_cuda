@@ -127,8 +127,8 @@ void DenseTest::testGeneral()
       randomize( A1 );
       DynamicMatrix<double,columnMajor> A2( A1 );
 
-      DynamicVector<complex<double>,rowVector> w1;
-      DynamicVector<complex<double>,rowVector> w2;
+      CUDADynamicVector<complex<double>,rowVector> w1;
+      CUDADynamicVector<complex<double>,rowVector> w2;
 
       eigen( A1, w1 );
       eigen( A2, w2 );
@@ -152,8 +152,8 @@ void DenseTest::testGeneral()
       randomize( A1 );
       DynamicMatrix<complex<double>,columnMajor> A2( A1 );
 
-      DynamicVector<complex<double>,rowVector> w1;
-      DynamicVector<complex<double>,rowVector> w2;
+      CUDADynamicVector<complex<double>,rowVector> w1;
+      CUDADynamicVector<complex<double>,rowVector> w2;
 
       eigen( A1, w1 );
       eigen( A2, w2 );
@@ -184,8 +184,8 @@ void DenseTest::testGeneral()
       DynamicMatrix<double,rowMajor>    A1( A );
       DynamicMatrix<double,columnMajor> A2( A );
 
-      DynamicVector<complex<double>,rowVector> w1;
-      DynamicVector<complex<double>,rowVector> w2;
+      CUDADynamicVector<complex<double>,rowVector> w1;
+      CUDADynamicVector<complex<double>,rowVector> w2;
 
       DynamicMatrix<complex<double>,rowMajor>    V1;
       DynamicMatrix<complex<double>,columnMajor> V2;
@@ -222,8 +222,8 @@ void DenseTest::testGeneral()
       DynamicMatrix<complex<double>,rowMajor>    A1( A );
       DynamicMatrix<complex<double>,columnMajor> A2( A );
 
-      DynamicVector<complex<double>,rowVector> w1;
-      DynamicVector<complex<double>,rowVector> w2;
+      CUDADynamicVector<complex<double>,rowVector> w1;
+      CUDADynamicVector<complex<double>,rowVector> w2;
 
       DynamicMatrix<complex<double>,rowMajor>    V1;
       DynamicMatrix<complex<double>,columnMajor> V2;
@@ -294,8 +294,8 @@ void DenseTest::testSymmetric()
       randomize( A1 );
       SymmetricMatrix< DynamicMatrix<double,columnMajor> > A2( A1 );
 
-      DynamicVector<double,rowVector> w1;
-      DynamicVector<double,rowVector> w2;
+      CUDADynamicVector<double,rowVector> w1;
+      CUDADynamicVector<double,rowVector> w2;
 
       eigen( A1, w1 );
       eigen( A2, w2 );
@@ -319,8 +319,8 @@ void DenseTest::testSymmetric()
       randomize( A1 );
       SymmetricMatrix< DynamicMatrix<complex<double>,columnMajor> > A2( A1 );
 
-      DynamicVector<complex<double>,rowVector> w1;
-      DynamicVector<complex<double>,rowVector> w2;
+      CUDADynamicVector<complex<double>,rowVector> w1;
+      CUDADynamicVector<complex<double>,rowVector> w2;
 
       eigen( A1, w1 );
       eigen( A2, w2 );
@@ -351,8 +351,8 @@ void DenseTest::testSymmetric()
       SymmetricMatrix< DynamicMatrix<double,rowMajor> >    A1( A );
       SymmetricMatrix< DynamicMatrix<double,columnMajor> > A2( A );
 
-      DynamicVector<double,rowVector> w1;
-      DynamicVector<double,rowVector> w2;
+      CUDADynamicVector<double,rowVector> w1;
+      CUDADynamicVector<double,rowVector> w2;
 
       DynamicMatrix<double,rowMajor>    V1;
       DynamicMatrix<double,columnMajor> V2;
@@ -389,8 +389,8 @@ void DenseTest::testSymmetric()
       SymmetricMatrix< DynamicMatrix<complex<double>,rowMajor> >    A1( A );
       SymmetricMatrix< DynamicMatrix<complex<double>,columnMajor> > A2( A );
 
-      DynamicVector<complex<double>,rowVector> w1;
-      DynamicVector<complex<double>,rowVector> w2;
+      CUDADynamicVector<complex<double>,rowVector> w1;
+      CUDADynamicVector<complex<double>,rowVector> w2;
 
       DynamicMatrix<complex<double>,rowMajor>    V1;
       DynamicMatrix<complex<double>,columnMajor> V2;
@@ -461,8 +461,8 @@ void DenseTest::testHermitian()
       randomize( A1 );
       HermitianMatrix< DynamicMatrix<double,columnMajor> > A2( A1 );
 
-      DynamicVector<double,rowVector> w1;
-      DynamicVector<double,rowVector> w2;
+      CUDADynamicVector<double,rowVector> w1;
+      CUDADynamicVector<double,rowVector> w2;
 
       eigen( A1, w1 );
       eigen( A2, w2 );
@@ -486,8 +486,8 @@ void DenseTest::testHermitian()
       randomize( A1 );
       HermitianMatrix< DynamicMatrix<complex<double>,columnMajor> > A2( A1 );
 
-      DynamicVector<double,rowVector> w1;
-      DynamicVector<double,rowVector> w2;
+      CUDADynamicVector<double,rowVector> w1;
+      CUDADynamicVector<double,rowVector> w2;
 
       eigen( A1, w1 );
       eigen( A2, w2 );
@@ -518,8 +518,8 @@ void DenseTest::testHermitian()
       HermitianMatrix< DynamicMatrix<double,rowMajor> >    A1( A );
       HermitianMatrix< DynamicMatrix<double,columnMajor> > A2( A );
 
-      DynamicVector<double,rowVector> w1;
-      DynamicVector<double,rowVector> w2;
+      CUDADynamicVector<double,rowVector> w1;
+      CUDADynamicVector<double,rowVector> w2;
 
       DynamicMatrix<double,rowMajor>    V1;
       DynamicMatrix<double,columnMajor> V2;
@@ -556,8 +556,8 @@ void DenseTest::testHermitian()
       HermitianMatrix< DynamicMatrix<complex<double>,rowMajor> >    A1( A );
       HermitianMatrix< DynamicMatrix<complex<double>,columnMajor> > A2( A );
 
-      DynamicVector<double,rowVector> w1;
-      DynamicVector<double,rowVector> w2;
+      CUDADynamicVector<double,rowVector> w1;
+      CUDADynamicVector<double,rowVector> w2;
 
       DynamicMatrix<complex<double>,rowMajor>    V1;
       DynamicMatrix<complex<double>,columnMajor> V2;
