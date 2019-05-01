@@ -3,7 +3,6 @@
 
 include config.mk
 
-
 CUSRC = $(shell find src -name "*.cu")	# Sources
 TESTS = $(CUSRC:.cu=.test)					# Test executables
 RUNS	= $(TESTS:.test=.run)				# Runs
@@ -29,7 +28,6 @@ debug: $(NAME)
 
 clean:
 	rm -f $(TESTS)
-
 
 run: $(RUNS)
 
