@@ -158,7 +158,7 @@ inline Creator< blaze::CUDADynamicVector<T,TF> >::Creator( size_t size, const Cr
 */
 template< typename T  // Element type of the N-dimensional vector
         , bool TF >   // Transpose flag of the N-dimensional vector
-inline blaze::CUDADynamicVector<T,TF> Creator< blaze::DynamicVector<T,TF> >::operator()() const
+inline blaze::CUDADynamicVector<T,TF> Creator< blaze::CUDADynamicVector<T,TF> >::operator()() const
 {
    return (*this)( Default() );
 }
