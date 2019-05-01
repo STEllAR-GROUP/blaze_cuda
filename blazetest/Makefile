@@ -3,12 +3,10 @@
 
 include config.mk
 
-# Sources
-CUSRC = $(shell find src -name "*.cu")
 
-# Objects
-TESTS = $(CUSRC:.cu=.test)
-RUNS	= $(TESTS:.test=.run)
+CUSRC = $(shell find src -name "*.cu")	# Sources
+TESTS = $(CUSRC:.cu=.test)					# Test executables
+RUNS	= $(TESTS:.test=.run)				# Runs
 
 # Dependency files
 DEPS  = $(OBJ:.o=.d)
@@ -21,6 +19,8 @@ DEPS  = $(OBJ:.o=.d)
 .test.run:
 	$<
 
+tests: $(TESTS)
+
 # Dependencies
 -include $(DEPS)
 
@@ -29,6 +29,7 @@ debug: $(NAME)
 
 clean:
 	rm -f $(TESTS)
+
 
 run: $(RUNS)
 
