@@ -61,7 +61,7 @@ namespace densevector {
 /*!\brief Auxiliary class for all tests of the DenseVector functionality.
 //
 // This class represents a test suite for the DenseVector functionality contained in the
-// <em><blaze_cuda/math/dense/DenseVector.h></em> header file.
+// <em><blaze/math/dense/DenseVector.h></em> header file.
 */
 class OperationTest
 {
