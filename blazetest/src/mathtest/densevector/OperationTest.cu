@@ -39,7 +39,7 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <blaze_cuda/math/dense/CUDADenseVector.h>
+#include <blaze_cuda/math/dense/DenseVector.h>
 #include <blaze_cuda/math/CUDADynamicVector.h>
 #include <blazetest/mathtest/densevector/OperationTest.h>
 #include <blazetest/mathtest/IsEqual.h>
