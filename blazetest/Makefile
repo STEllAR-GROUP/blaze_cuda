@@ -12,12 +12,12 @@ DEPS  = $(OBJ:.o=.d)
 
 # Compilation
 .cu.test:
-#	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<
-	$(CU) $(CXXFLAGS) $(CUFLAGS) -MMD -c -o $@ $<
+#	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<	# Compiling & linking
+	$(CU) $(CXXFLAGS) $(CUFLAGS) -MMD -c -o $@ $<			# Compiling
 
 # Run
 .test.run:
-	$<
+	./$<
 
 tests: $(TESTS)
 
