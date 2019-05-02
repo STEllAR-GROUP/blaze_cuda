@@ -18,8 +18,8 @@ DEPS  = $(TESTS:.test=.d)
 
 # Run
 .test.run:
-	./$< > $<.log
-	mv $<.log $@	# Renamed if test passed
+	./$<
+	touch $@	# Renamed if test passed
 
 tests: $(TESTS)
 
