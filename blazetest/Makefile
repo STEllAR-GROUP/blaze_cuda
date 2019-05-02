@@ -8,16 +8,17 @@ TESTS = $(CUSRC:.cu=.test)					# Test executables
 RUNS	= $(TESTS:.test=.run)				# Runs
 
 # Dependency files
-DEPS  = $(OBJ:.o=.d)
+DEPS  = $(TESTS:.test=.d)
 
 # Compilation
 .cu.test:
-#	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<	# Compiling & linking
-	$(CU) $(CXXFLAGS) $(CUFLAGS) -MMD -c -o $@ $<			# Compiling
+	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<
+#	$(CU) $(CXXFLAGS) $(CUFLAGS) -MMD -c -o $@ $<
 
 # Run
 .test.run:
-	./$<
+	./$< > $($<:.test=.log)
+	mv $($<:.test=.log) $@	# Renamed if test passed
 
 tests: $(TESTS)
 
@@ -28,7 +29,7 @@ debug: CXXFLAGS += -DDEBUG -g
 debug: $(NAME)
 
 clean:
-	rm -f $(TESTS)
+	rm -f $(TESTS) $(RUNS) $(TESTS:.test=.log) $(DEPS)
 
 run: $(RUNS)
 
