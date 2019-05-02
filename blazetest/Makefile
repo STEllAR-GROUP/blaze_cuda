@@ -12,7 +12,9 @@ DEPS  = $(OBJ:.o=.d)
 
 # Compilation
 .cu.test:
-	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<
+	mv $< $<.disable
+#	@echo $<
+#	$(CU) $(CXXFLAGS) $(CUFLAGS) -MMD -c -o $@ $<
 
 # Run
 .test.run:
