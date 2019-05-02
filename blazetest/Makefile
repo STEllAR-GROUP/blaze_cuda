@@ -6,6 +6,7 @@ include config.mk
 CUSRC = $(shell find src -name "*.cu")	# Sources
 TESTS = $(CUSRC:.cu=.test)					# Test executables
 RUNS	= $(TESTS:.test=.run)				# Runs
+LOGS	= $(TESTS:.test=.test.run)			# Logs
 
 # Dependency files
 DEPS  = $(TESTS:.test=.d)
@@ -17,8 +18,8 @@ DEPS  = $(TESTS:.test=.d)
 
 # Run
 .test.run:
-	./$< > $($<:.test=.log)
-	mv $($<:.test=.log) $@	# Renamed if test passed
+	./$< > $<.log
+	mv $<.log $@	# Renamed if test passed
 
 tests: $(TESTS)
 
@@ -29,7 +30,7 @@ debug: CXXFLAGS += -DDEBUG -g
 debug: $(NAME)
 
 clean:
-	rm -f $(TESTS) $(RUNS) $(TESTS:.test=.log) $(DEPS)
+	rm -f $(TESTS) $(RUNS) $(LOGS) $(DEPS)
 
 run: $(RUNS)
 
