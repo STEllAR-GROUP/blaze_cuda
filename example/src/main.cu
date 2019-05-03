@@ -15,7 +15,8 @@ int main(int, char const *[])
    using vtype = blaze::CUDADynamicVector<float>;
    vtype a(vecsize, 10);
 
-   a += blaze::exp(a) * 10;
+   // NB: The BLAZE_HOST_DEVICE is here to make the lambda available on CUDA devices (if CUDA is enabled)
+   a += blaze::exp( a ) * 10 + blaze::map( a, [] BLAZE_HOST_DEVICE ( auto const& n ){ return n * n; } );
 
    std::cout << "val:\n" << a;
 }
