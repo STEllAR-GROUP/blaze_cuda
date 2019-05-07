@@ -20,9 +20,11 @@ int main(int, char const *[])
    vtype  a_( vecsize, 10 );
    cvtype a ( a_.data(), a_.size() );
 
-
-   // NB: The BLAZE_HOST_DEVICE is here to make the lambda available on CUDA devices (if CUDA is enabled)
-   a += blaze::exp( a ) * 10 + blaze::map( a, [] BLAZE_HOST_DEVICE ( auto const& n ){ return n * n; } );
+   // NB: The BLAZE_HOST_DEVICE macro is here to make the lambda
+   // available on CUDA devices (if CUDA is enabled)
+   a += blaze::exp( a ) * 10
+      + blaze::map( a
+                  , [] BLAZE_HOST_DEVICE ( auto const& n ){ return n * n; } );
 
    std::cout << "val:\n" << a_;
 }
