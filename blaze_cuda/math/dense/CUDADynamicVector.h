@@ -119,7 +119,6 @@
 
 #include <cuda_runtime.h>
 
-#include <iostream>
 
 namespace blaze {
 
@@ -346,19 +345,17 @@ class CUDADynamicVector
    static bool constexpr smpAssignable = false;
 
    template< typename VT > inline auto assign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline void assign( const SparseVector<VT,TF>& rhs );
-
    template< typename VT > inline void addAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline void addAssign( const SparseVector<VT,TF>& rhs );
-
    template< typename VT > inline void subAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline void subAssign( const SparseVector<VT,TF>& rhs );
-
    template< typename VT > inline void multAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline void multAssign( const SparseVector<VT,TF>& rhs );
-
    template< typename VT > inline void divAssign( const DenseVector<VT,TF>& rhs );
+
+   template< typename VT > inline void assign( const SparseVector<VT,TF>& rhs );
+   template< typename VT > inline void addAssign( const SparseVector<VT,TF>& rhs );
+   template< typename VT > inline void subAssign( const SparseVector<VT,TF>& rhs );
+   template< typename VT > inline void multAssign( const SparseVector<VT,TF>& rhs );
    template< typename VT > inline void divAssign( const SparseVector<VT,TF>& rhs );
+
    //@}
    //**********************************************************************************************
 
@@ -1627,7 +1624,6 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline bool CUDADynamicVector<Type,TF>::canSMPAssign() const noexcept
 {
-   //return ( size() > SMP_DVECASSIGN_THRESHOLD );
    return false;
 }
 //*************************************************************************************************
@@ -1638,6 +1634,8 @@ template< typename Type  // Data type of the vector
 template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDADynamicVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
 {
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
    cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
    cudaDeviceSynchronize();
 }
@@ -1710,8 +1708,6 @@ template< typename VT >  // Type of the right-hand side sparse vector
 inline void CUDADynamicVector<Type,TF>::addAssign( const SparseVector<VT,TF>& rhs )
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
-
-   // TODO
 
    for( auto element=(~rhs).begin(); element!=(~rhs).end(); ++element )
       v_[element->index()] += element->value();
