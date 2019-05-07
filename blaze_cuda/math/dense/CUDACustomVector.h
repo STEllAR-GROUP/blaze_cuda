@@ -93,7 +93,7 @@
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
 
-//#include <blaze_cuad/math/CUDA.h>
+//#include <blaze_cuda/math/CUDA.h>
 #include <blaze_cuda/math/typetraits/HasCUDAAdd.h>
 #include <blaze_cuda/math/typetraits/HasCUDADiv.h>
 #include <blaze_cuda/math/typetraits/HasCUDAMult.h>
@@ -119,7 +119,7 @@ namespace blaze {
 /*!\brief Efficient implementation of a customizable vector.
 // \ingroup custom_vector
 //
-// \section customvector_general General
+// \section cudacustomvector_general General
 //
 // The CUDACustomVector class template provides the functionality to represent an external array of
 // elements of arbitrary type and a fixed size as a native \b Blaze dense vector data structure.
@@ -166,19 +166,19 @@ namespace blaze {
    using AlignedPadded = CUDACustomVector<complex<double>,aligned,padded,rowVector>;
    \endcode
 
-// \n \section customvector_special_properties Special Properties of Custom Vectors
+// \n \section cudacustomvector_special_properties Special Properties of Custom Vectors
 //
 // In comparison with the remaining \b Blaze dense vector types CUDACustomVector has several special
 // characteristics. All of these result from the fact that a custom vector is not performing any
 // kind of memory allocation, but instead is given an existing array of elements. The following
 // sections discuss all of these characteristics:
 //
-//  -# <b>\ref customvector_memory_management</b>
-//  -# <b>\ref customvector_copy_operations</b>
-//  -# <b>\ref customvector_alignment</b>
-//  -# <b>\ref customvector_padding</b>
+//  -# <b>\ref cudacustomvector_memory_management</b>
+//  -# <b>\ref cudacustomvector_copy_operations</b>
+//  -# <b>\ref cudacustomvector_alignment</b>
+//  -# <b>\ref cudacustomvector_padding</b>
 //
-// \n \subsection customvector_memory_management Memory Management
+// \n \subsection cudacustomvector_memory_management Memory Management
 //
 // The CUDACustomVector class template acts as an adaptor for an existing array of elements. As such
 // it provides everything that is required to use the array just like a native \b Blaze dense
@@ -209,7 +209,7 @@ namespace blaze {
    CUDACustomVector<int,aligned,padded> b( memory.get(), 3UL, 16UL );
    \endcode
 
-// \n \subsection customvector_copy_operations Copy Operations
+// \n \subsection cudacustomvector_copy_operations Copy Operations
 //
 // As with all dense vectors it is possible to copy construct a custom vector:
 
@@ -242,7 +242,7 @@ namespace blaze {
    a = c;  // Copy assignment: Set all values of vector a and b to 4.
    \endcode
 
-// \n \subsection customvector_alignment Alignment
+// \n \subsection cudacustomvector_alignment Alignment
 //
 // In case the custom vector is specified as \a aligned the passed array must be guaranteed to
 // be aligned according to the requirements of the used instruction set (SSE, AVX, ...). For
@@ -264,7 +264,7 @@ namespace blaze {
 // In case the alignment requirements are violated, a \a std::invalid_argument exception is
 // thrown.
 //
-// \n \subsection customvector_padding Padding
+// \n \subsection cudacustomvector_padding Padding
 //
 // Adding padding elements to the end of an array can have a significant impact on performance.
 // For instance, assuming that AVX is available, then two aligned, padded, 3-dimensional vectors
@@ -336,7 +336,7 @@ namespace blaze {
 // maximum performance!
 //
 //
-// \n \section customvector_arithmetic_operations Arithmetic Operations
+// \n \section cudacustomvector_arithmetic_operations Arithmetic Operations
 //
 // The use of custom vectors in arithmetic operations is designed to be as natural and intuitive
 // as possible. All operations (addition, subtraction, multiplication, scaling, ...) can be
@@ -402,7 +402,7 @@ class CUDACustomVector
  public:
    //**Type definitions****************************************************************************
    using This     = CUDACustomVector<Type,AF,PF,TF,RT>;  //!< Type of this CUDACustomVector instance.
-   using BaseType = DenseVector<This,TF>;            //!< Base type of this CUDACustomVector instance.
+   using BaseType = DenseVector<This,TF>;                //!< Base type of this CUDACustomVector instance.
 
    //! Result type for expression template evaluations.
    using ResultType = RT;
@@ -411,7 +411,6 @@ class CUDACustomVector
    using TransposeType = TransposeType_t<ResultType>;
 
    using ElementType   = Type;                      //!< Type of the vector elements.
-   using SIMDType      = SIMDTrait_t<ElementType>;  //!< SIMD type of the vector elements.
    using ReturnType    = const Type&;               //!< Return type for expression template evaluations
    using CompositeType = const CUDACustomVector&;       //!< Data type for composite expression templates.
 
