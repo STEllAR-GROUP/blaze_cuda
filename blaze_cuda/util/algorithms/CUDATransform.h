@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
 //  \file blaze/util/CUDATransform.h
-//  \brief Header file for the IsCUDAEnabled type trait
+//  \brief Header file for CUDATransform's implementation
 //
 //  Copyright (C) 2012-2019 Jules Pénuchot - All Rights Reserved
 //
