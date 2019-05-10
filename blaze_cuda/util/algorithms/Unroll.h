@@ -39,24 +39,25 @@
 
 #include <utility>
 
-#include <blaze/system/HostDevice.h>
+#include <blaze/system/Inline.h>
+#include <blaze/system/CUDAAttributes.h>
 
 namespace blaze {
 
 namespace unroll_detail {
 
    template < typename F, std::size_t... Is >
-   inline void BLAZE_HOST_DEVICE unroll_impl( F const& f, std::index_sequence<Is...> const& )
+   BLAZE_ALWAYS_INLINE void BLAZE_HOST_DEVICE unroll_impl( F const& f, std::index_sequence< Is... > const& )
    {
-      ( f(std::integral_constant<std::size_t, Is>{}) , ... );
+      ( f( std::integral_constant< std::size_t, Is >{} ) , ... );
    }
 
 } // namespace unroll_detail
 
 template< std::size_t N, typename F >
-inline void BLAZE_HOST_DEVICE unroll( F const& f )
+BLAZE_ALWAYS_INLINE void BLAZE_HOST_DEVICE unroll( F const& f )
 {
-   unroll_detail::unroll_impl( f, std::make_index_sequence<N>{} );
+   unroll_detail::unroll_impl( f, std::make_index_sequence< N >{} );
 }
 
 }  // namespace blaze
