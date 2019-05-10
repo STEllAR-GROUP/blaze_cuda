@@ -23,8 +23,7 @@ int main(int, char const *[])
    // NB: The BLAZE_HOST_DEVICE macro is here to make the lambda
    // available on CUDA devices (if CUDA is enabled)
    a += blaze::exp( a ) * 10
-      + blaze::map( a
-                  , [] BLAZE_HOST_DEVICE ( auto const& n ){ return n * n; } );
+      + blaze::map( a, [] BLAZE_HOST_DEVICE ( auto const& n ){ return n * n; } );
 
    std::cout << "val:\n" << a_;
 }
