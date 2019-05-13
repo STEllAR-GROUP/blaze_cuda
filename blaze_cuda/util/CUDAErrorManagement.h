@@ -36,13 +36,18 @@
 #define _BLAZE_CUDA_UTIL_CUDAERRORMANAGEMENT_H_
 
 #include <stdexcept>
+#include <sstream>
 
 #include <cuda_runtime.h>
 
 #define CUDA_ERROR_CHECK                                                      \
-   if (cudaGetLastError() != cudaSuccess)                                     \
+   if (auto err = cudaGetLastError(); err == cudaSuccess)                     \
    {                                                                          \
-      std::runtime_error(std::to_string(__LINE__) + __FILE__ + __func__);     \
+      std::stringstream ss;                                                   \
+      ss << "CUDA Runtime error at: " << __FILE__ << ':' << __LINE__          \
+         << ", in function: " << __func__ << ". CUDA error string: "          \
+         << cudaGetErrorString(err);                                          \
+      throw std::runtime_error(ss.str());                                     \
    }
 
 #endif
