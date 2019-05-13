@@ -58,7 +58,8 @@ namespace blaze {
       }
 
       template < std::size_t Unroll = 4
-               , typename InputIt1, typename InputIt2
+               , typename InputIt1
+               , typename InputIt2
                , typename OutputIt
                , typename F >
       void __global__ _cuda_zip_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin
@@ -112,7 +113,7 @@ namespace blaze {
       size_t const elmt_cnt = in1_end - in1_begin;
       size_t const block_cnt = elmt_cnt / elmt_per_block;
 
-      detail::_cuda_transform_impl<Unroll>
+      detail::_cuda_zip_transform_impl<Unroll>
          <<< block_cnt, block_size >>> ( in1_begin, in2_begin, out_begin, f );
 
       size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
@@ -121,7 +122,7 @@ namespace blaze {
       auto const scal_in2_begin = in2_begin + blocked_elmts_cnt;
       auto const scal_out_begin = out_begin + blocked_elmts_cnt;
 
-      detail::_cuda_transform_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>>
+      detail::_cuda_zip_transform_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>>
          ( scal_in1_begin, scal_in2_begin, scal_out_begin, f );
    }
 
