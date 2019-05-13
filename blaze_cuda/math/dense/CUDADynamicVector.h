@@ -630,7 +630,7 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline CUDADynamicVector<Type,TF>::~CUDADynamicVector()
 {
-   if( v_ != std::nullptr ) cudaFree( v_ );
+   if( v_ != nullptr ) cudaFree( v_ );
 }
 //*************************************************************************************************
 
