@@ -8,6 +8,7 @@
 #include <blaze_cuda/Blaze.h>
 #include <blaze_cuda/math/dense/CUDACustomVector.h>
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
+#include <blaze_cuda/util/algorithms/CUDAReduce.h>
 
 int main(int, char const *[])
 {
