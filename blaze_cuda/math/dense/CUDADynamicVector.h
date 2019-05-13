@@ -116,6 +116,7 @@
 
 #include <blaze_cuda/util/algorithms/CUDACopy.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 #include <cuda_runtime.h>
 
@@ -429,6 +430,7 @@ inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n )
    //, v_       ( allocate<Type>( capacity_ ) )  // The vector elements
 {
    cudaMallocManaged((void**)&v_, n * sizeof(Type));   // TODO: Make an allocator, maybe..?
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -448,6 +450,7 @@ inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Type& init
 {
    cuda_transform(begin(), end(), begin(), [=] __device__ (auto const&){ return init; });
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -627,7 +630,7 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline CUDADynamicVector<Type,TF>::~CUDADynamicVector()
 {
-   cudaFree( v_ );
+   if( v_ != std::nullptr ) cudaFree( v_ );
 }
 //*************************************************************************************************
 
@@ -1340,6 +1343,7 @@ inline void CUDADynamicVector<Type,TF>::resize( size_t n, bool preserve )
       Type* BLAZE_RESTRICT tmp = allocate<Type>( newCapacity );
 
       cudaMallocManaged( (void**)&tmp, newCapacity );
+      CUDA_ERROR_CHECK;
 
       // Initializing the new array
       if( preserve ) {
@@ -1354,6 +1358,7 @@ inline void CUDADynamicVector<Type,TF>::resize( size_t n, bool preserve )
       // Replacing the old array
       swap( v_, tmp );
       cudaFree( tmp );
+      CUDA_ERROR_CHECK;
       capacity_ = newCapacity;
    }
    else if( IsVectorizable_v<Type> && n < size_ )
@@ -1411,6 +1416,7 @@ inline void CUDADynamicVector<Type,TF>::reserve( size_t n )
       {
          Type* ptr;
          cudaMallocManaged((void**)&ptr, n * sizeof(Type));
+         CUDA_ERROR_CHECK;
          return ptr;
       }();
 
@@ -1425,6 +1431,7 @@ inline void CUDADynamicVector<Type,TF>::reserve( size_t n )
       // Replacing the old array
       swap( tmp, v_ );
       cudaFree( tmp );
+      CUDA_ERROR_CHECK;
       capacity_ = newCapacity;
    }
 }
@@ -1605,7 +1612,7 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline bool CUDADynamicVector<Type,TF>::isAligned() const noexcept
 {
-   return true;
+   return false;
 }
 //*************************************************************************************************
 
@@ -1638,6 +1645,7 @@ inline auto CUDADynamicVector<Type,TF>::assign( const DenseVector<VT,TF>& rhs )
 
    cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 
 //*************************************************************************************************
@@ -1686,6 +1694,7 @@ inline void CUDADynamicVector<Type,TF>::addAssign( const DenseVector<VT,TF>& rhs
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v + rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -1737,6 +1746,7 @@ inline void CUDADynamicVector<Type,TF>::subAssign( const DenseVector<VT,TF>& rhs
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v - rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -1788,6 +1798,7 @@ inline void CUDADynamicVector<Type,TF>::multAssign( const DenseVector<VT,TF>& rh
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v * rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -1843,6 +1854,7 @@ inline void CUDADynamicVector<Type,TF>::divAssign( const DenseVector<VT,TF>& rhs
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v / rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 

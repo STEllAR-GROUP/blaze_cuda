@@ -94,12 +94,13 @@
 #include <blaze/util/typetraits/RemoveConst.h>
 
 //#include <blaze_cuda/math/CUDA.h>
-#include <blaze_cuda/math/typetraits/HasCUDAAdd.h>
-#include <blaze_cuda/math/typetraits/HasCUDADiv.h>
-#include <blaze_cuda/math/typetraits/HasCUDAMult.h>
-#include <blaze_cuda/math/typetraits/HasCUDASub.h>
+//#include <blaze_cuda/math/typetraits/HasCUDAAdd.h>
+//#include <blaze_cuda/math/typetraits/HasCUDADiv.h>
+//#include <blaze_cuda/math/typetraits/HasCUDAMult.h>
+//#include <blaze_cuda/math/typetraits/HasCUDASub.h>
 #include <blaze_cuda/util/algorithms/CUDACopy.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 #include <cuda_runtime.h>
 
@@ -1872,6 +1873,7 @@ inline auto CUDACustomVector<Type,AF,PF,TF,RT>::assign( const DenseVector<VT,TF>
 {
    cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -1901,6 +1903,7 @@ inline auto CUDACustomVector<Type,AF,PF,TF,RT>::addAssign( const DenseVector<VT,
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v + rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -1954,6 +1957,7 @@ inline auto CUDACustomVector<Type,AF,PF,TF,RT>::subAssign( const DenseVector<VT,
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v - rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -2007,6 +2011,7 @@ inline auto CUDACustomVector<Type,AF,PF,TF,RT>::multAssign( const DenseVector<VT
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v * rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -2064,6 +2069,7 @@ inline auto CUDACustomVector<Type,AF,PF,TF,RT>::divAssign( const DenseVector<VT,
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v / rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 //*************************************************************************************************
 
@@ -3544,6 +3550,7 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::assign( const DenseVector<VT
 
    cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3601,6 +3608,7 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::addAssign( const DenseVector
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v + rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3658,6 +3666,7 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::subAssign( const DenseVector
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v - rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3715,6 +3724,7 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::multAssign( const DenseVecto
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v * rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3776,6 +3786,7 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::divAssign( const DenseVector
    cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
                      , [] __device__ ( Type const& v, Type const& rhs_v ) { return v / rhs_v; } );
    cudaDeviceSynchronize();
+   CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
