@@ -60,7 +60,7 @@ namespace blaze {
    inline void cuda_transform ( InputIt in_begin, InputIt in_end
                               , OutputIt out_begin
                               , F const& f ) {
-      // TODO: Kernel param size tuning
+      // TODO: Kernel optimization
       detail::_cuda_transform_impl <<< 1, in_end - in_begin >>> ( in_begin, out_begin, f );
    }
 
@@ -69,7 +69,7 @@ namespace blaze {
                                  , InputIt2 in2_begin
                                  , OutputIt out_begin
                                  , F const& f ) {
-      // TODO: Kernel param size tuning
+      // TODO: Kernel optimization
       detail::_cuda_zip_transform_impl <<< 1, in1_end - in1_begin >>> ( in1_begin, in2_begin
                                                                       , out_begin, f );
    }

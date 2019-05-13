@@ -49,7 +49,7 @@ namespace blaze {
 
    template< typename InputIt, typename OutputIt >
    inline void cuda_copy( InputIt in_begin, InputIt in_end, OutputIt out_begin ) {
-      // TODO: Kernel param size tuning
+      // TODO: Kernel optimization
       detail::_cuda_copy_impl <<< 1, in_end - in_begin >>> ( in_begin, out_begin );
    }
 
