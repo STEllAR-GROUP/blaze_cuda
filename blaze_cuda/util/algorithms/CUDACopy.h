@@ -35,22 +35,48 @@
 #ifndef _BLAZE_CUDA_UTIL_ALGORITHMS_CUDACOPY_H_
 #define _BLAZE_CUDA_UTIL_ALGORITHMS_CUDACOPY_H_
 
+#include <cstddef>
+
+#include <blaze_cuda/util/algorithms/Unroll.h>
+
 namespace blaze {
 
    namespace detail {
 
-      template< typename InputIt, typename OutputIt >
-      void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin ) {
-         size_t const id = threadIdx.x;
-         *(out_begin + id) = *(in_begin + id);
+      template < std::size_t Unroll = 4
+               , typename InputIt
+               , typename OutputIt >
+      void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin )
+      {
+         size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+
+         unroll<Unroll> ( [&](auto const& I)
+         {
+            *(out_begin + id + I()) = *(in_begin + id + I());
+         } );
       }
 
    }
 
-   template< typename InputIt, typename OutputIt >
-   inline void cuda_copy( InputIt in_begin, InputIt in_end, OutputIt out_begin ) {
-      // TODO: Kernel optimization
-      detail::_cuda_copy_impl <<< 1, in_end - in_begin >>> ( in_begin, out_begin );
+   template< std::size_t Unroll = 4, typename InputIt, typename OutputIt >
+   inline void cuda_copy( InputIt in_begin, InputIt in_end, OutputIt out_begin )
+   {
+      using std::size_t;
+
+      constexpr size_t block_size = 128;
+      constexpr size_t elmt_per_block = block_size * Unroll;
+
+      size_t const elmt_cnt = in_end - in_begin;
+      size_t const block_cnt = elmt_cnt / elmt_per_block;
+
+      detail::_cuda_copy_impl <<< block_cnt, block_size >>> ( in_begin, out_begin );
+
+      size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
+
+      auto const scal_in_begin  = in_begin  + blocked_elmts_cnt;
+      auto const scal_out_begin = out_begin + blocked_elmts_cnt;
+
+      detail::_cuda_copy_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>> ( scal_in_begin, scal_out_begin );
    }
 
 }

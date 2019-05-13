@@ -35,43 +35,94 @@
 #ifndef _BLAZE_CUDA_UTIL_ALGORITHMS_CUDATRANSFORM_H_
 #define _BLAZE_CUDA_UTIL_ALGORITHMS_CUDATRANSFORM_H_
 
+#include <cstddef>
+
+#include <blaze_cuda/util/algorithms/Unroll.h>
+
 namespace blaze {
 
    namespace detail {
 
-      template< typename InputIt, typename OutputIt, typename F >
+      template < std::size_t Unroll = 4
+               , typename InputIt
+               , typename OutputIt
+               , typename F >
       void __global__ _cuda_transform_impl( InputIt in_begin, OutputIt out_begin, F f )
       {
-         auto const id = threadIdx.x;
-         *(out_begin + id) = f( *(in_begin + id) );
+         size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+
+         unroll<Unroll>( [&] ( auto const& I )
+         {
+            *( out_begin + id + I() ) = f( *( in_begin + id + I() ) );
+         } );
       }
 
-      template< typename InputIt1, typename InputIt2, typename OutputIt, typename F >
+      template < std::size_t Unroll = 4
+               , typename InputIt1, typename InputIt2
+               , typename OutputIt
+               , typename F >
       void __global__ _cuda_zip_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin
                                               , OutputIt out_begin, F f )
       {
-         auto const id = threadIdx.x;
+         size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+
          *(out_begin + id) = f( *(in1_begin + id), *(in2_begin + id) );
       }
 
    }  // namespace detail
 
-   template< typename InputIt, typename OutputIt, typename F >
+   template< std::size_t Unroll = 4, typename InputIt, typename OutputIt, typename F >
    inline void cuda_transform ( InputIt in_begin, InputIt in_end
                               , OutputIt out_begin
                               , F const& f ) {
-      // TODO: Kernel optimization
-      detail::_cuda_transform_impl <<< 1, in_end - in_begin >>> ( in_begin, out_begin, f );
+      using std::size_t;
+
+      constexpr size_t block_size = 128;
+      constexpr size_t elmt_per_block = block_size * Unroll;
+
+      size_t const elmt_cnt = in_end - in_begin;
+      size_t const block_cnt = elmt_cnt / elmt_per_block;
+
+      detail::_cuda_transform_impl <<< block_cnt, block_size >>> ( in_begin, out_begin, f );
+
+      size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
+
+      auto const scal_in_begin  = in_begin  + blocked_elmts_cnt;
+      auto const scal_out_begin = out_begin + blocked_elmts_cnt;
+
+      detail::_cuda_transform_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>>
+         ( scal_in_begin, scal_out_begin, f );
    }
 
-   template< typename InputIt1, typename InputIt2, typename OutputIt, typename F >
+   template < std::size_t Unroll = 4
+            , typename InputIt1
+            , typename InputIt2
+            , typename OutputIt
+            , typename F >
    inline void cuda_zip_transform( InputIt1 in1_begin, InputIt1 in1_end
                                  , InputIt2 in2_begin
                                  , OutputIt out_begin
-                                 , F const& f ) {
-      // TODO: Kernel optimization
-      detail::_cuda_zip_transform_impl <<< 1, in1_end - in1_begin >>> ( in1_begin, in2_begin
-                                                                      , out_begin, f );
+                                 , F const& f )
+   {
+      using std::size_t;
+
+      constexpr size_t block_size = 128;
+      constexpr size_t elmt_per_block = block_size * Unroll;
+
+      size_t const elmt_cnt = in1_end - in1_begin;
+      size_t const block_cnt = elmt_cnt / elmt_per_block;
+
+      detail::_cuda_transform_impl<Unroll>
+         <<< block_cnt, block_size >>> ( in1_begin, in2_begin, out_begin, f );
+
+      size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
+
+      auto const scal_in1_begin = in1_begin + blocked_elmts_cnt;
+      auto const scal_in2_begin = in2_begin + blocked_elmts_cnt;
+      auto const scal_out_begin = out_begin + blocked_elmts_cnt;
+
+      detail::_cuda_transform_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>>
+         ( scal_in1_begin, scal_in2_begin, scal_out_begin, f );
    }
 
 }  // namespace blaze
