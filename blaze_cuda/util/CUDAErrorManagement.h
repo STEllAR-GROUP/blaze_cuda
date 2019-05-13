@@ -35,8 +35,8 @@
 #ifndef _BLAZE_CUDA_UTIL_CUDAERRORMANAGEMENT_H_
 #define _BLAZE_CUDA_UTIL_CUDAERRORMANAGEMENT_H_
 
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 #include <cuda_runtime.h>
 
