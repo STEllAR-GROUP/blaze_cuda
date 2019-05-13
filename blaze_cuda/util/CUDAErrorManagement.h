@@ -41,7 +41,7 @@
 #include <cuda_runtime.h>
 
 #define CUDA_ERROR_CHECK                                                      \
-   if (auto err = cudaGetLastError(); err == cudaSuccess)                     \
+   if (auto err = cudaGetLastError(); err != cudaSuccess)                     \
    {                                                                          \
       std::stringstream ss;                                                   \
       ss << "CUDA Runtime error at: " << __FILE__ << ':' << __LINE__          \
