@@ -35,12 +35,16 @@
 #ifndef _BLAZE_CUDA_UTIL_ALGORITHMS_CUDAREDUCE_H_
 #define _BLAZE_CUDA_UTIL_ALGORITHMS_CUDAREDUCE_H_
 
+#include <array>
+#include <cmath>
 #include <cstddef>
+#include <tuple>
 #include <type_traits>
 
-#include <blaze/system/CUDAAttributes.h>
+#include <iostream>
 
 #include <blaze_cuda/util/algorithms/Unroll.h>
+#include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 
 #include <cuda_runtime.h>
@@ -49,6 +53,9 @@ namespace blaze {
 
 namespace cuda_reduce_detail {
 
+   // Util function
+   constexpr std::size_t pow2(std::size_t n) { return 2 << n; }
+
    // Main idea:
    //
    //       See: https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
@@ -56,91 +63,95 @@ namespace cuda_reduce_detail {
    //    Implementation of the reduction algorithm described in the PDF above,
    //    but with C++ generic constructs (generic unrolling, generic binop...)
 
-   template < std::size_t Unroll = 4
-            , typename InOutIt, typename OutputIt
-            , typename T
-            , typename BinOp >
-   void BLAZE_GLOBAL reduce_kernel ( InOutIt inout_beg, T const& init
-      , BinOp const& binop = [] BLAZE_HOST_DEVICE ( auto const& a, auto const& b )
-         { return a + b; } )
-   {
-      auto const thread_count = blockDim.x * gridDim.x;                 // Total amount of threads
-      auto const thread_id    = blockDim.x * blockIdx.x + threadIdx.x;  // Global thread index
+template < std::size_t Unroll, std::size_t BlockSizeExponent
+         , typename InputIt , typename OutputIt
+         , typename T
+         , typename BinOp >
+void __global__ reduce_kernel ( InputIt in_beg, OutputIt out_beg, T init, BinOp binop )
+{
+   constexpr size_t block_size = pow2( BlockSizeExponent );
 
-      auto a_beg = inout_beg + ( thread_id * Unroll );
-      auto b_beg = inout_beg + ( thread_id * Unroll * thread_count );
+   // Shared memory pool
+   __shared__ std::array<T, block_size * 2> sdata;
 
-      auto& out = *( inout_beg + thread_id );
+   // Thread indexing
+   auto const thread_count = blockDim.x * gridDim.x;
+   auto const global_id    = blockDim.x * blockIdx.x + threadIdx.x;
 
-      T red = init;
+   // Array indexing
+   auto begin = in_beg + ( global_id * Unroll );
 
-      unroll<Unroll>( [&]( auto )
-      {
-         red = binop( red, binop( *a_beg, *b_beg ) );
-         a_beg++; b_beg++;
-      } );
+   // Accumulator init
+   T acc = init;
 
-      out = binop( out, red );
+   // Computation, unrolled N times
+   unroll< Unroll >( [&]( auto const& I ) {
+      acc = binop( acc, *( begin + ( I() * thread_count ) ) );
+   } );
 
+   auto& self = sdata[ threadIdx.x ];
+
+   // Storing result
+   self = binop( self, acc );
+
+   __syncthreads();
+
+   // Block reduction
+   unroll< BlockSizeExponent >( [&] ( auto I ) {
+      auto constexpr Delta = pow2( BlockSizeExponent - I() - 1 );
+      self = sdata[ threadIdx.x + Delta ];
       __syncthreads();
-   }
+   } );
+
+   // Storing result
+   __syncthreads();
+   if( threadIdx.x == 0 ) *( out_beg + blockIdx.x ) = sdata[ 0 ];
+}
 
 }  // namespace cuda_reduce_detail
 
-template < std::size_t Unroll = 4
+
+template < std::size_t Unroll = 4, std::size_t BlockSizeExponent = 8
          , typename InputOutputIt
          , typename T
          , typename BinOp >
-inline auto cuda_reduce ( InputOutputIt inout_beg, InputOutputIt inout_end
-   , T init, BinOp const& binop )
-   -> decltype( *inout_beg )
+inline auto cuda_reduce ( InputOutputIt inout_beg, InputOutputIt inout_end, T init, BinOp binop )
 {
+   using cuda_reduce_detail::reduce_kernel;
+   using cuda_reduce_detail::pow2;
+
    using std::size_t;
+   constexpr size_t block_size = pow2( BlockSizeExponent );
+   constexpr size_t elmts_per_block = block_size * Unroll;
 
-   //using ElmtType = std::decay_t< decltype( *inout_beg ) >;
+   // Computing
 
-   constexpr size_t block_size      = 128;                      // Number of threads per block
-   constexpr size_t elmt_per_block  = block_size * Unroll * 2;  // Number of reduced elements per block
+   // TODO: Second loop for max block size
 
-   auto elmt_cnt = inout_end - inout_beg; // Number of elements
-
-   auto procecssed_by_gpu  = elmt_cnt % elmt_per_block;           // Number of elements to be processed by the GPU at each iteration
-   auto block_cnt          = procecssed_by_gpu / elmt_per_block;  // Number of blocks to be launched at each iteration
-   auto prev_block_cnt     = block_cnt;                           // Keeping a track of the number of blocks
-
-   while( block_cnt > 0 )
+   while( inout_end - inout_beg >= (ptrdiff_t)elmts_per_block )
    {
-      cuda_reduce_detail::reduce_kernel < Unroll > <<< block_cnt, block_size >>>
-         ( inout_beg, binop, init, binop );
+      size_t const size            = inout_end - inout_end;
+      size_t const unpadded_size   = size % elmts_per_block;
+      size_t const padded_size     = size - unpadded_size;
+      size_t const block_cnt       = padded_size / elmts_per_block;
 
-      procecssed_by_gpu /= elmt_per_block;
-      prev_block_cnt    = block_cnt;
-      block_cnt         = procecssed_by_gpu / elmt_per_block;
+      blaze::cuda_zip_transform( inout_end - unpadded_size, inout_end, inout_beg, inout_beg, binop );
 
-      //cudaDeviceSynchronize();
+      cudaDeviceSynchronize();
+      CUDA_ERROR_CHECK;
+
+      reduce_kernel< Unroll, BlockSizeExponent > <<< block_cnt, block_size >>>
+         ( inout_beg, inout_end, init, binop );
+      inout_end = inout_beg + block_cnt;
    }
 
-   auto ret = init;
+   T ret = init;
 
-   // Scalar end
-   for( auto scal_beg = inout_end - ( elmt_cnt % elmt_per_block )
-      ; scal_beg < inout_end
-      ; scal_beg++ )
-   { ret = binop( ret, *scal_beg ); }
-
-   // Gather the rest
-   cudaDeviceSynchronize();
-
-   CUDA_ERROR_CHECK;
-
-   auto const gath_end = inout_beg + ( prev_block_cnt * block_size );
-   for( auto gath_beg = inout_beg
-      ; gath_beg < gath_end
-      ; gath_beg++ )
-   { ret = binop( ret, *gath_beg ); }
+   while( inout_beg < inout_end ) ret = binop(ret, *( inout_beg++ ));
 
    return ret;
 }
+
 
 }  // namespace blaze
 
