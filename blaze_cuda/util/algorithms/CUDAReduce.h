@@ -54,7 +54,7 @@ namespace blaze {
 namespace cuda_reduce_detail {
 
    // Util function
-   constexpr std::size_t pow2(std::size_t n) { return 2 << n; }
+   constexpr std::size_t pow2( std::size_t n ) { return 1 << n; }
 
    // Main idea:
    //
