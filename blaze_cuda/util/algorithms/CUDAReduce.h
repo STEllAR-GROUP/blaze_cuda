@@ -89,17 +89,15 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt out_beg, T init, BinOp 
       acc = binop( acc, *( begin + ( I() * thread_count ) ) );
    } );
 
-   auto& self = sdata[ threadIdx.x ];
-
    // Storing result
-   self = binop( self, acc );
+   sdata[ threadIdx.x ] = binop( sdata[ threadIdx.x ], acc );
 
    __syncthreads();
 
    // Block reduction
    unroll< BlockSizeExponent >( [&] ( auto I ) {
       auto constexpr Delta = pow2( BlockSizeExponent - I() - 1 );
-      self = sdata[ threadIdx.x + Delta ];
+      sdata[ threadIdx.x ] += sdata[ threadIdx.x + Delta ];
       __syncthreads();
    } );
 
@@ -115,7 +113,7 @@ template < std::size_t Unroll = 4, std::size_t BlockSizeExponent = 8
          , typename InputOutputIt
          , typename T
          , typename BinOp >
-inline auto cuda_reduce ( InputOutputIt inout_beg, InputOutputIt inout_end, T init, BinOp binop )
+inline auto cuda_reduce ( InputOutputIt const& inout_beg, InputOutputIt const& inout_end, T init, BinOp binop )
 {
    using cuda_reduce_detail::reduce_kernel;
    using cuda_reduce_detail::pow2;
@@ -126,28 +124,37 @@ inline auto cuda_reduce ( InputOutputIt inout_beg, InputOutputIt inout_end, T in
 
    // Computing
 
-   // TODO: Second loop for max block size
+   // TODO: Capping block size
+   auto begin = inout_beg, end = inout_end;
 
-   while( inout_end - inout_beg >= (ptrdiff_t)elmts_per_block )
+   while( end - begin >= ptrdiff_t( elmts_per_block ) )
    {
-      size_t const size            = inout_end - inout_end;
-      size_t const unpadded_size   = size % elmts_per_block;
-      size_t const padded_size     = size - unpadded_size;
-      size_t const block_cnt       = padded_size / elmts_per_block;
+      size_t const size          = end - begin;
+      size_t const unpadded_size = size % elmts_per_block;
+      size_t const padded_size   = size - unpadded_size;
+      size_t const block_cnt     = padded_size / elmts_per_block;
 
-      blaze::cuda_zip_transform( inout_end - unpadded_size, inout_end, inout_beg, inout_beg, binop );
+      if( unpadded_size > 0 ) {
+         blaze::cuda_zip_transform( end - unpadded_size, end, inout_beg, inout_beg, binop );
+         end = end - unpadded_size;
+      }
 
       cudaDeviceSynchronize();
       CUDA_ERROR_CHECK;
 
-      reduce_kernel< Unroll, BlockSizeExponent > <<< block_cnt, block_size >>>
-         ( inout_beg, inout_end, init, binop );
-      inout_end = inout_beg + block_cnt;
+      if( block_cnt > 0 ) {
+         reduce_kernel< Unroll, BlockSizeExponent > <<< block_cnt, block_size >>>
+            ( begin, inout_beg, init, binop );
+         end = begin + block_cnt;
+      }
+
+      cudaDeviceSynchronize();
+      CUDA_ERROR_CHECK;
    }
 
    T ret = init;
 
-   while( inout_beg < inout_end ) ret = binop(ret, *( inout_beg++ ));
+   while( begin < end ) ret = binop(ret, *( begin++ ));
 
    return ret;
 }
