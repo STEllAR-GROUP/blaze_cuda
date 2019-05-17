@@ -63,7 +63,7 @@ template < std::size_t Unroll, std::size_t BlockSizeExponent
          , typename InputIt , typename OutputIt
          , typename T
          , typename BinOp >
-void __global__ reduce_kernel ( InputIt in_beg, OutputIt out_beg, T init, BinOp binop )
+void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinOp binop )
 {
    constexpr size_t block_size = 1 << BlockSizeExponent;
 
@@ -101,7 +101,7 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt out_beg, T init, BinOp 
 
    // Storing result
    if( threadIdx.x == 0 )
-      *( out_beg + blockIdx.x ) = binop( *( out_beg + blockIdx.x ), sdata[ 0 ] );
+      *( inout_beg + blockIdx.x ) = binop( *( inout_beg + blockIdx.x ), sdata[ 0 ] );
 }
 
 }  // namespace cuda_reduce_detail
@@ -125,7 +125,7 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
    size_t const unpadded_size = ( inout_end - inout_beg ) % elmts_per_block;
 
    using store_t = blaze::CUDADynamicVector<T>;
-   auto store_vec = store_t(elmts_per_block, init);
+   store_t store_vec( elmts_per_block, init );
 
    if( unpadded_size > 0 ) {
       blaze::cuda_zip_transform( inout_end - unpadded_size, inout_end
@@ -155,18 +155,19 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
    }
 
    // Initializing final reduce value
-   CUDAManagedValue<T> res(init);
+   CUDAManagedValue<T> res_wrapper(init);
+   auto& res = *res_wrapper;
 
    // Reducing the storage vector inside *resptr
    reduce_kernel
       < Unroll, BlockSizeExponent >
       <<< 1, block_size >>>
-      ( store_vec.begin(), &*res, init, binop );
+      ( store_vec.begin(), &res, init, binop );
 
    cudaDeviceSynchronize();
    CUDA_ERROR_CHECK;
 
-   return *res;
+   return res;
 }
 
 
