@@ -39,6 +39,8 @@
 
 #include <cuda_runtime.h>
 
+#include <blaze/system/CUDAAttributes.h>
+
 namespace blaze {
 
 template< typename T >
@@ -47,19 +49,19 @@ class CUDAManagedValue
    T* _ptr;
 
 public:
-   CUDAManagedValue()
+   inline BLAZE_HOST_DEVICE CUDAManagedValue()
    {
       cudaMallocManaged( ( void** )&_ptr, sizeof( T ) );
       *_ptr = T();
    }
 
-   CUDAManagedValue( T const& v ) : CUDAManagedValue() { *_ptr = v; }
-   CUDAManagedValue( T && v )     : CUDAManagedValue() { *_ptr = std::move( v ); }
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( T const& v ) : CUDAManagedValue() { *_ptr = v; }
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( T && v )     : CUDAManagedValue() { *_ptr = std::move( v ); }
 
-   T& operator*() { return *_ptr; }
-   T* ptr()       { return  _ptr; }
+   inline BLAZE_HOST_DEVICE T& operator*() { return *_ptr; }
+   inline BLAZE_HOST_DEVICE T* ptr()       { return  _ptr; }
 
-   ~CUDAManagedValue() { cudaFree( _ptr ); }
+   inline BLAZE_HOST_DEVICE ~CUDAManagedValue() { cudaFree( _ptr ); }
 };
 
 }  // namespace blaze
