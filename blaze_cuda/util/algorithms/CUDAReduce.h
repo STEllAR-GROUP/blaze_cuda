@@ -72,7 +72,9 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt out_beg, T init, BinOp 
 
    // Shared memory pool & init
    __shared__ std::array< T, block_size * 2 > sdata;
+   sdata[ threadIdx.x ] = init;
    sdata[ threadIdx.x + block_size ] = init;
+   __syncthreads();
 
    // Array indexing
    auto begin = in_beg + global_id;
@@ -91,17 +93,14 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt out_beg, T init, BinOp 
 
    // Block reduction
    unroll< BlockSizeExponent >( [&] ( auto I ) {
-      auto& store = sdata[ threadIdx.x ];
       auto constexpr Delta = 1 << ( BlockSizeExponent - I() - 1 );
-      store = binop( store, sdata[ threadIdx.x + Delta ] );
+      sdata[ threadIdx.x ] = binop( sdata[ threadIdx.x ], sdata[ threadIdx.x + Delta ] );
       __syncthreads();
    } );
 
    // Storing result
-   if( threadIdx.x == 0 ) {
-      auto& store = *( out_beg + blockIdx.x );
-      store = binop( store, sdata[ 0 ] );
-   }
+   if( threadIdx.x == 0 )
+      *( out_beg + blockIdx.x ) = binop( *( out_beg + blockIdx.x ), sdata[ 0 ] );
 }
 
 }  // namespace cuda_reduce_detail
@@ -152,12 +151,14 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
          ( begin, store_vec.begin(), init, binop );
 
       begin += block_cnt * elmts_per_block;
-
    }
 
+   // Initializing final reduce value
    T* resptr;
    cudaMallocManaged((void**)&resptr, sizeof(T));
+   *resptr = init;
 
+   // Reducing the storage vector inside *resptr
    reduce_kernel
       < Unroll, BlockSizeExponent >
       <<< 1, block_size >>>
@@ -167,7 +168,7 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
    CUDA_ERROR_CHECK;
 
    auto res = *resptr;
-   cudaFree(resptr);
+   cudaFree(resptr); // Watch out: memory leak could happen here
    return res;
 }
 
