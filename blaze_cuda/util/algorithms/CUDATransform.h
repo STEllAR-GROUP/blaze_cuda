@@ -38,12 +38,13 @@
 #include <cstddef>
 
 #include <blaze_cuda/util/algorithms/Unroll.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 namespace blaze {
 
    namespace detail {
 
-      template < std::size_t Unroll = 4
+      template < std::size_t Unroll
                , typename InputIt
                , typename OutputIt
                , typename F >
@@ -57,7 +58,7 @@ namespace blaze {
          } );
       }
 
-      template < std::size_t Unroll = 4
+      template < std::size_t Unroll
                , typename InputIt1
                , typename InputIt2
                , typename OutputIt
@@ -75,24 +76,41 @@ namespace blaze {
    template< std::size_t Unroll = 4, typename InputIt, typename OutputIt, typename F >
    inline void cuda_transform ( InputIt in_begin, InputIt in_end
                               , OutputIt out_begin
-                              , F const& f ) {
+                              , F const& f )
+   {
       using std::size_t;
 
-      constexpr size_t block_size = 128;
-      constexpr size_t elmt_per_block = block_size * Unroll;
+      constexpr size_t max_block_size  = 512;
+      constexpr size_t max_block_cnt   = 8192;
+      constexpr size_t elmt_per_block  = max_block_size * Unroll;
 
       size_t const elmt_cnt = in_end - in_begin;
       size_t const block_cnt = elmt_cnt / elmt_per_block;
 
-      detail::_cuda_transform_impl <<< block_cnt, block_size >>> ( in_begin, out_begin, f );
+      while( in_end - in_begin >= std::ptrdiff_t( elmt_per_block ) )
+      {
+         auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
+         detail::_cuda_transform_impl
+            <Unroll>
+            <<< final_block_cnt, max_block_size >>>
+            ( in_begin, out_begin, f );
 
-      size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
+         in_begin  += final_block_cnt;
+         out_begin += final_block_cnt;
+      }
 
-      auto const scal_in_begin  = in_begin  + blocked_elmts_cnt;
-      auto const scal_out_begin = out_begin + blocked_elmts_cnt;
+      while( in_end - in_begin > 0 )
+      {
+         auto const final_block_size = std::min( max_block_size, size_t( in_end - in_begin ) );
 
-      detail::_cuda_transform_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>>
-         ( scal_in_begin, scal_out_begin, f );
+         detail::_cuda_transform_impl<1> <<< 1, final_block_size >>>
+            ( in_begin, out_begin, f );
+
+         in_begin  += final_block_size;
+         out_begin += final_block_size;
+      }
+
+      CUDA_ERROR_CHECK;
    }
 
    template < std::size_t Unroll = 4
@@ -107,23 +125,42 @@ namespace blaze {
    {
       using std::size_t;
 
-      constexpr size_t block_size = 128;
-      constexpr size_t elmt_per_block = block_size * Unroll;
+      constexpr size_t max_block_size = 512;
+      constexpr size_t max_block_cnt  = 8192;
+      constexpr size_t elmt_per_block = max_block_size * Unroll;
 
       size_t const elmt_cnt = in1_end - in1_begin;
       size_t const block_cnt = elmt_cnt / elmt_per_block;
 
-      detail::_cuda_zip_transform_impl<Unroll>
-         <<< block_cnt, block_size >>> ( in1_begin, in2_begin, out_begin, f );
+      while( in1_end - in1_begin >= std::ptrdiff_t( elmt_per_block ) )
+      {
+         auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
 
-      size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
+         detail::_cuda_zip_transform_impl
+            <Unroll>
+            <<< final_block_cnt, max_block_size >>>
+            ( in1_begin, in2_begin, out_begin, f );
 
-      auto const scal_in1_begin = in1_begin + blocked_elmts_cnt;
-      auto const scal_in2_begin = in2_begin + blocked_elmts_cnt;
-      auto const scal_out_begin = out_begin + blocked_elmts_cnt;
+         in1_begin += final_block_cnt;
+         in2_begin += final_block_cnt;
+         out_begin += final_block_cnt;
+      }
 
-      detail::_cuda_zip_transform_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>>
-         ( scal_in1_begin, scal_in2_begin, scal_out_begin, f );
+      while( in1_end - in1_begin > 0 )
+      {
+         auto const final_block_size = std::min( max_block_size, size_t( in1_end - in1_begin ) );
+
+         detail::_cuda_zip_transform_impl
+            <1>
+            <<< 1, final_block_size >>>
+            ( in1_begin, in2_begin, out_begin, f );
+
+         in1_begin += final_block_size;
+         in2_begin += final_block_size;
+         out_begin += final_block_size;
+      }
+
+      CUDA_ERROR_CHECK;
    }
 
 }  // namespace blaze
