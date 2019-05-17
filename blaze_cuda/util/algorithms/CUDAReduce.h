@@ -44,6 +44,7 @@
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/algorithms/Unroll.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
+#include <blaze_cuda/util/CUDAValue.h>
 
 #include <cuda_runtime.h>
 
@@ -154,22 +155,18 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
    }
 
    // Initializing final reduce value
-   T* resptr;
-   cudaMallocManaged((void**)&resptr, sizeof(T));
-   *resptr = init;
+   CUDAManagedValue<T> res(init);
 
    // Reducing the storage vector inside *resptr
    reduce_kernel
       < Unroll, BlockSizeExponent >
       <<< 1, block_size >>>
-      ( store_vec.begin(), resptr, init, binop );
+      ( store_vec.begin(), &*res, init, binop );
 
    cudaDeviceSynchronize();
    CUDA_ERROR_CHECK;
 
-   auto res = *resptr;
-   cudaFree(resptr); // Watch out: memory leak could happen here
-   return res;
+   return *res;
 }
 
 
