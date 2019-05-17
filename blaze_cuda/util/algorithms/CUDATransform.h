@@ -54,7 +54,7 @@ namespace blaze {
 
          unroll<Unroll>( [&] ( auto const& I )
          {
-            *( out_begin + id + I() ) = f( *( in_begin + id + I() ) );
+            *(out_begin + id + I()) = f( *(in_begin + id + I()) );
          } );
       }
 
@@ -68,7 +68,11 @@ namespace blaze {
       {
          size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
 
-         *(out_begin + id) = f( *(in1_begin + id), *(in2_begin + id) );
+         unroll<Unroll>( [&] ( auto const& I )
+         {
+            *(out_begin + id + I()) = f( *(in1_begin + id + I())
+                                       , *(in2_begin + id + I()) );
+         } );
       }
 
    }  // namespace detail
