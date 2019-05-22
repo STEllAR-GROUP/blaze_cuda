@@ -38,6 +38,8 @@
 #include <array>
 #include <cstddef>
 
+#include <iostream>
+
 #include <blaze/system/Inline.h>
 
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
@@ -75,7 +77,6 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
    __shared__ std::array< T, block_size * 2 > sdata;
    sdata[ threadIdx.x ] = init;
    sdata[ threadIdx.x + block_size ] = init;
-   __syncthreads();
 
    // Array indexing
    auto begin = in_beg + global_id;
@@ -107,7 +108,7 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
 }  // namespace cuda_reduce_detail
 
 
-template < std::size_t Unroll = 4, std::size_t BlockSizeExponent = 8
+template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 8
          , typename InputOutputIt
          , typename T
          , typename BinOp >
@@ -118,6 +119,8 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
 {
    using cuda_reduce_detail::reduce_kernel;
    using std::size_t;
+
+   if( inout_end - inout_beg < 0 ) throw std::runtime_error("Invalid iterator order");
 
    size_t constexpr block_size = 1 << BlockSizeExponent;
    size_t constexpr elmts_per_block = block_size * Unroll;
@@ -150,20 +153,21 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
          < Unroll, BlockSizeExponent >
          <<< block_cnt, block_size >>>
          ( begin, store_vec.begin(), init, binop );
+      cudaDeviceSynchronize();
+      CUDA_ERROR_CHECK;
 
       begin += block_cnt * elmts_per_block;
    }
 
    // Initializing final reduce value
-   CUDAManagedValue<T> res_wrapper(init);
+   CUDAManagedValue<T> res_wrapper( init );
    auto& res = *res_wrapper;
 
-   // Reducing the storage vector inside *resptr
+   // Reducing the storage vector inside *res_wrapper
    reduce_kernel
       < Unroll, BlockSizeExponent >
       <<< 1, block_size >>>
       ( store_vec.begin(), &res, init, binop );
-
    cudaDeviceSynchronize();
    CUDA_ERROR_CHECK;
 
