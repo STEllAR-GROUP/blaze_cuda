@@ -55,13 +55,22 @@ public:
       *_ptr = T();
    }
 
-   inline BLAZE_HOST_DEVICE CUDAManagedValue( T const& v ) : CUDAManagedValue() { *_ptr = v; }
-   inline BLAZE_HOST_DEVICE CUDAManagedValue( T && v )     : CUDAManagedValue() { *_ptr = std::move( v ); }
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( CUDAManagedValue && o )      : _ptr( o._ptr )
+      { o._ptr = nullptr; }
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( CUDAManagedValue const& o )  : CUDAManagedValue()
+      { *_ptr = *o._ptr; }
+
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( T const& v )   : CUDAManagedValue()
+      { *_ptr = v; }
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( T &&     v )   : CUDAManagedValue()
+      { *_ptr = std::move( v ); }
+   inline BLAZE_HOST_DEVICE CUDAManagedValue( T *      ptr ) : _ptr( ptr ) {}
+
 
    inline BLAZE_HOST_DEVICE T& operator*() { return *_ptr; }
    inline BLAZE_HOST_DEVICE T* ptr()       { return  _ptr; }
 
-   inline BLAZE_HOST_DEVICE ~CUDAManagedValue() { cudaFree( _ptr ); }
+   inline BLAZE_HOST_DEVICE ~CUDAManagedValue() { if( _ptr != nullptr ) cudaFree( _ptr ); }
 };
 
 }  // namespace blaze
