@@ -20,3 +20,9 @@ CUFLAGS += --cuda-gpu-arch=$(CUDA_GPU_ARCH)
 
 # Linker
 LDFLAGS += -fPIC -lm -lcudart
+
+## Development
+
+# Remote execution variables
+REMOTE_EXEC_HOST ?= localhost
+REMOTE_EXEC_PATH ?= /tmp/blazetest_remote
