@@ -38,7 +38,7 @@
 #include <array>
 #include <cstddef>
 
-#include <iostream>
+#include <cuda_runtime.h>
 
 #include <blaze/system/Inline.h>
 
@@ -48,7 +48,6 @@
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 #include <blaze_cuda/util/CUDAValue.h>
 
-#include <cuda_runtime.h>
 
 namespace blaze {
 
@@ -113,8 +112,8 @@ template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 8
          , typename T
          , typename BinOp >
 BLAZE_ALWAYS_INLINE auto cuda_reduce
-   ( InputOutputIt const& inout_beg
-   , InputOutputIt const& inout_end
+   ( InputOutputIt inout_beg
+   , InputOutputIt inout_end
    , T init, BinOp binop )
 {
    using cuda_reduce_detail::reduce_kernel;
@@ -141,22 +140,19 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
 
    // Computing
 
-   for( auto begin = inout_beg
-           , end   = inout_end - unpadded_size
-      ; end - begin >= ptrdiff_t( elmts_per_block )
-      ; )
+   while( inout_end - inout_beg >= ptrdiff_t( elmts_per_block ) )
    {
-      size_t const size      = end - begin;
+      size_t const size      = inout_end - inout_beg;
       size_t const block_cnt = std::min( size / elmts_per_block, elmts_per_block );
 
       reduce_kernel
          < Unroll, BlockSizeExponent >
          <<< block_cnt, block_size >>>
-         ( begin, store_vec.begin(), init, binop );
+         ( inout_beg, store_vec.begin(), init, binop );
       cudaDeviceSynchronize();
       CUDA_ERROR_CHECK;
 
-      begin += block_cnt * elmts_per_block;
+      inout_beg += block_cnt * elmts_per_block;
    }
 
    // Initializing final reduce value

@@ -52,8 +52,7 @@ namespace blaze {
       {
          size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
 
-         unroll<Unroll>( [&] ( auto const& I )
-         {
+         unroll<Unroll>( [&] ( auto const& I ) {
             *(out_begin + id + I()) = f( *(in_begin + id + I()) );
          } );
       }
@@ -68,8 +67,7 @@ namespace blaze {
       {
          size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
 
-         unroll<Unroll>( [&] ( auto const& I )
-         {
+         unroll<Unroll>( [&] ( auto const& I ) {
             *(out_begin + id + I()) = f( *( in1_begin + id + I() )
                                        , *( in2_begin + id + I() ) );
          } );
@@ -88,11 +86,11 @@ namespace blaze {
       constexpr size_t max_block_cnt    = 8192;
       constexpr size_t elmts_per_block  = max_block_size * Unroll;
 
-      size_t const elmt_cnt = in_end - in_begin;
-      size_t const block_cnt = elmt_cnt / elmts_per_block;
-
       while( in_end - in_begin >= ptrdiff_t( elmts_per_block ) )
       {
+         size_t const elmt_cnt = in_end - in_begin;
+         size_t const block_cnt = elmt_cnt / elmts_per_block;
+
          auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
          detail::_cuda_transform_impl
             <Unroll>
@@ -115,11 +113,11 @@ namespace blaze {
             ( in_begin, out_begin, f );
 
          auto const incr = final_block_size;
-
          in_begin  += incr;
          out_begin += incr;
       }
 
+      cudaDeviceSynchronize();
       CUDA_ERROR_CHECK;
    }
 
@@ -128,7 +126,8 @@ namespace blaze {
             , typename InputIt2
             , typename OutputIt
             , typename F >
-   inline void cuda_zip_transform( InputIt1 in1_begin, InputIt1 in1_end
+   inline void cuda_zip_transform( InputIt1 in1_begin
+                                 , InputIt1 in1_end
                                  , InputIt2 in2_begin
                                  , OutputIt out_begin
                                  , F const& f )
@@ -139,11 +138,11 @@ namespace blaze {
       constexpr size_t max_block_cnt   = 8192;
       constexpr size_t elmts_per_block = max_block_size * Unroll;
 
-      size_t const elmt_cnt = in1_end - in1_begin;
-      size_t const block_cnt = elmt_cnt / elmts_per_block;
-
       while( in1_end - in1_begin >= ptrdiff_t( elmts_per_block ) )
       {
+         size_t const elmt_cnt = in1_end - in1_begin;
+         size_t const block_cnt = elmt_cnt / elmts_per_block;
+
          auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
 
          detail::_cuda_zip_transform_impl
@@ -174,6 +173,7 @@ namespace blaze {
          out_begin += incr;
       }
 
+      cudaDeviceSynchronize();
       CUDA_ERROR_CHECK;
    }
 
