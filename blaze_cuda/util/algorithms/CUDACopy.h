@@ -38,6 +38,7 @@
 #include <cstddef>
 
 #include <blaze_cuda/util/algorithms/Unroll.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 namespace blaze {
 
@@ -63,20 +64,43 @@ namespace blaze {
    {
       using std::size_t;
 
-      constexpr size_t block_size = 128;
-      constexpr size_t elmt_per_block = block_size * Unroll;
+      constexpr size_t max_block_size   = 512;
+      constexpr size_t max_block_cnt    = 8192;
+      constexpr size_t elmts_per_block  = max_block_size * Unroll;
 
-      size_t const elmt_cnt = in_end - in_begin;
-      size_t const block_cnt = elmt_cnt / elmt_per_block;
+      while( in_end - in_begin >= ptrdiff_t( elmts_per_block ) )
+      {
+         size_t const elmt_cnt = in_end - in_begin;
+         size_t const block_cnt = elmt_cnt / elmts_per_block;
 
-      detail::_cuda_copy_impl <<< block_cnt, block_size >>> ( in_begin, out_begin );
+         auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
+         detail::_cuda_copy_impl
+            <Unroll>
+            <<< final_block_cnt, max_block_size >>>
+            ( in_begin, out_begin );
 
-      size_t const blocked_elmts_cnt = ( block_cnt * elmt_per_block );
+         auto const incr = final_block_cnt * elmts_per_block;
 
-      auto const scal_in_begin  = in_begin  + blocked_elmts_cnt;
-      auto const scal_out_begin = out_begin + blocked_elmts_cnt;
+         in_begin  += incr;
+         out_begin += incr;
+      }
 
-      detail::_cuda_copy_impl<1> <<< 1, elmt_cnt - blocked_elmts_cnt >>> ( scal_in_begin, scal_out_begin );
+      CUDA_ERROR_CHECK;
+
+      while( in_end - in_begin > 0 )
+      {
+         auto const final_block_size = std::min( max_block_size, size_t( in_end - in_begin ) );
+
+         detail::_cuda_copy_impl<1> <<< 1, final_block_size >>>
+            ( in_begin, out_begin );
+
+         auto const incr = final_block_size;
+         in_begin  += incr;
+         out_begin += incr;
+      }
+
+      cudaDeviceSynchronize();
+      CUDA_ERROR_CHECK;
    }
 
 }
