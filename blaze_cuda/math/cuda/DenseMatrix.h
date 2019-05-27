@@ -41,24 +41,14 @@
 // Includes
 //*************************************************************************************************
 
-#include <hpx/include/parallel_for_loop.hpp>
 #include <blaze/math/Aliases.h>
 #include <blaze/math/AlignmentFlag.h>
-#include <blaze/math/constraints/SMPAssignable.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/expressions/SparseMatrix.h>
-#include <blaze/math/functors/AddAssign.h>
-#include <blaze/math/functors/Assign.h>
-#include <blaze/math/functors/MultAssign.h>
-#include <blaze/math/functors/SchurAssign.h>
-#include <blaze/math/functors/SubAssign.h>
-#include <blaze/math/simd/SIMDTrait.h>
+//#include <blaze/math/functors/SchurAssign.h>
 #include <blaze/math/smp/SerialSection.h>
-#include <blaze/math/smp/ThreadMapping.h>
-#include <blaze/math/smp/Functions.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
-#include <blaze/math/typetraits/IsSIMDCombinable.h>
 #include <blaze/math/views/Submatrix.h>
 #include <blaze/system/SMP.h>
 #include <blaze/util/algorithms/Min.h>
