@@ -342,8 +342,9 @@ class CUDADynamicVector
    inline bool isAligned   () const noexcept;
    inline bool canSMPAssign() const noexcept;
 
-   static bool constexpr simdEnabled   = false;
-   static bool constexpr smpAssignable = false;
+   static bool constexpr simdEnabled    = false;
+   static bool constexpr smpAssignable  = false;
+   static bool constexpr cudaAssignable = true;
 
    template< typename VT > inline auto assign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void addAssign( const DenseVector<VT,TF>& rhs );
