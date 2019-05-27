@@ -44,9 +44,8 @@
 #include <type_traits>
 
 #include <blaze/math/expressions/View.h>
-#include <blaze/math/typetraits/IsMatrix.h>
-#include <blaze/math/typetraits/IsVector.h>
 #include <blaze/math/typetraits/IsView.h>
+#include <blaze/math/typetraits/IsExpression.h>
 #include <blaze/util/FalseType.h>
 #include <blaze/util/IntegralConstant.h>
 #include <blaze/util/typetraits/Void.h>
@@ -83,47 +82,31 @@ struct IsCUDAAssignableHelper< T, Void_t< decltype( T::cudaAssignable ) > >
 /*! \endcond */
 //*************************************************************************************************
 
-
 template< typename T, typename = void >
-struct IsCUDAAssignableHelper_view
+struct IsCUDAAssignableHelper_View
    : public FalseType
 {};
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T >
-struct IsCUDAAssignableHelper_view< T, Void_t< EnableIf_t< IsView_v<T> > > >
+struct IsCUDAAssignableHelper_View < T, Void_t< EnableIf_t< IsView_v< T > > > >
    : public BoolConstant< IsCUDAAssignableHelper< typename T::ViewedType >::value >
 {};
 /*! \endcond */
 //*************************************************************************************************
 
 template< typename T, typename = void >
-struct IsCUDAAssignableHelper_vector
+struct IsCUDAAssignableHelper_Expression
    : public FalseType
 {};
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 template< typename T >
-struct IsCUDAAssignableHelper_vector< T, Void_t< EnableIf_t< IsVector_v<T> > > >
-   : public BoolConstant< IsCUDAAssignableHelper< typename T::ViewedType >::value >
+struct IsCUDAAssignableHelper_Expression < T, Void_t< EnableIf_t< IsExpression_v<T> > > >
+   : public BoolConstant< IsCUDAAssignableHelper< typename T::ResultType >::value >
 {};
 /*! \endcond */
 //*************************************************************************************************
-
-
-template< typename T, typename = void >
-struct IsCUDAAssignableHelper_matrix
-   : public FalseType
-{};
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct IsCUDAAssignableHelper_matrix< T, Void_t< EnableIf_t< IsMatrix_v<T> > > >
-   : public BoolConstant< IsCUDAAssignableHelper< typename T::ViewedType >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
 
 //*************************************************************************************************
 /*!\brief Compile time check for data types.
@@ -161,7 +144,8 @@ struct IsCUDAAssignableHelper_matrix< T, Void_t< EnableIf_t< IsMatrix_v<T> > > >
 template< typename T >
 struct IsCUDAAssignable
    : public BoolConstant<  IsCUDAAssignableHelper<T>::value
-                        || IsCUDAAssignableHelper_view<T>::value >
+                        || IsCUDAAssignableHelper_View<T>::value
+                        || IsCUDAAssignableHelper_Expression<T>::value >
 {};
 //*************************************************************************************************
 
