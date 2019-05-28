@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
 //  \file blaze/util/Memory.h
-//  \brief Header file for memory allocation and deallocation functionality
+//  \brief Header file for CUDA memory allocation and deallocation functionality
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
@@ -36,6 +36,18 @@
 #ifndef _BLAZE_CUDA_UTIL_MEMORY_H_
 #define _BLAZE_CUDA_UTIL_MEMORY_H_
 
+#include <cuda_runtime.h>
+
+#include <new>
+#include <blaze/util/Assert.h>
+#include <blaze/util/DisableIf.h>
+#include <blaze/util/EnableIf.h>
+#include <blaze/util/Exception.h>
+#include <blaze/util/Types.h>
+#include <blaze/util/typetraits/IsBuiltin.h>
+
+#include <blaze_cuda/util/CUDAErrorManagement.h>
+
 namespace blaze {
 
 //=================================================================================================
@@ -46,21 +58,28 @@ namespace blaze {
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Backend implementation for aligned array allocation.
+/*!\brief Backend implementation for CUDA managed array allocation.
 // \ingroup util
 //
 // \param size The number of bytes to be allocated.
-// \param alignment The required minimum alignment.
-// \return Byte pointer to the first element of the aligned array.
+// \return Byte pointer to the first element of the array.
 // \exception std::bad_alloc Allocation failed.
 //
-// This function provides the functionality to allocate memory based on the given alignment
-// restrictions. For that purpose it uses the according system-specific memory allocation
-// functions.
+// This function provides the functionality to allocate CUDA managed memory.
 */
-inline byte_t* allocate_backend( size_t size, size_t alignment )
+inline byte_t* cuda_managed_allocate_backend( size_t size )
 {
+   void* raw( nullptr );
 
+   try {
+      cudaMallocManaged( &raw, size );
+      CUDA_ERROR_CHECK;
+   }
+   catch( ... ) {
+      BLAZE_THROW_BAD_ALLOC;
+   }
+
+   return reinterpret_cast<byte_t*>( raw );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -68,18 +87,18 @@ inline byte_t* allocate_backend( size_t size, size_t alignment )
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Backend implementation for the deallocation of aligned memory.
+/*!\brief Backend implementation for the deallocation of CUDA memory.
 // \ingroup util
 //
 // \param address The address of the first element of the array to be deallocated.
 // \return void
 //
-// This function deallocates the given memory that was previously allocated via the allocate()
-// function. For that purpose it uses the according system-specific memory deallocation functions.
+// This function deallocates the given memory that was previously allocated via the
+// cuda_managed_allocate() function.
 */
-inline void deallocate_backend( const void* address ) noexcept
+inline void cuda_deallocate_backend( const void* address ) noexcept
 {
-
+   cudaFree( const_cast<void*>( address ) );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -94,31 +113,22 @@ inline void deallocate_backend( const void* address ) noexcept
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Aligned array allocation for built-in data types.
+/*!\brief Allocation for built-in data types.
 // \ingroup util
 //
 // \param size The number of elements of the given type to allocate.
 // \return Pointer to the first element of the aligned array.
 // \exception std::bad_alloc Allocation failed.
 //
-// The allocate() function provides the functionality to allocate memory based on the alignment
-// restrictions of the given built-in data type. For instance, in case SSE vectorization is
-// possible, the returned memory is guaranteed to be at least 16-byte aligned. In case AVX is
-// active, the memory is even guaranteed to be at least 32-byte aligned.
-//
-// Examples:
-
-   \code
-   // Guaranteed to be 16-byte aligned (32-byte aligned in case AVX is used)
-   double* dp = allocate<double>( 10UL );
-   \endcode
+// The allocate() function provides the functionality to allocate CUDA managed memory.
 */
 template< typename T >
-EnableIf_t< IsBuiltin_v<T>, T* > allocate( size_t size )
+EnableIf_t< IsBuiltin_v<T>, T* > cuda_managed_allocate( size_t size )
 {
-   constexpr size_t alignment( AlignmentOf_v<T> );
-
-   return reinterpret_cast<T*>( allocate_backend( size*sizeof(T), alignment ) );
+   T* ptr;
+   cudaMallocManaged( reinterpret_cast<void**>( &ptr ), size * sizeof(T) );
+   CUDA_ERROR_CHECK;
+   return ptr;
 }
 //*************************************************************************************************
 
@@ -131,28 +141,21 @@ EnableIf_t< IsBuiltin_v<T>, T* > allocate( size_t size )
 // \return Pointer to the first element of the aligned array.
 // \exception std::bad_alloc Allocation failed.
 //
-// The allocate() function provides the functionality to allocate memory based on the alignment
-// restrictions of the given user-specific class type. For instance, in case the given type has
-// the requirement to be 32-byte aligned, the returned pointer is guaranteed to be 32-byte
-// aligned. Additionally, all elements of the array are guaranteed to be default constructed.
-// Note that the allocate() function provides exception safety similar to the new operator: In
-// case any element throws an exception during construction, all elements that have already been
-// constructed are destroyed in reverse order and the allocated memory is deallocated again.
+// The cuda_managed_allocate() function provides the functionality to allocate CUDA managed memory.
+// All elements of the array are guaranteed to be default constructed.
+// Note that the cuda_managed_allocate() function provides exception safety similar to the
+// new operator: In case any element throws an exception during construction, all elements
+// that have already been constructed are destroyed in reverse order and the allocated memory
+// is deallocated again.
 */
 template< typename T >
-DisableIf_t< IsBuiltin_v<T>, T* > allocate( size_t size )
+DisableIf_t< IsBuiltin_v<T>, T* > cuda_managed_allocate( size_t size )
 {
-   constexpr size_t alignment ( AlignmentOf_v<T> );
-   constexpr size_t headersize( ( sizeof(size_t) < alignment ) ? ( alignment ) : ( sizeof( size_t ) ) );
-
-   BLAZE_INTERNAL_ASSERT( headersize >= alignment      , "Invalid header size detected" );
-   BLAZE_INTERNAL_ASSERT( headersize % alignment == 0UL, "Invalid header size detected" );
-
-   byte_t* const raw( allocate_backend( size*sizeof(T)+headersize, alignment ) );
+   byte_t* const raw( cuda_managed_allocate_backend( size*sizeof(T) ) );
 
    *reinterpret_cast<size_t*>( raw ) = size;
 
-   T* const address( reinterpret_cast<T*>( raw + headersize ) );
+   T* const address( reinterpret_cast<T*>( raw ) );
    size_t i( 0UL );
 
    try {
@@ -162,7 +165,7 @@ DisableIf_t< IsBuiltin_v<T>, T* > allocate( size_t size )
    catch( ... ) {
       while( i != 0UL )
          address[--i].~T();
-      deallocate_backend( raw );
+      cuda_deallocate_backend( raw );
       throw;
    }
 
@@ -178,16 +181,16 @@ DisableIf_t< IsBuiltin_v<T>, T* > allocate( size_t size )
 // \param address The address of the first element of the array to be deallocated.
 // \return void
 //
-// This function deallocates the given memory that was previously allocated via the allocate()
-// function.
+// This function deallocates the given memory that was previously allocated via the
+// cuda_managed_deallocate() function.
 */
 template< typename T >
-EnableIf_t< IsBuiltin_v<T> > deallocate( T* address ) noexcept
+EnableIf_t< IsBuiltin_v<T> > cuda_managed_deallocate( T* address ) noexcept
 {
    if( address == nullptr )
       return;
 
-   deallocate_backend( address );
+   cuda_deallocate_backend( address );
 }
 //*************************************************************************************************
 
@@ -199,28 +202,22 @@ EnableIf_t< IsBuiltin_v<T> > deallocate( T* address ) noexcept
 // \param address The address of the first element of the array to be deallocated.
 // \return void
 //
-// This function deallocates the given memory that was previously allocated via the allocate()
-// function.
+// This function deallocates the given memory that was previously allocated via the
+// cuda_managed_deallocate() function.
 */
 template< typename T >
-DisableIf_t< IsBuiltin_v<T> > deallocate( T* address )
+DisableIf_t< IsBuiltin_v<T> > cuda_managed_deallocate( T* address )
 {
    if( address == nullptr )
       return;
 
-   constexpr size_t alignment ( AlignmentOf_v<T> );
-   constexpr size_t headersize( ( sizeof(size_t) < alignment ) ? ( alignment ) : ( sizeof( size_t ) ) );
-
-   BLAZE_INTERNAL_ASSERT( headersize >= alignment      , "Invalid header size detected" );
-   BLAZE_INTERNAL_ASSERT( headersize % alignment == 0UL, "Invalid header size detected" );
-
-   const byte_t* const raw = reinterpret_cast<byte_t*>( address ) - headersize;
+   const byte_t* const raw = reinterpret_cast<byte_t*>( address );
 
    const size_t size( *reinterpret_cast<const size_t*>( raw ) );
    for( size_t i=0UL; i<size; ++i )
       address[i].~T();
 
-   deallocate_backend( raw );
+   cudaFree( reinterpret_cast<void*>( address ) );
 }
 //*************************************************************************************************
 
