@@ -159,7 +159,7 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto cudaAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+inline auto smpAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
    -> EnableIf_t< IsDenseMatrix_v<MT1> && ( !IsCUDAAssignable_v<MT1> || !IsCUDAAssignable_v<MT2> ) >
 {
    BLAZE_FUNCTION_TRACE;
