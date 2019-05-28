@@ -71,13 +71,10 @@ inline byte_t* cuda_managed_allocate_backend( size_t size )
 {
    void* raw( nullptr );
 
-   try {
-      cudaMallocManaged( &raw, size );
-      CUDA_ERROR_CHECK;
-   }
-   catch( ... ) {
+   cudaMallocManaged( &raw, size );
+
+   if( cudaGetLastError() != cudaSuccess )
       BLAZE_THROW_BAD_ALLOC;
-   }
 
    return reinterpret_cast<byte_t*>( raw );
 }
@@ -125,10 +122,7 @@ inline void cuda_deallocate_backend( const void* address ) noexcept
 template< typename T >
 EnableIf_t< IsBuiltin_v<T>, T* > cuda_managed_allocate( size_t size )
 {
-   T* ptr;
-   cudaMallocManaged( reinterpret_cast<void**>( &ptr ), size * sizeof(T) );
-   CUDA_ERROR_CHECK;
-   return ptr;
+   return reinterpret_cast<T*>( cuda_managed_allocate_backend( size*sizeof(T) ) );
 }
 //*************************************************************************************************
 
