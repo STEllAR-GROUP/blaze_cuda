@@ -65,46 +65,9 @@ namespace blaze {
 /*!\brief Auxiliary helper struct for the IsCUDAAssignable type trait.
 // \ingroup math_type_traits
 */
-template< typename T, typename = void >
-struct IsCUDAAssignableHelper
-   : public FalseType
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct IsCUDAAssignableHelper< T, Void_t< decltype( T::cudaAssignable ) > >
-   : public BoolConstant< T::cudaAssignable >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-template< typename T, typename = void >
-struct IsCUDAAssignableHelper_View
-   : public FalseType
-{};
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct IsCUDAAssignableHelper_View < T, Void_t< EnableIf_t< IsView_v< T > > > >
-   : public BoolConstant< IsCUDAAssignableHelper< typename T::ViewedType >::value >
-{};
-/*! \endcond */
-//*************************************************************************************************
-
-template< typename T, typename = void >
-struct IsCUDAAssignableHelper_Expression
-   : public FalseType
-{};
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-template< typename T >
-struct IsCUDAAssignableHelper_Expression < T, Void_t< EnableIf_t< IsExpression_v<T> > > >
-   : public BoolConstant< IsCUDAAssignableHelper< typename T::ResultType >::value >
-{};
+template< typename T, typename = void > struct IsCUDAAssignableHelper            : public FalseType {};
+template< typename T, typename = void > struct IsCUDAAssignableHelper_View       : public FalseType {};
+template< typename T, typename = void > struct IsCUDAAssignableHelper_Expression : public FalseType {};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -149,7 +112,6 @@ struct IsCUDAAssignable
 {};
 //*************************************************************************************************
 
-
 //*************************************************************************************************
 /*!\brief Auxiliary variable template for the IsCUDAAssignable type trait.
 // \ingroup type_traits
@@ -165,6 +127,34 @@ struct IsCUDAAssignable
 */
 template< typename T >
 constexpr bool IsCUDAAssignable_v = IsCUDAAssignable<T>::value;
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T >
+struct IsCUDAAssignableHelper< T, Void_t< decltype( T::cudaAssignable ) > >
+   : public BoolConstant< T::cudaAssignable >
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T >
+struct IsCUDAAssignableHelper_View < T, Void_t< EnableIf_t< IsView_v< T > > > >
+   : public BoolConstant< IsCUDAAssignable_v< typename T::ViewedType > >
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T >
+struct IsCUDAAssignableHelper_Expression < T, Void_t< EnableIf_t< IsExpression_v<T> > > >
+   : public BoolConstant< IsCUDAAssignable_v< typename T::ResultType > >
+{};
+/*! \endcond */
 //*************************************************************************************************
 
 } // namespace blaze
