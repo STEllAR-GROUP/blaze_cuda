@@ -16,6 +16,7 @@ CU  ?= clang++
 # Compile flags
 CXXFLAGS += -O3 -march=native
 CXXFLAGS += -DVERSION=\"$(VERSION)\"
+CXXFLAGS += -DBLAZE_HPX_PARALLEL_MODE -DBLAZE_CUDA_MODE
 CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
             -Wdouble-promotion -Wshadow
 
