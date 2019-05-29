@@ -90,7 +90,6 @@
 #include <blaze/util/typetraits/IsIntegral.h>
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
-#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 
 namespace blaze {
 

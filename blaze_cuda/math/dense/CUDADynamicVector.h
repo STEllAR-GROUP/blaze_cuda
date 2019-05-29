@@ -112,7 +112,6 @@
 #include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
-#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 #include <blaze_cuda/util/Memory.h>
 
 
