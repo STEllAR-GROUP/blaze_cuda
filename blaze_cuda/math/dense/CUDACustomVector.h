@@ -4,7 +4,6 @@
 //  \brief Header file for the implementation of a customizable vector
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
-//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -69,7 +68,6 @@
 #include <blaze/math/typetraits/IsContiguous.h>
 #include <blaze/math/typetraits/IsCustom.h>
 #include <blaze/math/typetraits/IsPadded.h>
-#include <blaze/math/typetraits/IsSIMDCombinable.h>
 #include <blaze/math/typetraits/IsSMPAssignable.h>
 #include <blaze/math/typetraits/IsSparseVector.h>
 #include <blaze/system/CacheSize.h>
@@ -92,18 +90,7 @@
 #include <blaze/util/typetraits/IsIntegral.h>
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
-
-//#include <blaze_cuda/math/CUDA.h>
-//#include <blaze_cuda/math/typetraits/HasCUDAAdd.h>
-//#include <blaze_cuda/math/typetraits/HasCUDADiv.h>
-//#include <blaze_cuda/math/typetraits/HasCUDAMult.h>
-//#include <blaze_cuda/math/typetraits/HasCUDASub.h>
-#include <blaze_cuda/util/algorithms/CUDACopy.h>
-#include <blaze_cuda/util/algorithms/CUDATransform.h>
-#include <blaze_cuda/util/CUDAErrorManagement.h>
-
-#include <cuda_runtime.h>
-
+#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 
 namespace blaze {
 
@@ -120,7 +107,7 @@ namespace blaze {
 /*!\brief Efficient implementation of a customizable vector.
 // \ingroup custom_vector
 //
-// \section cudacustomvector_general General
+// \section customvector_general General
 //
 // The CUDACustomVector class template provides the functionality to represent an external array of
 // elements of arbitrary type and a fixed size as a native \b Blaze dense vector data structure.
@@ -167,19 +154,19 @@ namespace blaze {
    using AlignedPadded = CUDACustomVector<complex<double>,aligned,padded,rowVector>;
    \endcode
 
-// \n \section cudacustomvector_special_properties Special Properties of Custom Vectors
+// \n \section customvector_special_properties Special Properties of Custom Vectors
 //
 // In comparison with the remaining \b Blaze dense vector types CUDACustomVector has several special
 // characteristics. All of these result from the fact that a custom vector is not performing any
 // kind of memory allocation, but instead is given an existing array of elements. The following
 // sections discuss all of these characteristics:
 //
-//  -# <b>\ref cudacustomvector_memory_management</b>
-//  -# <b>\ref cudacustomvector_copy_operations</b>
-//  -# <b>\ref cudacustomvector_alignment</b>
-//  -# <b>\ref cudacustomvector_padding</b>
+//  -# <b>\ref customvector_memory_management</b>
+//  -# <b>\ref customvector_copy_operations</b>
+//  -# <b>\ref customvector_alignment</b>
+//  -# <b>\ref customvector_padding</b>
 //
-// \n \subsection cudacustomvector_memory_management Memory Management
+// \n \subsection customvector_memory_management Memory Management
 //
 // The CUDACustomVector class template acts as an adaptor for an existing array of elements. As such
 // it provides everything that is required to use the array just like a native \b Blaze dense
@@ -210,7 +197,7 @@ namespace blaze {
    CUDACustomVector<int,aligned,padded> b( memory.get(), 3UL, 16UL );
    \endcode
 
-// \n \subsection cudacustomvector_copy_operations Copy Operations
+// \n \subsection customvector_copy_operations Copy Operations
 //
 // As with all dense vectors it is possible to copy construct a custom vector:
 
@@ -243,7 +230,7 @@ namespace blaze {
    a = c;  // Copy assignment: Set all values of vector a and b to 4.
    \endcode
 
-// \n \subsection cudacustomvector_alignment Alignment
+// \n \subsection customvector_alignment Alignment
 //
 // In case the custom vector is specified as \a aligned the passed array must be guaranteed to
 // be aligned according to the requirements of the used instruction set (SSE, AVX, ...). For
@@ -265,7 +252,7 @@ namespace blaze {
 // In case the alignment requirements are violated, a \a std::invalid_argument exception is
 // thrown.
 //
-// \n \subsection cudacustomvector_padding Padding
+// \n \subsection customvector_padding Padding
 //
 // Adding padding elements to the end of an array can have a significant impact on performance.
 // For instance, assuming that AVX is available, then two aligned, padded, 3-dimensional vectors
@@ -337,7 +324,7 @@ namespace blaze {
 // maximum performance!
 //
 //
-// \n \section cudacustomvector_arithmetic_operations Arithmetic Operations
+// \n \section customvector_arithmetic_operations Arithmetic Operations
 //
 // The use of custom vectors in arithmetic operations is designed to be as natural and intuitive
 // as possible. All operations (addition, subtraction, multiplication, scaling, ...) can be
@@ -403,7 +390,7 @@ class CUDACustomVector
  public:
    //**Type definitions****************************************************************************
    using This     = CUDACustomVector<Type,AF,PF,TF,RT>;  //!< Type of this CUDACustomVector instance.
-   using BaseType = DenseVector<This,TF>;                //!< Base type of this CUDACustomVector instance.
+   using BaseType = DenseVector<This,TF>;            //!< Base type of this CUDACustomVector instance.
 
    //! Result type for expression template evaluations.
    using ResultType = RT;
@@ -450,13 +437,19 @@ class CUDACustomVector
        in can be optimized via SIMD operations. In case the element type of the vector is a
        vectorizable data type, the \a simdEnabled compilation flag is set to \a true, otherwise
        it is set to \a false. */
-   static constexpr bool simdEnabled = IsVectorizable_v<Type>;
+   static constexpr bool simdEnabled = false;
 
    //! Compilation flag for SMP assignments.
    /*! The \a smpAssignable compilation flag indicates whether the vector can be used in SMP
        (shared memory parallel) assignments (both on the left-hand and right-hand side of the
        assignment). */
    static constexpr bool smpAssignable = !IsSMPAssignable_v<Type>;
+   //**********************************************************************************************
+
+   //! Compilation flag for CUDA assignments.
+   /*! The \a smpAssignable compilation flag indicates whether the vector can be used in CUDA
+       assignments (both on the left-hand and right-hand side of the assignment). */
+   static constexpr bool cudaAssignable = !IsCUDAAssignable_v<Type>;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
@@ -550,10 +543,7 @@ class CUDACustomVector
    /*! \cond BLAZE_INTERNAL */
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedAssign_v = false;
    /*! \endcond */
    //**********************************************************************************************
 
@@ -561,11 +551,7 @@ class CUDACustomVector
    /*! \cond BLAZE_INTERNAL */
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedAddAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDAdd_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedAddAssign_v = false;
    /*! \endcond */
    //**********************************************************************************************
 
@@ -573,11 +559,7 @@ class CUDACustomVector
    /*! \cond BLAZE_INTERNAL */
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedSubAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDSub_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedSubAssign_v = false;
    /*! \endcond */
    //**********************************************************************************************
 
@@ -585,11 +567,7 @@ class CUDACustomVector
    /*! \cond BLAZE_INTERNAL */
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedMultAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDMult_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedMultAssign_v = false;
    /*! \endcond */
    //**********************************************************************************************
 
@@ -597,17 +575,8 @@ class CUDACustomVector
    /*! \cond BLAZE_INTERNAL */
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedDivAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDDiv_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedDivAssign_v = false;
    /*! \endcond */
-   //**********************************************************************************************
-
-   //**SIMD properties*****************************************************************************
-   //! The number of elements packed within a single SIMD element.
-   static constexpr size_t SIMDSIZE = SIMDTrait<ElementType>::size;
    //**********************************************************************************************
 
  public:
@@ -621,18 +590,18 @@ class CUDACustomVector
    inline bool canSMPAssign() const noexcept;
 
    template< typename VT > inline auto assign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto addAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto subAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto multAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto divAssign( const DenseVector<VT,TF>& rhs );
-
    template< typename VT > inline void assign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto addAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void addAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto subAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void subAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto multAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void multAssign( const SparseVector<VT,TF>& rhs );
-   template< typename VT > inline void divAssign( const SparseVector<VT,TF>& rhs );
 
-
+   template< typename VT > inline auto divAssign( const DenseVector<VT,TF>& rhs );
    //@}
    //**********************************************************************************************
 
@@ -1847,7 +1816,7 @@ template< typename Type  // Data type of the vector
         , typename RT >  // Result type
 inline bool CUDACustomVector<Type,AF,PF,TF,RT>::canSMPAssign() const noexcept
 {
-   return false;
+   return true;
 }
 //*************************************************************************************************
 
@@ -1871,12 +1840,46 @@ template< typename Type  // Data type of the vector
 template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDACustomVector<Type,AF,PF,TF,RT>::assign( const DenseVector<VT,TF>& rhs )
 {
-   cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] = (~rhs)[i    ];
+      v_[i+1UL] = (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] = (~rhs)[ipos];
 }
 //*************************************************************************************************
 
+
+//*************************************************************************************************
+/*!\brief Default implementation of the assignment of a sparse vector.
+//
+// \param rhs The right-hand side sparse vector to be assigned.
+// \return void
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the vector
+        , bool AF        // Alignment flag
+        , bool PF        // Padding flag
+        , bool TF        // Transpose flag
+        , typename RT >  // Result type
+template< typename VT >  // Type of the right-hand side sparse vector
+inline void CUDACustomVector<Type,AF,PF,TF,RT>::assign( const SparseVector<VT,TF>& rhs )
+{
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   for( auto element=(~rhs).begin(); element!=(~rhs).end(); ++element )
+      v_[element->index()] = element->value();
+}
+//*************************************************************************************************
 
 
 //*************************************************************************************************
@@ -1900,10 +1903,15 @@ inline auto CUDACustomVector<Type,AF,PF,TF,RT>::addAssign( const DenseVector<VT,
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v + rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] += (~rhs)[i    ];
+      v_[i+1UL] += (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] += (~rhs)[ipos];
 }
 //*************************************************************************************************
 
@@ -1954,10 +1962,17 @@ template< typename Type  // Data type of the vector
 template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDACustomVector<Type,AF,PF,TF,RT>::subAssign( const DenseVector<VT,TF>& rhs )
 {
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v - rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] -= (~rhs)[i    ];
+      v_[i+1UL] -= (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] -= (~rhs)[ipos];
 }
 //*************************************************************************************************
 
@@ -2008,10 +2023,17 @@ template< typename Type  // Data type of the vector
 template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDACustomVector<Type,AF,PF,TF,RT>::multAssign( const DenseVector<VT,TF>& rhs )
 {
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v * rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] *= (~rhs)[i    ];
+      v_[i+1UL] *= (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] *= (~rhs)[ipos];
 }
 //*************************************************************************************************
 
@@ -2066,10 +2088,17 @@ template< typename Type  // Data type of the vector
 template< typename VT >  // Type of the right-hand side dense vector
 inline auto CUDACustomVector<Type,AF,PF,TF,RT>::divAssign( const DenseVector<VT,TF>& rhs )
 {
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v / rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
+
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] /= (~rhs)[i    ];
+      v_[i+1UL] /= (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] /= (~rhs)[ipos];
 }
 //*************************************************************************************************
 
@@ -2249,55 +2278,30 @@ class CUDACustomVector<Type,AF,padded,TF,RT>
    //**********************************************************************************************
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedAssign_v = false;
+
+   //**********************************************************************************************
+   //! Helper variable template for the explicit application of the SFINAE principle.
+   template< typename VT >
+   static constexpr bool VectorizedAddAssign_v = false;
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedAddAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDAdd_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedSubAssign_v = false;
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedSubAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDSub_v< Type, ElementType_t<VT> > );
+   static constexpr bool VectorizedMultAssign_v = false;
    //**********************************************************************************************
 
    //**********************************************************************************************
    //! Helper variable template for the explicit application of the SFINAE principle.
    template< typename VT >
-   static constexpr bool VectorizedMultAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDMult_v< Type, ElementType_t<VT> > );
-   //**********************************************************************************************
-
-   //**********************************************************************************************
-   //! Helper variable template for the explicit application of the SFINAE principle.
-   template< typename VT >
-   static constexpr bool VectorizedDivAssign_v =
-      ( useOptimizedKernels &&
-        simdEnabled && VT::simdEnabled &&
-        IsSIMDCombinable_v< Type, ElementType_t<VT> > &&
-        HasSIMDDiv_v< Type, ElementType_t<VT> > );
-   //**********************************************************************************************
-
-   //**SIMD properties*****************************************************************************
-   //! The number of elements packed within a single SIMD element.
-   static constexpr size_t SIMDSIZE = SIMDTrait<ElementType>::size;
+   static constexpr bool VectorizedDivAssign_v = false;
    //**********************************************************************************************
 
  public:
@@ -2311,15 +2315,18 @@ class CUDACustomVector<Type,AF,padded,TF,RT>
    inline bool canSMPAssign() const noexcept;
 
    template< typename VT > inline auto assign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto addAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto subAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto multAssign( const DenseVector<VT,TF>& rhs );
-   template< typename VT > inline auto divAssign( const DenseVector<VT,TF>& rhs );
-
    template< typename VT > inline void assign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto addAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void addAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto subAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void subAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto multAssign( const DenseVector<VT,TF>& rhs );
    template< typename VT > inline void multAssign( const SparseVector<VT,TF>& rhs );
+
+   template< typename VT > inline auto divAssign( const DenseVector<VT,TF>& rhs );
    //@}
    //**********************************************************************************************
 
@@ -2416,13 +2423,8 @@ inline CUDACustomVector<Type,AF,padded,TF,RT>::CUDACustomVector( Type* ptr, size
       BLAZE_THROW_INVALID_ARGUMENT( "Invalid alignment detected" );
    }
 
-   if( IsVectorizable_v<Type> && capacity_ < nextMultiple<size_t>( size_, SIMDSIZE ) ) {
-      BLAZE_THROW_INVALID_ARGUMENT( "Insufficient capacity for padded vector" );
-   }
-
-   if( IsVectorizable_v<Type> ) {
-      for( size_t i=size_; i<capacity_; ++i )
-         clear( v_[i] );
+   for( size_t i=size_; i<capacity_; ++i ) {
+      clear( v_[i] );
    }
 }
 /*! \endcond */
@@ -3075,10 +3077,10 @@ inline CUDACustomVector<Type,AF,padded,TF,RT>&
       const MultType tmp( *this * (~rhs) );
       if( IsSparseVector_v<MultType> )
          reset();
-      assign( *this, tmp );
+      smpAssign( *this, tmp );
    }
    else {
-      multAssign( *this, ~rhs );
+      smpMultAssign( *this, ~rhs );
    }
 
    return *this;
@@ -3121,10 +3123,10 @@ inline CUDACustomVector<Type,AF,padded,TF,RT>&
 
    if( (~rhs).canAlias( this ) ) {
       const DivType tmp( *this / (~rhs) );
-      assign( *this, tmp );
+      smpAssign( *this, tmp );
    }
    else {
-      divAssign( *this, ~rhs );
+      smpDivAssign( *this, ~rhs );
    }
 
    return *this;
@@ -3548,9 +3550,15 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::assign( const DenseVector<VT
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   cuda_copy ( (~rhs).begin(), (~rhs).end(), begin() );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] = (~rhs)[i    ];
+      v_[i+1UL] = (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] = (~rhs)[ipos];
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3605,10 +3613,15 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::addAssign( const DenseVector
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v + rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] += (~rhs)[i    ];
+      v_[i+1UL] += (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] += (~rhs)[ipos];
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3663,10 +3676,15 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::subAssign( const DenseVector
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v - rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] -= (~rhs)[i    ];
+      v_[i+1UL] -= (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] -= (~rhs)[ipos];
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3721,10 +3739,15 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::multAssign( const DenseVecto
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v * rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] *= (~rhs)[i    ];
+      v_[i+1UL] *= (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] *= (~rhs)[ipos];
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -3783,13 +3806,19 @@ inline auto CUDACustomVector<Type,AF,padded,TF,RT>::divAssign( const DenseVector
 {
    BLAZE_INTERNAL_ASSERT( size_ == (~rhs).size(), "Invalid vector sizes" );
 
-   cuda_zip_transform( begin(), end(), (~rhs).begin(), begin()
-                     , [] __device__ ( Type const& v, Type const& rhs_v ) { return v / rhs_v; } );
-   cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   const size_t ipos( size_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( size_ - ( size_ % 2UL ) ) == ipos, "Invalid end calculation" );
+
+   for( size_t i=0UL; i<ipos; i+=2UL ) {
+      v_[i    ] /= (~rhs)[i    ];
+      v_[i+1UL] /= (~rhs)[i+1UL];
+   }
+   if( ipos < (~rhs).size() )
+      v_[ipos] /= (~rhs)[ipos];
 }
 /*! \endcond */
 //*************************************************************************************************
+
 
 
 
@@ -4004,6 +4033,42 @@ struct HasMutableDataAccess< CUDACustomVector<T,AF,PF,TF,RT> >
 /*! \cond BLAZE_INTERNAL */
 template< typename T, bool AF, bool PF, bool TF, typename RT >
 struct IsCustom< CUDACustomVector<T,AF,PF,TF,RT> >
+   : public TrueType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISALIGNED SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T, bool PF, bool TF, typename RT >
+struct IsAligned< CUDACustomVector<T,aligned,PF,TF,RT> >
+   : public TrueType
+{};
+/*! \endcond */
+//*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  ISALIGNED SPECIALIZATIONS
+//
+//=================================================================================================
+
+//*************************************************************************************************
+/*! \cond BLAZE_INTERNAL */
+template< typename T, bool PF, bool TF, typename RT >
+struct IsContiguous< CUDACustomVector<T,aligned,PF,TF,RT> >
    : public TrueType
 {};
 /*! \endcond */
