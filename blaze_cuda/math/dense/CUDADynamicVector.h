@@ -1682,7 +1682,7 @@ template< typename Type  // Data type of the vector
         , bool TF >      // Transpose flag
 inline bool CUDADynamicVector<Type,TF>::canSMPAssign() const noexcept
 {
-   return ( size() > SMP_DVECASSIGN_THRESHOLD );
+   return true;
 }
 //*************************************************************************************************
 
