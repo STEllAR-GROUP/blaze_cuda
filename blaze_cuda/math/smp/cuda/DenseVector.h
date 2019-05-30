@@ -64,8 +64,8 @@
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Types.h>
-
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 
 namespace blaze {
@@ -98,9 +98,10 @@ template< typename VT1   // Type of the left-hand side dense vector
         , typename VT2   // Type of the right-hand side dense vector
         , bool TF2       // Transpose flag of the right-hand side dense vector
         , typename OP >  // Type of the assignment operation
-void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs, OP op )
+inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs, OP op )
 {
-   blaze::cuda_zip_transform( lhs.begin(), lhs.end(), rhs.begin(), lhs.begin(), op );
+   blaze::cuda_zip_transform( (~lhs).begin(), (~lhs).end(), (~rhs).begin(), (~lhs).begin(), op );
+   CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -123,16 +124,16 @@ void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs, OP 
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT1   // Type of the left-hand side dense vector
-        , bool TF1       // Transpose flag of the left-hand side dense vector
-        , typename VT2   // Type of the right-hand side sparse vector
-        , bool TF2       // Transpose flag of the right-hand side sparse vector
-        , typename OP >  // Type of the assignment operation
-void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP op )
-{
-   // TODO
-   static_assert( TF1 || !TF1 , "not implemented" );
-}
+//template< typename VT1   // Type of the left-hand side dense vector
+//        , bool TF1       // Transpose flag of the left-hand side dense vector
+//        , typename VT2   // Type of the right-hand side sparse vector
+//        , bool TF2       // Transpose flag of the right-hand side sparse vector
+//        , typename OP >  // Type of the assignment operation
+//void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP op )
+//{
+//   // TODO
+//   static_assert( TF1 || !TF1 , "not implemented" );
+//}
 /*! \endcond */
 //*************************************************************************************************
 

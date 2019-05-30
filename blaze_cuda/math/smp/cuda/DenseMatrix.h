@@ -346,7 +346,7 @@ template< typename VT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpMultAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
+inline auto smpMultAssign( Matrix<VT1,TF1>& lhs, const Matrix<VT2,TF2>& rhs )
    -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
 {
    BLAZE_FUNCTION_TRACE;
