@@ -124,16 +124,16 @@ inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& r
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-//template< typename VT1   // Type of the left-hand side dense vector
-//        , bool TF1       // Transpose flag of the left-hand side dense vector
-//        , typename VT2   // Type of the right-hand side sparse vector
-//        , bool TF2       // Transpose flag of the right-hand side sparse vector
-//        , typename OP >  // Type of the assignment operation
-//void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP op )
-//{
-//   // TODO
-//   static_assert( TF1 || !TF1 , "not implemented" );
-//}
+template< typename VT1   // Type of the left-hand side dense vector
+        , bool TF1       // Transpose flag of the left-hand side dense vector
+        , typename VT2   // Type of the right-hand side sparse vector
+        , bool TF2       // Transpose flag of the right-hand side sparse vector
+        , typename OP >  // Type of the assignment operation
+void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP op )
+{
+   static_assert( TF1 || !TF1 , "not implemented" );
+   (void)lhs; (void)rhs; (void)op;
+}
 /*! \endcond */
 //*************************************************************************************************
 
