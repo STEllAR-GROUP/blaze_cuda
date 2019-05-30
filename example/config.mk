@@ -1,10 +1,5 @@
 # Project version
 NAME    = prog
-VERSION = 0.0.1
-
-# Paths
-PREFIX    ?= /usr/local
-MANPREFIX ?= $(PREFIX)/share/man
 
 # CUDA arch
 CUDA_GPU_ARCH ?= sm_75
@@ -15,8 +10,7 @@ CU  ?= clang++
 
 # Compile flags
 CXXFLAGS += -O3 -march=native
-CXXFLAGS += -DVERSION=\"$(VERSION)\"
-CXXFLAGS += -DBLAZE_HPX_PARALLEL_MODE -DBLAZE_CUDA_MODE
+CXXFLAGS += -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION -DBLAZE_USE_HPX_THREADS -DBLAZE_CUDA_MODE
 CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
             -Wdouble-promotion -Wshadow
 
@@ -32,7 +26,7 @@ CUFLAGS += --cuda-gpu-arch=$(CUDA_GPU_ARCH)
 
 # Linker
 LDFLAGS += -fPIC -O3
-LDFLAGS += -lm -lcudart
+LDFLAGS += -lm -lcudart -lhpx
 
 
 ## Development
