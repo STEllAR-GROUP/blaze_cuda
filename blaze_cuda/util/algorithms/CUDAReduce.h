@@ -126,11 +126,11 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
 
    size_t const unpadded_size = ( inout_end - inout_beg ) % elmts_per_block;
 
-   using store_t = blaze::CUDADynamicVector<T>;
+   using store_t = CUDADynamicVector<T>;
    store_t store_vec( elmts_per_block, init );
 
    if( unpadded_size > 0 ) {
-      blaze::cuda_zip_transform( inout_end - unpadded_size, inout_end
+      cuda_zip_transform( inout_end - unpadded_size, inout_end
          , store_vec.begin()
          , store_vec.begin(), binop );
 

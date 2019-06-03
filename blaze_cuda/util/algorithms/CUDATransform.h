@@ -38,7 +38,6 @@
 #include <cstddef>
 
 #include <blaze_cuda/util/algorithms/Unroll.h>
-#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 namespace blaze {
 
@@ -103,8 +102,6 @@ namespace blaze {
          out_begin += incr;
       }
 
-      CUDA_ERROR_CHECK;
-
       while( in_end - in_begin > 0 )
       {
          auto const final_block_size = std::min( max_block_size, size_t( in_end - in_begin ) );
@@ -116,9 +113,6 @@ namespace blaze {
          in_begin  += incr;
          out_begin += incr;
       }
-
-      cudaDeviceSynchronize();
-      CUDA_ERROR_CHECK;
    }
 
    template < std::size_t Unroll = 4
@@ -172,9 +166,6 @@ namespace blaze {
          in2_begin += incr;
          out_begin += incr;
       }
-
-      cudaDeviceSynchronize();
-      CUDA_ERROR_CHECK;
    }
 
 }  // namespace blaze
