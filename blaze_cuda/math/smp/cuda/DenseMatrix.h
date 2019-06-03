@@ -61,6 +61,7 @@
 #include <blaze/util/Types.h>
 
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 namespace blaze {
 
@@ -94,7 +95,15 @@ template< typename MT1   // Type of the left-hand side dense matrix
         , typename OP >  // Type of the assignment operation
 void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP op )
 {
-   // TODO
+   if constexpr ( SO1 == rowMajor && SO2 == rowMajor )
+   {
+      for( auto i = 0; i < (~lhs).rows(); i++ )
+      {
+         cuda_transform((~rhs).begin(i), (~rhs).end(i), (~lhs).begin(i), op );
+      }
+
+      CUDA_ERROR_CHECK;
+   }
 }
 /*! \endcond */
 //*************************************************************************************************
