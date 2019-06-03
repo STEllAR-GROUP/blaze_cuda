@@ -74,6 +74,7 @@
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
 #include <blaze/math/typetraits/HighType.h>
 #include <blaze/math/typetraits/IsAligned.h>
+#include <blaze/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/typetraits/IsColumnVector.h>
 #include <blaze/math/typetraits/IsContiguous.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
@@ -112,8 +113,10 @@
 #include <blaze/util/typetraits/IsNumeric.h>
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
-#include <blaze_cuda/util/Memory.h>
 
+#include <blaze_cuda/util/Memory.h>
+#include <blaze_cuda/util/algorithms/CUDATransform.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
 namespace blaze {
 
@@ -487,10 +490,9 @@ inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n )
    , capacity_( n )                                         // The maximum capacity of the vector
    , v_       ( cuda_managed_allocate<Type>( capacity_ ) )  // The vector elements
 {
-   if( IsVectorizable_v<Type> ) {
-      for( size_t i=size_; i<capacity_; ++i )
-         v_[i] = Type();
-   }
+   cuda_transform( begin(), end(), begin(), [] BLAZE_DEVICE_CALLABLE ( auto const& ) {
+      return Type();
+   } );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -510,8 +512,11 @@ template< typename Type  // Data type of the vector
 inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Type& init )
    : CUDADynamicVector( n )
 {
-   for( size_t i=0UL; i<size_; ++i )
-      v_[i] = init;
+   cuda_transform( begin(), end(), begin(), [=] BLAZE_DEVICE_CALLABLE ( auto const& ) {
+      return init;
+   } );
+
+   CUDA_ERROR_CHECK;
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -2082,6 +2087,12 @@ inline void swap( CUDADynamicVector<Type,TF>& a, CUDADynamicVector<Type,TF>& b )
 
 
 
+// CUDADynamicMatrix forward declaration
+template< typename Type, bool SO > class CUDADynamicMatrix;
+
+
+
+
 //=================================================================================================
 //
 //  HASCONSTDATAACCESS SPECIALIZATIONS
@@ -2400,7 +2411,7 @@ struct DivTraitEval2< T1, T2
 template< typename T, typename OP, bool TF >
 struct MapTrait< CUDADynamicVector<T,TF>, OP >
 {
-   using Type = CUDADynamicVector< typename MapTrait<T,OP>::Type, TF >;
+   using Type = CUDADynamicVector< MapTrait_t<T,OP>, TF >;
 };
 /*! \endcond */
 //*************************************************************************************************
@@ -2527,14 +2538,11 @@ struct ElementsTrait< CUDADynamicVector<T1,TF>, N >
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-
-// TODO: uncomment when CUDADynamicMatrix is implemented
-
-//template< typename T1, bool SO, size_t... CRAs >
-//struct RowTrait< CUDADynamicMatrix<T1,SO>, CRAs... >
-//{
-//   using Type = CUDADynamicVector<T1,true>;
-//};
+template< typename T1, bool SO, size_t... CRAs >
+struct RowTrait< CUDADynamicMatrix<T1,SO>, CRAs... >
+{
+   using Type = CUDADynamicVector<T1,true>;
+};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2552,11 +2560,11 @@ struct ElementsTrait< CUDADynamicVector<T1,TF>, N >
 
 // TODO: uncomment when CUDADynamicMatrix is implemented
 
-//template< typename T1, bool SO, size_t... CCAs >
-//struct ColumnTrait< CUDADynamicMatrix<T1,SO>, CCAs... >
-//{
-//   using Type = CUDADynamicVector<T1,true>;
-//};
+template< typename T1, bool SO, size_t... CCAs >
+struct ColumnTrait< CUDADynamicMatrix<T1,SO>, CCAs... >
+{
+   using Type = CUDADynamicVector<T1,true>;
+};
 /*! \endcond */
 //*************************************************************************************************
 
@@ -2574,11 +2582,11 @@ struct ElementsTrait< CUDADynamicVector<T1,TF>, N >
 
 // TODO: uncomment when CUDADynamicMatrix is implemented
 
-//template< typename T1, bool SO, ptrdiff_t... CBAs >
-//struct BandTrait< CUDADynamicMatrix<T1,SO>, CBAs... >
-//{
-//   using Type = CUDADynamicVector<T1,true>;
-//};
+template< typename T1, bool SO, ptrdiff_t... CBAs >
+struct BandTrait< CUDADynamicMatrix<T1,SO>, CBAs... >
+{
+   using Type = CUDADynamicVector<T1,true>;
+};
 /*! \endcond */
 //*************************************************************************************************
 
