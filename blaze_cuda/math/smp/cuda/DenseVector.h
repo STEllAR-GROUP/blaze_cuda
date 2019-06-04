@@ -100,7 +100,7 @@ template< typename VT1   // Type of the left-hand side dense vector
         , typename OP >  // Type of the assignment operation
 inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs, OP op )
 {
-   cuda_zip_transform( (~lhs).begin(), (~lhs).end(), (~rhs).begin(), (~lhs).begin(), op );
+   cuda_transform( (~lhs).begin(), (~lhs).end(), (~rhs).begin(), (~lhs).begin(), op );
    CUDA_ERROR_CHECK;
 }
 /*! \endcond */
