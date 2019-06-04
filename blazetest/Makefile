@@ -10,7 +10,7 @@ RUNS	= $(TESTS:.test=.run)				# Runs
 
 # Compilation
 .cu.test:
-	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<
+	$(CU) $(CXXFLAGS) $(CUFLAGS) -MMD -o $@ -c $<
 
 # Run
 .test.run:
