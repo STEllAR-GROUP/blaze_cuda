@@ -48,6 +48,7 @@
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 #include <blaze_cuda/util/CUDAValue.h>
 
+// In Blaze we Thrust
 #ifdef BLAZE_CUDA_USE_THRUST
 #include <thrust/reduce.h>
 #include <thrust/execution_policy.h>
@@ -57,39 +58,33 @@ namespace blaze {
 
 namespace cuda_reduce_detail {
 
-   // Main idea:
-   //
-   //       See: https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
-   //
-   //    Implementation of the reduction algorithm described in the PDF above,
-   //    but with C++ generic constructs (generic unrolling, generic binop...)
-
 template < std::size_t Unroll, std::size_t BlockSizeExponent
          , typename InputIt , typename OutputIt
          , typename T
          , typename BinOp >
 void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinOp binop )
 {
+   // See: https://developer.download.nvidia.com/assets/cuda/files/reduction.pdf
+
    constexpr size_t block_size = 1 << BlockSizeExponent;
 
    // Thread indexing
    auto const thread_count = blockDim.x * gridDim.x;
    auto const global_id    = blockDim.x * blockIdx.x + threadIdx.x;
 
-   // Shared memory pool & init
-   __shared__ std::array< T, block_size * 2 > sdata;
-   sdata[ threadIdx.x ] = init;
-   sdata[ threadIdx.x + block_size ] = init;
-
    // Array indexing
    auto begin = in_beg + global_id;
 
+   // Shared memory pool & init
+   __shared__ std::array< T, block_size * 2 > sdata;
+   sdata[ threadIdx.x + block_size ] = init;
+
    // Accumulator init
-   T acc = init;
+   T acc = *begin;
 
    // Computation, unrolled N times
-   unroll< Unroll >( [&]( auto const& I ) {
-      acc = binop( acc, *( begin + ( I() * thread_count ) ) );
+   unroll< Unroll - 1 >( [&]( auto const& I ) {
+      acc = binop( acc, *( begin + ( (I() + 1) * thread_count ) ) );
    } );
 
    // Storing result
@@ -115,7 +110,7 @@ template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 8
          , typename InputOutputIt
          , typename T
          , typename BinOp >
-BLAZE_ALWAYS_INLINE auto cuda_reduce
+inline auto cuda_reduce
    ( InputOutputIt inout_beg
    , InputOutputIt inout_end
    , T init, BinOp binop )
@@ -134,7 +129,7 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
    store_t store_vec( elmts_per_block, init );
 
    if( unpadded_size > 0 ) {
-      cuda_zip_transform( inout_end - unpadded_size, inout_end
+      cuda_transform( inout_end - unpadded_size, inout_end
          , store_vec.begin()
          , store_vec.begin(), binop );
 
@@ -153,10 +148,9 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
          < Unroll, BlockSizeExponent >
          <<< block_cnt, block_size >>>
          ( inout_beg, store_vec.begin(), init, binop );
-      cudaDeviceSynchronize();
-      CUDA_ERROR_CHECK;
 
       inout_beg += block_cnt * elmts_per_block;
+      cudaDeviceSynchronize();
    }
 
    // Initializing final reduce value
@@ -168,26 +162,32 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
       < Unroll, BlockSizeExponent >
       <<< 1, block_size >>>
       ( store_vec.begin(), &res, init, binop );
+
    cudaDeviceSynchronize();
+
    CUDA_ERROR_CHECK;
 
    return res;
 }
 
 #ifdef BLAZE_CUDA_USE_THRUST
+
 template< typename VT, bool TF, typename T, typename OP >
-auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
-   -> EnableIf_t< IsSMPAssignable_v< DenseVector<VT, TF> > >
+inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
+   -> EnableIf_t< IsSMPAssignable_v<VT>, T >
 {
    return thrust::reduce( thrust::device, (~vec).begin(), (~vec).end(), init, op );
 }
+
 #else
+
 template< typename VT, bool TF, typename T, typename OP >
-auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
-   -> EnableIf_t< IsSMPAssignable_v< DenseVector<VT, TF> > >
+inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
+   -> EnableIf_t< IsSMPAssignable_v<VT>, T >
 {
    return cuda_reduce( (~vec).begin(), (~vec).end(), init, op );
 }
+
 #endif
 
 }  // namespace blaze

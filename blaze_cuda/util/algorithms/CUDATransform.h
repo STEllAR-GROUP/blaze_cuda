@@ -39,40 +39,41 @@
 
 #include <blaze_cuda/util/algorithms/Unroll.h>
 
+#ifdef BLAZE_CUDA_USE_THRUST
+#include <thrust/transform.h>
+#include <thrust/execution_policy.h>
+#endif
+
 namespace blaze {
 
-   namespace detail {
+namespace detail {
 
-      template < std::size_t Unroll
-               , typename InputIt
-               , typename OutputIt
-               , typename F >
-      void __global__ _cuda_transform_impl( InputIt in_begin, OutputIt out_begin, F f )
-      {
-         size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+   template < std::size_t Unroll
+            , typename InputIt
+            , typename OutputIt
+            , typename F >
+   void __global__ _cuda_transform_impl( InputIt in_begin, OutputIt out_begin, F f )
+   {
+      size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+      unroll<Unroll>( [&] ( auto const& I ) {
+         *(out_begin + id + I()) = f( *(in_begin + id + I()) );
+      } );
+   }
 
-         unroll<Unroll>( [&] ( auto const& I ) {
-            *(out_begin + id + I()) = f( *(in_begin + id + I()) );
-         } );
-      }
-
-      template < std::size_t Unroll
-               , typename InputIt1
-               , typename InputIt2
-               , typename OutputIt
-               , typename F >
-      void __global__ _cuda_zip_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin
-                                              , OutputIt out_begin, F f )
-      {
-         size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
-
-         unroll<Unroll>( [&] ( auto const& I ) {
-            *(out_begin + id + I()) = f( *( in1_begin + id + I() )
-                                       , *( in2_begin + id + I() ) );
-         } );
-      }
-
-   }  // namespace detail
+   template < std::size_t Unroll
+            , typename InputIt1
+            , typename InputIt2
+            , typename OutputIt
+            , typename F >
+   void __global__ _cuda_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin
+                                           , OutputIt out_begin, F f )
+   {
+      size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+      unroll<Unroll>( [&] ( auto const& I ) {
+         *(out_begin + id + I()) = f( *( in1_begin + id + I() )
+                                    , *( in2_begin + id + I() ) );
+      } );
+   }
 
    template< std::size_t Unroll = 4, typename InputIt, typename OutputIt, typename F >
    inline void cuda_transform ( InputIt in_begin, InputIt in_end
@@ -120,7 +121,7 @@ namespace blaze {
             , typename InputIt2
             , typename OutputIt
             , typename F >
-   inline void cuda_zip_transform( InputIt1 in1_begin
+   inline void cuda_transform( InputIt1 in1_begin
                                  , InputIt1 in1_end
                                  , InputIt2 in2_begin
                                  , OutputIt out_begin
@@ -139,7 +140,7 @@ namespace blaze {
 
          auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
 
-         detail::_cuda_zip_transform_impl
+         detail::_cuda_transform_impl
             <Unroll>
             <<< final_block_cnt, max_block_size >>>
             ( in1_begin, in2_begin, out_begin, f );
@@ -155,7 +156,7 @@ namespace blaze {
       {
          auto const final_block_size = std::min( max_block_size, size_t( in1_end - in1_begin ) );
 
-         detail::_cuda_zip_transform_impl
+         detail::_cuda_transform_impl
             <1>
             <<< 1, final_block_size >>>
             ( in1_begin, in2_begin, out_begin, f );
@@ -167,6 +168,56 @@ namespace blaze {
          out_begin += incr;
       }
    }
+
+}  // namespace detail
+
+#ifdef BLAZE_CUDA_USE_THRUST
+
+template < std::size_t Unroll = 4
+         , typename InputIt1, typename InputIt2, typename OutputIt
+         , typename F >
+inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
+                           , InputIt2 in2_begin
+                           , OutputIt out_begin
+                           , F f )
+{
+   thrust::transform( thrust::device, in1_begin, in1_end, in2_begin, out_begin, f );
+}
+
+template < std::size_t Unroll = 4
+         , typename InputIt1, typename OutputIt
+         , typename F >
+inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
+                           , OutputIt out_begin
+                           , F f )
+{
+   thrust::transform( thrust::device, in1_begin, in1_end, out_begin, f );
+}
+
+#else
+
+template < std::size_t Unroll = 4
+         , typename InputIt1, typename InputIt2, typename OutputIt
+         , typename F >
+inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
+                           , InputIt2 in2_begin
+                           , OutputIt out_begin
+                           , F f )
+{
+   detail::cuda_transform( in1_begin, in1_end, in2_begin, out_begin, f );
+}
+
+template < std::size_t Unroll = 4
+         , typename InputIt1, typename OutputIt
+         , typename F >
+inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
+                           , OutputIt out_begin
+                           , F f )
+{
+   detail::cuda_transform( in1_begin, in1_end, out_begin, f );
+}
+
+#endif
 
 }  // namespace blaze
 
