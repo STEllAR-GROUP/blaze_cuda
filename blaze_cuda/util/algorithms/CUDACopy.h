@@ -37,72 +37,17 @@
 
 #include <cstddef>
 
-#include <blaze_cuda/util/algorithms/Unroll.h>
+#include <blaze/system/CUDAAttributes.h>
+#include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 
 namespace blaze {
-
-   namespace detail {
-
-      template < std::size_t Unroll = 4
-               , typename InputIt
-               , typename OutputIt >
-      void __global__ _cuda_copy_impl( InputIt in_begin, OutputIt out_begin )
-      {
-         size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
-
-         unroll<Unroll> ( [&](auto const& I)
-         {
-            *(out_begin + id + I()) = *(in_begin + id + I());
-         } );
-      }
-
-   }
-
    template< std::size_t Unroll = 4, typename InputIt, typename OutputIt >
    inline void cuda_copy( InputIt in_begin, InputIt in_end, OutputIt out_begin )
    {
-      using std::size_t;
-
-      constexpr size_t max_block_size   = 512;
-      constexpr size_t max_block_cnt    = 8192;
-      constexpr size_t elmts_per_block  = max_block_size * Unroll;
-
-      while( in_end - in_begin >= ptrdiff_t( elmts_per_block ) )
-      {
-         size_t const elmt_cnt = in_end - in_begin;
-         size_t const block_cnt = elmt_cnt / elmts_per_block;
-
-         auto const final_block_cnt = std::min( block_cnt, max_block_cnt );
-         detail::_cuda_copy_impl
-            <Unroll>
-            <<< final_block_cnt, max_block_size >>>
-            ( in_begin, out_begin );
-
-         auto const incr = final_block_cnt * elmts_per_block;
-
-         in_begin  += incr;
-         out_begin += incr;
-      }
-
-      CUDA_ERROR_CHECK;
-
-      while( in_end - in_begin > 0 )
-      {
-         auto const final_block_size = std::min( max_block_size, size_t( in_end - in_begin ) );
-
-         detail::_cuda_copy_impl<1> <<< 1, final_block_size >>>
-            ( in_begin, out_begin );
-
-         auto const incr = final_block_size;
-         in_begin  += incr;
-         out_begin += incr;
-      }
-
-      cudaDeviceSynchronize();
-      CUDA_ERROR_CHECK;
+      cuda_transform( in_begin , in_end, out_begin
+         , [] BLAZE_DEVICE_CALLABLE ( auto const& e ) { return e; } );
    }
-
 }
 
 #endif

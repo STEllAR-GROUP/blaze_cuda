@@ -54,9 +54,17 @@ namespace detail {
             , typename F >
    void __global__ _cuda_transform_impl( InputIt in_begin, OutputIt out_begin, F f )
    {
-      size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+      using std::size_t;
+
+      size_t const grid_size = gridDim.x * blockDim.x;
+      size_t const global_id = ((blockIdx.x * blockDim.x) + threadIdx.x);
+
+      const auto n_in_begin  = in_begin  + global_id;
+      const auto n_out_begin = out_begin + global_id;
+
       unroll<Unroll>( [&] ( auto const& I ) {
-         *(out_begin + id + I()) = f( *(in_begin + id + I()) );
+         auto delta = I() * grid_size;
+         *(n_out_begin + delta) = f( *(n_in_begin + delta) );
       } );
    }
 
@@ -68,10 +76,19 @@ namespace detail {
    void __global__ _cuda_transform_impl( InputIt1 in1_begin, InputIt2 in2_begin
                                            , OutputIt out_begin, F f )
    {
-      size_t const id = ((blockIdx.x * blockDim.x) + threadIdx.x) * Unroll;
+      using std::size_t;
+
+      size_t const grid_size = gridDim.x * blockDim.x;
+      size_t const global_id = ((blockIdx.x * blockDim.x) + threadIdx.x);
+
+      const auto n_in1_begin  = in1_begin  + global_id;
+      const auto n_in2_begin  = in2_begin  + global_id;
+      const auto n_out_begin  = out_begin  + global_id;
+
       unroll<Unroll>( [&] ( auto const& I ) {
-         *(out_begin + id + I()) = f( *( in1_begin + id + I() )
-                                    , *( in2_begin + id + I() ) );
+         auto delta = I() * grid_size;
+         *(n_out_begin + delta) = f ( *( n_in1_begin + delta )
+                                    , *( n_in2_begin + delta ) );
       } );
    }
 
@@ -173,7 +190,7 @@ namespace detail {
 
 #ifdef BLAZE_CUDA_USE_THRUST
 
-template < std::size_t Unroll = 4
+template < std::size_t Unroll = 16
          , typename InputIt1, typename InputIt2, typename OutputIt
          , typename F >
 inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
@@ -184,7 +201,7 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
    thrust::transform( thrust::device, in1_begin, in1_end, in2_begin, out_begin, f );
 }
 
-template < std::size_t Unroll = 4
+template < std::size_t Unroll = 16
          , typename InputIt1, typename OutputIt
          , typename F >
 inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
@@ -196,7 +213,7 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
 
 #else
 
-template < std::size_t Unroll = 4
+template < std::size_t Unroll = 16
          , typename InputIt1, typename InputIt2, typename OutputIt
          , typename F >
 inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
@@ -207,7 +224,7 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
    detail::cuda_transform( in1_begin, in1_end, in2_begin, out_begin, f );
 }
 
-template < std::size_t Unroll = 4
+template < std::size_t Unroll = 16
          , typename InputIt1, typename OutputIt
          , typename F >
 inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
