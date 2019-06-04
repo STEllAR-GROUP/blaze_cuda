@@ -94,81 +94,82 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
    // Block reduction
    unroll< BlockSizeExponent >( [&] ( auto I ) {
       auto constexpr Delta = 1 << ( BlockSizeExponent - I() - 1 );
-      sdata[ threadIdx.x ] = binop( sdata[ threadIdx.x ], sdata[ threadIdx.x + Delta ] );
+      auto v = binop( sdata[ threadIdx.x ], sdata[ threadIdx.x + Delta ] );
+      __syncthreads();
+      sdata[ threadIdx.x ] = v;
       __syncthreads();
    } );
 
    // Storing result
    if( threadIdx.x == 0 )
       *( inout_beg + blockIdx.x ) = binop( *( inout_beg + blockIdx.x ), sdata[ 0 ] );
-}
-
-}  // namespace cuda_reduce_detail
-
-
-template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 8
-         , typename InputOutputIt
-         , typename T
-         , typename BinOp >
-inline auto cuda_reduce
-   ( InputOutputIt inout_beg
-   , InputOutputIt inout_end
-   , T init, BinOp binop )
-{
-   using cuda_reduce_detail::reduce_kernel;
-   using std::size_t;
-
-   if( inout_end - inout_beg < 0 ) throw std::runtime_error("Invalid iterator order");
-
-   size_t constexpr block_size = 1 << BlockSizeExponent;
-   size_t constexpr elmts_per_block = block_size * Unroll;
-
-   size_t const unpadded_size = ( inout_end - inout_beg ) % elmts_per_block;
-
-   using store_t = CUDADynamicVector<T>;
-   store_t store_vec( elmts_per_block, init );
-
-   if( unpadded_size > 0 ) {
-      cuda_transform( inout_end - unpadded_size, inout_end
-         , store_vec.begin()
-         , store_vec.begin(), binop );
-
-      cudaDeviceSynchronize();
-      CUDA_ERROR_CHECK;
    }
 
-   // Computing
 
-   while( inout_end - inout_beg >= ptrdiff_t( elmts_per_block ) )
+   template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 10
+            , typename InputOutputIt
+            , typename T
+            , typename BinOp >
+   inline auto reduce
+      ( InputOutputIt inout_beg
+      , InputOutputIt inout_end
+      , T init, BinOp binop )
    {
-      size_t const size      = inout_end - inout_beg;
-      size_t const block_cnt = std::min( size / elmts_per_block, elmts_per_block );
+      using std::size_t;
 
+      if( inout_end - inout_beg < 0 ) throw std::runtime_error("Invalid iterator order");
+
+      size_t constexpr block_size = 1 << BlockSizeExponent;
+      size_t constexpr elmts_per_block = block_size * Unroll;
+
+      size_t const unpadded_size = ( inout_end - inout_beg ) % elmts_per_block;
+
+      using store_t = CUDADynamicVector<T>;
+      store_t store_vec( elmts_per_block, init );
+
+      if( unpadded_size > 0 ) {
+         cuda_transform( inout_end - unpadded_size, inout_end
+            , store_vec.begin()
+            , store_vec.begin(), binop );
+
+         cudaDeviceSynchronize();
+         CUDA_ERROR_CHECK;
+      }
+
+      // Computing
+
+      while( inout_end - inout_beg >= ptrdiff_t( elmts_per_block ) )
+      {
+         size_t const size      = inout_end - inout_beg;
+         size_t const block_cnt = std::min( size / elmts_per_block, elmts_per_block );
+
+         reduce_kernel
+            < Unroll, BlockSizeExponent >
+            <<< block_cnt, block_size >>>
+            ( inout_beg, store_vec.begin(), init, binop );
+
+         inout_beg += block_cnt * elmts_per_block;
+         cudaDeviceSynchronize();
+      }
+
+      // Initializing final reduce value
+      CUDAManagedValue<T> res_wrapper( init );
+      auto& res = *res_wrapper;
+
+      // Reducing the storage vector inside *res_wrapper
       reduce_kernel
          < Unroll, BlockSizeExponent >
-         <<< block_cnt, block_size >>>
-         ( inout_beg, store_vec.begin(), init, binop );
+         <<< 1, block_size >>>
+         ( store_vec.begin(), &res, init, binop );
 
-      inout_beg += block_cnt * elmts_per_block;
       cudaDeviceSynchronize();
+
+      CUDA_ERROR_CHECK;
+
+      return res;
    }
 
-   // Initializing final reduce value
-   CUDAManagedValue<T> res_wrapper( init );
-   auto& res = *res_wrapper;
-
-   // Reducing the storage vector inside *res_wrapper
-   reduce_kernel
-      < Unroll, BlockSizeExponent >
-      <<< 1, block_size >>>
-      ( store_vec.begin(), &res, init, binop );
-
-   cudaDeviceSynchronize();
-
-   CUDA_ERROR_CHECK;
-
-   return res;
-}
+}  // namespace cuda_reduce_detail
 
 #ifdef BLAZE_CUDA_USE_THRUST
 
@@ -185,7 +186,7 @@ template< typename VT, bool TF, typename T, typename OP >
 inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
    -> EnableIf_t< IsSMPAssignable_v<VT>, T >
 {
-   return cuda_reduce( (~vec).begin(), (~vec).end(), init, op );
+   return cuda_reduce_detail::reduce( (~vec).begin(), (~vec).end(), init, op );
 }
 
 #endif
