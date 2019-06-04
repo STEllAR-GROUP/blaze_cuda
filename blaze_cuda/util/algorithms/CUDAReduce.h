@@ -132,8 +132,8 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
             , store_vec.begin()
             , store_vec.begin(), binop );
 
-         cudaDeviceSynchronize();
-         CUDA_ERROR_CHECK;
+         //cudaDeviceSynchronize();
+         //CUDA_ERROR_CHECK;
       }
 
       // Computing
@@ -149,7 +149,7 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
             ( inout_beg, store_vec.begin(), init, binop );
 
          inout_beg += block_cnt * elmts_per_block;
-         cudaDeviceSynchronize();
+         //cudaDeviceSynchronize();
       }
 
       // Initializing final reduce value
@@ -163,7 +163,6 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
          ( store_vec.begin(), &res, init, binop );
 
       cudaDeviceSynchronize();
-
       CUDA_ERROR_CHECK;
 
       return res;
