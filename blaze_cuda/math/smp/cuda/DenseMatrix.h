@@ -98,10 +98,7 @@ void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP 
    if constexpr ( SO1 == rowMajor && SO2 == rowMajor )
    {
       for( auto i = 0; i < (~lhs).rows(); i++ )
-      {
-         cuda_transform((~rhs).begin(i), (~rhs).end(i), (~lhs).begin(i), op );
-      }
-
+         cuda_transform( (~rhs).begin(i), (~rhs).end(i), (~lhs).begin(i), op );
       CUDA_ERROR_CHECK;
    }
 }
@@ -180,7 +177,7 @@ inline auto smpAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
 
-   cudaAssign( ~lhs, ~rhs, Assign() );
+   cudaAssign( ~lhs, ~rhs, [] BLAZE_DEVICE_CALLABLE ( auto const& e ) { return e; } );
 }
 /*! \endcond */
 //*************************************************************************************************
