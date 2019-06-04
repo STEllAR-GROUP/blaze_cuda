@@ -1,30 +1,26 @@
 #include <iostream>
 #include <cstddef>
-#include <vector>
-#include <algorithm>
 
 #include <blaze/Blaze.h>
 
 #include <blaze_cuda/Blaze.h>
 #include <blaze_cuda/math/dense/CUDACustomVector.h>
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
+#include <blaze_cuda/math/dense/CUDADynamicMatrix.h>
 #include <blaze_cuda/util/algorithms/CUDAReduce.h>
+#include <blaze_cuda/util/CUDAErrorManagement.h>
 
-int main(int, char const *[])
+int main( int, char const *[] )
 {
-   std::size_t constexpr vecsize = 32;
-   using elmt_type = float;
+   namespace bz = blaze;
+   using std::uint32_t;
 
-   using vtype  = blaze::CUDADynamicVector<elmt_type>;
-   using cvtype = blaze::CUDACustomVector<elmt_type, false, false>;
+   constexpr auto exponent = 22;
 
-   vtype  a_( vecsize, 10 );
-   cvtype a ( a_.data(), a_.size() );
+   bz::CUDADynamicVector< uint32_t > cv( 1UL << exponent, 1 );
 
-   // NB: The BLAZE_HOST_DEVICE macro is here to make the lambda
-   // available on CUDA devices (if CUDA is enabled)
-   a += blaze::exp( a ) * 10
-      + blaze::map( a, [] BLAZE_HOST_DEVICE ( auto const& n ){ return n * n; } );
+   auto val = bz::cuda_reduce( cv , uint32_t(0)
+      , [] BLAZE_DEVICE_CALLABLE (auto const& l, auto const& r) { return l + r; } );
 
-   std::cout << "val:\n" << a_;
+   std::cout << val << '\n' << (1UL << exponent) << '\n';
 }
