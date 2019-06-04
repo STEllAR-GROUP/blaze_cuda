@@ -48,6 +48,10 @@
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 #include <blaze_cuda/util/CUDAValue.h>
 
+#ifdef BLAZE_CUDA_USE_THRUST
+#include <thrust/reduce.h>
+#include <thrust/execution_policy.h>
+#endif
 
 namespace blaze {
 
@@ -170,6 +174,21 @@ BLAZE_ALWAYS_INLINE auto cuda_reduce
    return res;
 }
 
+#ifdef BLAZE_CUDA_USE_THRUST
+template< typename VT, bool TF, typename T, typename OP >
+auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
+   -> EnableIf_t< IsSMPAssignable_v< DenseVector<VT, TF> > >
+{
+   return thrust::reduce( thrust::device, (~vec).begin(), (~vec).end(), init, op );
+}
+#else
+template< typename VT, bool TF, typename T, typename OP >
+auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
+   -> EnableIf_t< IsSMPAssignable_v< DenseVector<VT, TF> > >
+{
+   return cuda_reduce( (~vec).begin(), (~vec).end(), init, op );
+}
+#endif
 
 }  // namespace blaze
 
