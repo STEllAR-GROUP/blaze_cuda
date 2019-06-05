@@ -5,5 +5,5 @@
 int main()
 {
    namespace bm = benchmark;
-   std::cout << std::chrono::nanoseconds(bm::time([](){})).count();
+   std::cout << std::chrono::nanoseconds(bm::time([](){})).count() << '\n';
 }
