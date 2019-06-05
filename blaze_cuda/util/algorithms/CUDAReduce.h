@@ -56,6 +56,17 @@
 
 namespace blaze {
 
+#ifdef BLAZE_CUDA_USE_THRUST
+
+template< typename VT, bool TF, typename T, typename OP >
+inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
+   -> EnableIf_t< IsSMPAssignable_v<VT>, T >
+{
+   return thrust::reduce( thrust::device, (~vec).begin(), (~vec).end(), init, op );
+}
+
+#else
+
 namespace cuda_reduce_detail {
 
 template < std::size_t Unroll, std::size_t BlockSizeExponent
@@ -169,17 +180,6 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
    }
 
 }  // namespace cuda_reduce_detail
-
-#ifdef BLAZE_CUDA_USE_THRUST
-
-template< typename VT, bool TF, typename T, typename OP >
-inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
-   -> EnableIf_t< IsSMPAssignable_v<VT>, T >
-{
-   return thrust::reduce( thrust::device, (~vec).begin(), (~vec).end(), init, op );
-}
-
-#else
 
 template< typename VT, bool TF, typename T, typename OP >
 inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
