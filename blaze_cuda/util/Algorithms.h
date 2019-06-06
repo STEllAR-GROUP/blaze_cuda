@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
-//  \file blaze_cuda/Blaze.h
-//  \brief Primary include file of the Blaze library
+//  \file blaze_cuda/util/Algorithms.h
+//  \brief Headerfile for generic algorithms
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
@@ -33,16 +33,17 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_CUDA_BLAZE_H_
-#define _BLAZE_CUDA_BLAZE_H_
+#ifndef _BLAZE_CUDA_UTIL_ALGORITHMS_H_
+#define _BLAZE_CUDA_UTIL_ALGORITHMS_H_
 
 
 //*************************************************************************************************
 // Includes
 //*************************************************************************************************
 
-#include <blaze_cuda/Math.h>
-#include <blaze_cuda/system/Version.h>
-#include <blaze_cuda/Util.h>
+#include <blaze_cuda/util/algorithms/CUDACopy.h>
+#include <blaze_cuda/util/algorithms/CUDAReduce.h>
+#include <blaze_cuda/util/algorithms/CUDATransform.h>
+#include <blaze_cuda/util/algorithms/Unroll.h>
 
 #endif

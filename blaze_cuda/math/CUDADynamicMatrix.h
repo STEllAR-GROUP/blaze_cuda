@@ -41,7 +41,6 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze/math/dense/CUDADynamicMatrix.h>
 #include <blaze/math/DenseMatrix.h>
 #include <blaze/math/DynamicVector.h>
 #include <blaze/math/Exception.h>
@@ -53,6 +52,8 @@
 #include <blaze/util/Assert.h>
 #include <blaze/util/constraints/Numeric.h>
 #include <blaze/util/Random.h>
+
+#include <blaze_cuda/math/dense/CUDADynamicMatrix.h>
 
 
 namespace blaze {

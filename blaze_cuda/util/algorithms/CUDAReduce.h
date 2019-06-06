@@ -192,6 +192,4 @@ inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
 
 }  // namespace blaze
 
-
-
 #endif
