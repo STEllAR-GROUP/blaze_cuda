@@ -13,10 +13,10 @@ LD  ?= clang++
 CXXFLAGS += -O3 -march=native
 
 CXXFLAGS += -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION -DBLAZE_USE_HPX_THREADS \
-				-DBLAZE_CUDA_MODE #-DBLAZE_CUDA_USE_THRUST
+				-DBLAZE_CUDA_MODE -DBLAZE_CUDA_USE_THRUST
 
-#CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
-#            -Wdouble-promotion -Wshadow
+CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
+            -Wdouble-promotion -Wshadow
 
 # Language
 CXXFLAGS += -std=c++17
@@ -34,4 +34,4 @@ LDFLAGS += -lm -lcudart -lhpx
 
 # Remote execution variables
 REMOTE_EXEC_HOST ?= localhost
-REMOTE_EXEC_PATH ?= /tmp/blaze_cuda_dev
+REMOTE_EXEC_PATH ?= /tmp/blaze_cuda_bench

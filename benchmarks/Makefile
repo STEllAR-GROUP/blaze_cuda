@@ -29,10 +29,18 @@ all: $(BENCH)
 
 # Running...
 .bench.score:
+ifeq ($(REMOTE),)
 	@echo '  · Running $<...'
 	@echo
 	@./$< | tee $@
 	@echo
+else
+	@echo '  · Running $<...'
+	@ssh $(REMOTE_EXEC_HOST) mkdir -p $(REMOTE_EXEC_PATH)
+	@scp $< $(REMOTE_EXEC_HOST):$(REMOTE_EXEC_PATH)
+	@ssh $(REMOTE_EXEC_HOST) $(REMOTE_EXEC_PATH)/$(notdir $<) | tee $@
+	@echo
+endif
 
 # Dependencies
 -include $(DEPS)
