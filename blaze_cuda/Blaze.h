@@ -41,6 +41,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/Blaze.h>
 #include <blaze_cuda/Math.h>
 #include <blaze_cuda/system/Version.h>
 #include <blaze_cuda/Util.h>
