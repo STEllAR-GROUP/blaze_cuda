@@ -117,7 +117,7 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
    }
 
 
-   template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 10
+   template < std::size_t Unroll = 16, std::size_t BlockSizeExponent = 8
             , typename InputOutputIt
             , typename T
             , typename BinOp >
