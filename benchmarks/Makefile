@@ -1,5 +1,5 @@
 .POSIX:
-.SUFFIXES: .cpp .hpp .h .cu .d .bench .score
+.SUFFIXES: .cpp .hpp .h .cu .d .bench .score .profile
 
 include config.mk
 
@@ -22,23 +22,39 @@ all: $(BENCH)
 # Compilation
 .cpp.bench:
 	@echo '  · Compiling $@...'
-	@$(CXX) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<
+	$(CXX) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $< $(HPXFLAGS)
 .cu.bench:
 	@echo '  · Compiling $@...'
-	@$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $<
+	$(CU) $(CXXFLAGS) $(CUFLAGS) $(LDFLAGS) -MMD -o $@ $< $(HPXFLAGS)
 
 # Running...
 .bench.score:
-ifeq ($(REMOTE),)
+ifeq ($(REMOTE_EXEC_HOST),)
 	@echo '  · Running $<...'
 	@echo
-	@./$< | tee $@
+	@hpxrun.py ./$< | tee $@
 	@echo
 else
 	@echo '  · Running $< on $(REMOTE_EXEC_HOST)...'
 	@ssh $(REMOTE_EXEC_HOST) mkdir -p $(REMOTE_EXEC_PATH)
 	@scp $< $(REMOTE_EXEC_HOST):$(REMOTE_EXEC_PATH)
-	@ssh $(REMOTE_EXEC_HOST) $(REMOTE_EXEC_PATH)/$(notdir $<) | tee $@
+	@ssh $(REMOTE_EXEC_HOST) hpxrun.py $(REMOTE_EXEC_PATH)/$(notdir $<) | tee $@
+	@echo
+endif
+
+# Profiling...
+.bench.profile:
+ifeq ($(REMOTE_EXEC_HOST),)
+	@echo '  · Running $<...'
+	@echo
+	@nvprof ./$< | tee $@
+	@echo
+else
+	@echo '  · Running $< on $(REMOTE_EXEC_HOST)...'
+	@ssh $(REMOTE_EXEC_HOST) mkdir -p $(REMOTE_EXEC_PATH)
+	@scp $< $(REMOTE_EXEC_HOST):$(REMOTE_EXEC_PATH)
+	@ssh $(REMOTE_EXEC_HOST) nvprof -o /tmp/nvprof_output $(REMOTE_EXEC_PATH)/$(notdir $<) | tee $@
+	@scp $(REMOTE_EXEC_HOST):/tmp/nvprof_output $@
 	@echo
 endif
 
@@ -47,13 +63,6 @@ endif
 
 debug: CXXFLAGS += -DDEBUG -g
 debug: $(BENCH)
-
-remote: REMOTE += '1'
-remote: $(SCORE)
-
-rerun:
-	rm -f $(SCORE)
-rerun: $(SCORE)
 
 clean:
 	rm -f $(SCORE) $(BENCH) $(DEPS)
