@@ -69,15 +69,15 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE float dotc( int n, const float* x, int incX, const float* y, int incY );
+BLAZE_ALWAYS_INLINE float cudotc( int n, const float* x, int incX, const float* y, int incY );
 
-BLAZE_ALWAYS_INLINE double dotc( int n, const double* x, int incX, const double* y, int incY );
+BLAZE_ALWAYS_INLINE double cudotc( int n, const double* x, int incX, const double* y, int incY );
 
-BLAZE_ALWAYS_INLINE complex<float> dotc( int n, const complex<float>* x, int incX,
-                                         const complex<float>* y, int incY );
+BLAZE_ALWAYS_INLINE complex<float> cudotc( int n, const complex<float>* x, int incX,
+                                           const complex<float>* y, int incY );
 
-BLAZE_ALWAYS_INLINE complex<double> dotc( int n, const complex<double>* x, int incX,
-                                          const complex<double>* y, int incY );
+BLAZE_ALWAYS_INLINE complex<double> cudotc( int n, const complex<double>* x, int incX,
+                                            const complex<double>* y, int incY );
 
 template< typename VT1, bool TF1, typename VT2, bool TF2 >
 BLAZE_ALWAYS_INLINE ElementType_t<VT1> dotc( const CUDADynamicVector<VT1,TF1>& x, const CUDADynamicVector<VT2,TF2>& y );
@@ -103,7 +103,7 @@ BLAZE_ALWAYS_INLINE ElementType_t<VT1> dotc( const CUDADynamicVector<VT1,TF1>& x
 // This function performs the dot product of the complex conjugate of a single precision dense
 // vector with another single precision dense vector based on the BLAS cublasSdot() function.
 */
-BLAZE_ALWAYS_INLINE float dotc( int n, const float* x, int incX, const float* y, int incY )
+BLAZE_ALWAYS_INLINE float cudotc( int n, const float* x, int incX, const float* y, int incY )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -131,7 +131,7 @@ BLAZE_ALWAYS_INLINE float dotc( int n, const float* x, int incX, const float* y,
 // This function performs the dot product of the complex conjugate of a double precision dense
 // vector with another double precision dense vector based on the BLAS cublasDdot() function.
 */
-BLAZE_ALWAYS_INLINE double dotc( int n, const double* x, int incX, const double* y, int incY )
+BLAZE_ALWAYS_INLINE double cudotc( int n, const double* x, int incX, const double* y, int incY )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -160,8 +160,8 @@ BLAZE_ALWAYS_INLINE double dotc( int n, const double* x, int incX, const double*
 // complex dense vector with another single precision complex dense vector based on the BLAS
 // cublasCdotc_sub() function.
 */
-BLAZE_ALWAYS_INLINE complex<float> dotc( int n, const complex<float>* x, int incX,
-                                         const complex<float>* y, int incY )
+BLAZE_ALWAYS_INLINE complex<float> cudotc( int n, const complex<float>* x, int incX,
+                                           const complex<float>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -194,8 +194,8 @@ BLAZE_ALWAYS_INLINE complex<float> dotc( int n, const complex<float>* x, int inc
 // complex dense vector with another double precision complex dense vector based on the BLAS
 // cublasZdotc_sub() function.
 */
-BLAZE_ALWAYS_INLINE complex<double> dotc( int n, const complex<double>* x, int incX,
-                                          const complex<double>* y, int incY )
+BLAZE_ALWAYS_INLINE complex<double> cudotc( int n, const complex<double>* x, int incX,
+                                            const complex<double>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -240,7 +240,7 @@ ElementType_t<VT1> dotc( const CUDADynamicVector<VT1,TF1>& x, const CUDADynamicV
 
    const int n( numeric_cast<int>( (~x).size() ) );
 
-   return dotc( n, (~x).data(), 1, (~y).data(), 1 );
+   return cudotc( n, (~x).data(), 1, (~y).data(), 1 );
 }
 #endif
 //*************************************************************************************************

@@ -69,15 +69,15 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE void axpy( int n, float alpha, const float* x, int incX, float* y, int incY );
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, float alpha, const float* x, int incX, float* y, int incY );
 
-BLAZE_ALWAYS_INLINE void axpy( int n, double alpha, const double* x, int incX, double* y, int incY );
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, double alpha, const double* x, int incX, double* y, int incY );
 
-BLAZE_ALWAYS_INLINE void axpy( int n, complex<float> alpha, const complex<float>* x,
-                               int incX, complex<float>* y, int incY );
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, complex<float> alpha, const complex<float>* x,
+                                 int incX, complex<float>* y, int incY );
 
-BLAZE_ALWAYS_INLINE void axpy( int n, complex<double> alpha, const complex<double>* x,
-                               int incX, complex<double>* y, int incY );
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, complex<double> alpha, const complex<double>* x,
+                                 int incX, complex<double>* y, int incY );
 
 template< typename VT1, bool TF1, typename VT2, bool TF2, typename ST >
 BLAZE_ALWAYS_INLINE void axpy( const CUDADynamicVector<VT1,TF1>& x, const CUDADynamicVector<VT2,TF2>& y, ST alpha );
@@ -104,8 +104,8 @@ BLAZE_ALWAYS_INLINE void axpy( const CUDADynamicVector<VT1,TF1>& x, const CUDADy
 // This function performs the dense vector axpy product for single precision operands based on
 // the BLAS cublasSaxpy() function.
 */
-BLAZE_ALWAYS_INLINE void axpy( int n, float alpha, const float* x,
-                               int incX, float* y, int incY )
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, float alpha, const float* x,
+                                 int incX, float* y, int incY )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -133,8 +133,8 @@ BLAZE_ALWAYS_INLINE void axpy( int n, float alpha, const float* x,
 // This function performs the dense vector axpy product for double precision operands based on
 // the BLAS cublasDaxpy() function.
 */
-BLAZE_ALWAYS_INLINE void axpy( int n, double alpha, const double* x,
-                               int incX, double* y, int incY )
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, double alpha, const double* x,
+                                 int incX, double* y, int incY )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -162,8 +162,8 @@ BLAZE_ALWAYS_INLINE void axpy( int n, double alpha, const double* x,
 // This function performs the dense vector axpy product for single precision complex operands
 // based on the BLAS cublasCaxpy() function.
 */
-BLAZE_ALWAYS_INLINE void axpy( int n, complex<float> alpha, const complex<float>* x,
-                               int incX, complex<float>* y, int incY )
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, complex<float> alpha, const complex<float>* x,
+                                 int incX, complex<float>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -194,8 +194,8 @@ BLAZE_ALWAYS_INLINE void axpy( int n, complex<float> alpha, const complex<float>
 // This function performs the dense vector axpy product for double precision complex operands
 // based on the BLAS cublasZaxpy() function.
 */
-BLAZE_ALWAYS_INLINE void axpy( int n, complex<double> alpha, const complex<double>* x,
-                               int incX, complex<double>* y, int incY )
+BLAZE_ALWAYS_INLINE void cuaxpy( int n, complex<double> alpha, const complex<double>* x,
+                                 int incX, complex<double>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -238,7 +238,7 @@ void axpy( CUDADynamicVector<VT1,TF1>& y, const CUDADynamicVector<VT2,TF2>& x, S
 
    const int n( numeric_cast<int>( (~x).size() ) );
 
-   axpy( n, alpha, (~x).data(), 1, (~y).data(), 1 );
+   cuaxpy( n, alpha, (~x).data(), 1, (~y).data(), 1 );
 }
 #endif
 //*************************************************************************************************

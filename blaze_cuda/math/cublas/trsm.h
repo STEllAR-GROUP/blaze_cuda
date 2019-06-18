@@ -70,30 +70,30 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               float alpha, const float* A, int lda, float* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 float alpha, const float* A, int lda, float* B, int ldb );
 
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               double alpha, const double* A, int lda, double* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 double alpha, const double* A, int lda, double* B, int ldb );
 
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               complex<float>* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<float> alpha, const complex<float>* A, int lda,
+                                 complex<float>* B, int ldb );
 
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               complex<double>* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<double> alpha, const complex<double>* A, int lda,
+                                 complex<double>* B, int ldb );
 
 template< typename MT, bool SO, typename VT, bool TF, typename ST >
-BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& b,
+BLAZE_ALWAYS_INLINE void trsm( const CUDADynamicMatrix<MT,SO>& A, CUDADynamicVector<VT,TF>& b,
                                CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha );
 
 template< typename MT1, bool SO1, typename MT2, bool SO2, typename ST >
-BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& B,
+BLAZE_ALWAYS_INLINE void trsm( const CUDADynamicMatrix<MT1,SO1>& A, CUDADynamicMatrix<MT2,SO2>& B,
                                CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha );
 
 #endif
@@ -125,9 +125,9 @@ BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO
 // based on the cublasStrsm() function. During the solution process, matrix \a B is overwritten
 // with the resulting matrix \a X. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               float alpha, const float* A, int lda, float* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 float alpha, const float* A, int lda, float* B, int ldb )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -162,9 +162,9 @@ BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO up
 // based on the cublasDtrsm() function. During the solution process, matrix \a B is overwritten
 // with the resulting matrix \a X. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               double alpha, const double* A, int lda, double* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 double alpha, const double* A, int lda, double* B, int ldb )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -199,10 +199,10 @@ BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO up
 // based on the cublasCtrsm() function. During the solution process, matrix \a B is overwritten
 // with the resulting matrix \a X. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               complex<float>* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<float> alpha, const complex<float>* A, int lda,
+                                 complex<float>* B, int ldb )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -240,10 +240,10 @@ BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO up
 // based on the cublasZtrsm() function. During the solution process, matrix \a B is overwritten
 // with the resulting matrix \a X. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               complex<double>* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrsm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<double> alpha, const complex<double>* A, int lda,
+                                 complex<double>* B, int ldb )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -282,7 +282,7 @@ template< typename MT    // Type of the system matrix
         , typename VT    // Type of the right-hand side matrix
         , bool TF        // Storage order of the right-hand side matrix
         , typename ST >  // Type of the scalar factor
-BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& b,
+BLAZE_ALWAYS_INLINE void trsm( const CUDADynamicMatrix<MT,SO>& A, CUDADynamicVector<VT,TF>& b,
                                CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT );
@@ -303,12 +303,12 @@ BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT,SO>& A, DenseVector<VT,TF>& 
    const int lda( numeric_cast<int>( (~A).spacing() ) );
    const int ldb( ( IsRowMajorMatrix_v<MT> )?( n ):( m ) );
 
-   trsm( ( IsRowMajorMatrix_v<MT> )?( CblasRowMajor ):( CblasColMajor ),
-         side,
-         uplo,
-         CblasNoTrans,
-         CblasNonUnit,
-         m, n, alpha, (~A).data(), lda, (~b).data(), ldb );
+   cutrsm( ( IsRowMajorMatrix_v<MT> )?( CblasRowMajor ):( CblasColMajor ),
+           side,
+           uplo,
+           CblasNoTrans,
+           CblasNonUnit,
+           m, n, alpha, (~A).data(), lda, (~b).data(), ldb );
 }
 #endif
 //*************************************************************************************************
@@ -339,7 +339,7 @@ template< typename MT1   // Type of the system matrix
         , typename MT2   // Type of the right-hand side matrix
         , bool SO2       // Storage order of the right-hand side matrix
         , typename ST >  // Type of the scalar factor
-BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO2>& B,
+BLAZE_ALWAYS_INLINE void trsm( const CUDADynamicMatrix<MT1,SO1>& A, CUDADynamicMatrix<MT2,SO2>& B,
                                CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -360,12 +360,12 @@ BLAZE_ALWAYS_INLINE void trsm( const DenseMatrix<MT1,SO1>& A, DenseMatrix<MT2,SO
    const int lda( numeric_cast<int>( (~A).spacing() ) );
    const int ldb( numeric_cast<int>( (~B).spacing() ) );
 
-   trsm( ( IsRowMajorMatrix_v<MT2> )?( CblasRowMajor ):( CblasColMajor ),
-         side,
-         ( SO1 == SO2 )?( uplo ):( ( uplo == CblasLower )?( CblasUpper ):( CblasLower ) ),
-         ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
-         CblasNonUnit,
-         m, n, alpha, (~A).data(), lda, (~B).data(), ldb );
+   cutrsm( ( IsRowMajorMatrix_v<MT2> )?( CblasRowMajor ):( CblasColMajor ),
+           side,
+           ( SO1 == SO2 )?( uplo ):( ( uplo == CblasLower )?( CblasUpper ):( CblasLower ) ),
+           ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
+           CblasNonUnit,
+           m, n, alpha, (~A).data(), lda, (~B).data(), ldb );
 }
 #endif
 //*************************************************************************************************

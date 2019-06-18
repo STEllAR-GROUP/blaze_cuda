@@ -45,7 +45,6 @@
 #include <blaze/math/constraints/Computation.h>
 #include <blaze/math/constraints/ConstDataAccess.h>
 #include <blaze/math/constraints/MutableDataAccess.h>
-#include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
 #include <blaze/system/BLAS.h>
 #include <blaze/system/Inline.h>
@@ -53,6 +52,8 @@
 #include <blaze/util/Complex.h>
 #include <blaze/util/NumericCast.h>
 #include <blaze/util/StaticAssert.h>
+
+#include <blaze_cuda/math/expressions/CUDADynamicMatrix.h>
 
 
 namespace blaze {
@@ -68,27 +69,27 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               float alpha, const float* A, int lda, float* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 float alpha, const float* A, int lda, float* B, int ldb );
 
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               double alpha, const double* A, int lda, double* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 double alpha, const double* A, int lda, double* B, int ldb );
 
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               complex<float>* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<float> alpha, const complex<float>* A, int lda,
+                                 complex<float>* B, int ldb );
 
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               complex<double>* B, int ldb );
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<double> alpha, const complex<double>* A, int lda,
+                                 complex<double>* B, int ldb );
 
 template< typename MT1, bool SO1, typename MT2, bool SO2, typename ST >
-BLAZE_ALWAYS_INLINE void trmm( DenseMatrix<MT1,SO1>& B, const DenseMatrix<MT2,SO2>& A,
-                               CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha );
+BLAZE_ALWAYS_INLINE void cutrmm( DenseMatrix<MT1,SO1>& B, const DenseMatrix<MT2,SO2>& A,
+                                 CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha );
 
 #endif
 //@}
@@ -118,9 +119,9 @@ BLAZE_ALWAYS_INLINE void trmm( DenseMatrix<MT1,SO1>& B, const DenseMatrix<MT2,SO
 // This function performs the scaling and multiplication of a triangular matrix by a matrix
 // based on the cublasStrmm() function. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               float alpha, const float* A, int lda, float* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 float alpha, const float* A, int lda, float* B, int ldb )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -154,9 +155,9 @@ BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO up
 // This function performs the scaling and multiplication of a triangular matrix by a matrix
 // based on the cublasDtrmm() function. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               double alpha, const double* A, int lda, double* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 double alpha, const double* A, int lda, double* B, int ldb )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -190,10 +191,10 @@ BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO up
 // This function performs the scaling and multiplication of a triangular matrix by a matrix
 // based on the cublasCtrmm() function. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               complex<float>* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<float> alpha, const complex<float>* A, int lda,
+                                 complex<float>* B, int ldb )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -230,10 +231,10 @@ BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO up
 // This function performs the scaling and multiplication of a triangular matrix by a matrix
 // based on the cublasZtrmm() function. Note that matrix \a A is expected to be a square matrix.
 */
-BLAZE_ALWAYS_INLINE void trmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
-                               CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               complex<double>* B, int ldb )
+BLAZE_ALWAYS_INLINE void cutrmm( CBLAS_ORDER order, CBLAS_SIDE side, CBLAS_UPLO uplo,
+                                 CBLAS_TRANSPOSE transA, CBLAS_DIAG diag, int m, int n,
+                                 complex<double> alpha, const complex<double>* A, int lda,
+                                 complex<double>* B, int ldb )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -271,7 +272,8 @@ template< typename MT1   // Type of the left-hand side target matrix
         , typename MT2   // Type of the left-hand side matrix operand
         , bool SO2       // Storage order of the left-hand side matrix operand
         , typename ST >  // Type of the scalar factor
-BLAZE_ALWAYS_INLINE void trmm( DenseMatrix<MT1,SO1>& B, const DenseMatrix<MT2,SO2>& A,
+BLAZE_ALWAYS_INLINE void trmm( CUDADynamicMatrix<MT1,SO1>& B,
+                               const CUDADynamicMatrix<MT2,SO2>& A,
                                CBLAS_SIDE side, CBLAS_UPLO uplo, ST alpha )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -292,12 +294,12 @@ BLAZE_ALWAYS_INLINE void trmm( DenseMatrix<MT1,SO1>& B, const DenseMatrix<MT2,SO
    const int lda( numeric_cast<int>( (~A).spacing() ) );
    const int ldb( numeric_cast<int>( (~B).spacing() ) );
 
-   trmm( ( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
-         side,
-         ( SO1 == SO2 )?( uplo ):( ( uplo == CblasLower )?( CblasUpper ):( CblasLower ) ),
-         ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
-         CblasNonUnit,
-         m, n, alpha, (~A).data(), lda, (~B).data(), ldb );
+   cutrmm( ( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
+           side,
+           ( SO1 == SO2 )?( uplo ):( ( uplo == CblasLower )?( CblasUpper ):( CblasLower ) ),
+           ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
+           CblasNonUnit,
+           m, n, alpha, (~A).data(), lda, (~B).data(), ldb );
 }
 #endif
 //*************************************************************************************************

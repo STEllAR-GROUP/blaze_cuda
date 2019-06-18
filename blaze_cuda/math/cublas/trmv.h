@@ -70,21 +70,21 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const float* A, int lda, float* x,
-                               int incX );
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const float* A, int lda, float* x,
+                                 int incX );
 
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const double* A, int lda, double* x,
-                               int incX );
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const double* A, int lda, double* x,
+                                 int incX );
 
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const complex<float>* A, int lda,
-                               complex<float>* x, int incX );
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const complex<float>* A, int lda,
+                                 complex<float>* x, int incX );
 
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const complex<double>* A, int lda,
-                               complex<double>* x, int incX );
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const complex<double>* A, int lda,
+                                 complex<double>* x, int incX );
 
 template< typename VT, typename MT, bool SO >
 BLAZE_ALWAYS_INLINE void trmv( CUDADynamicVector<VT,false>& x, const CUDADynamicMatrix<MT,SO>& A,
@@ -119,9 +119,9 @@ BLAZE_ALWAYS_INLINE void trmv( CUDADynamicVector<VT,true>& x, const CUDADynamicM
 // This function performs the multiplication of a single precision triangular matrix by a vector
 // based on the cublasStrmv() function.
 */
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const float* A, int lda, float* x,
-                               int incX )
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const float* A, int lda, float* x,
+                                 int incX )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -152,9 +152,9 @@ BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPO
 // This function performs the multiplication of a double precision triangular matrix by a vector
 // based on the cublasDtrmv() function.
 */
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const double* A, int lda, double* x,
-                               int incX )
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const double* A, int lda, double* x,
+                                 int incX )
 {
    cublasHandle_t handle;
    cublasCreate( &handle );
@@ -185,9 +185,9 @@ BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPO
 // This function performs the multiplication of a single precision complex triangular matrix by a
 // vector based on the cublasCtrmv() function.
 */
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const complex<float>* A, int lda,
-                               complex<float>* x, int incX )
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const complex<float>* A, int lda,
+                                 complex<float>* x, int incX )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -221,9 +221,9 @@ BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPO
 // This function performs the multiplication of a double precision complex triangular matrix by a
 // vector based on the cublasZtrmv() function.
 */
-BLAZE_ALWAYS_INLINE void trmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
-                               CBLAS_DIAG diag, int n, const complex<double>* A, int lda,
-                               complex<double>* x, int incX )
+BLAZE_ALWAYS_INLINE void cutrmv( CBLAS_ORDER order, CBLAS_UPLO uplo, CBLAS_TRANSPOSE transA,
+                                 CBLAS_DIAG diag, int n, const complex<double>* A, int lda,
+                                 complex<double>* x, int incX )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -274,8 +274,8 @@ BLAZE_ALWAYS_INLINE void trmv( CUDADynamicVector<VT,false>& x, const CUDADynamic
    const int n  ( numeric_cast<int>( (~A).rows() )    );
    const int lda( numeric_cast<int>( (~A).spacing() ) );
 
-   trmv( ( IsRowMajorMatrix_v<MT> )?( CblasRowMajor ):( CblasColMajor ),
-         uplo, CblasNoTrans, CblasNonUnit, n, (~A).data(), lda, (~x).data(), 1 );
+   cutrmv( ( IsRowMajorMatrix_v<MT> )?( CblasRowMajor ):( CblasColMajor ),
+           uplo, CblasNoTrans, CblasNonUnit, n, (~A).data(), lda, (~x).data(), 1 );
 }
 #endif
 //*************************************************************************************************
@@ -318,8 +318,8 @@ BLAZE_ALWAYS_INLINE void trmv( CUDADynamicVector<VT,true>& x, const CUDADynamicM
    const int n  ( numeric_cast<int>( (~A).rows() )    );
    const int lda( numeric_cast<int>( (~A).spacing() ) );
 
-   trmv( ( IsRowMajorMatrix_v<MT> )?( CblasRowMajor ):( CblasColMajor ),
-         uplo, CblasTrans, CblasNonUnit, n, (~A).data(), lda, (~x).data(), 1 );
+   cutrmv( ( IsRowMajorMatrix_v<MT> )?( CblasRowMajor ):( CblasColMajor ),
+           uplo, CblasTrans, CblasNonUnit, n, (~A).data(), lda, (~x).data(), 1 );
 }
 #endif
 //*************************************************************************************************

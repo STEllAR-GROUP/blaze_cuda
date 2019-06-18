@@ -67,15 +67,15 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE float dotu( int n, const float* x, int incX, const float* y, int incY );
+BLAZE_ALWAYS_INLINE float cudotu( int n, const float* x, int incX, const float* y, int incY );
 
-BLAZE_ALWAYS_INLINE double dotu( int n, const double* x, int incX, const double* y, int incY );
+BLAZE_ALWAYS_INLINE double cudotu( int n, const double* x, int incX, const double* y, int incY );
 
-BLAZE_ALWAYS_INLINE complex<float> dotu( int n, const complex<float>* x, int incX,
-                                         const complex<float>* y, int incY );
+BLAZE_ALWAYS_INLINE complex<float> cudotu( int n, const complex<float>* x, int incX,
+                                           const complex<float>* y, int incY );
 
-BLAZE_ALWAYS_INLINE complex<double> dotu( int n, const complex<double>* x, int incX,
-                                          const complex<double>* y, int incY );
+BLAZE_ALWAYS_INLINE complex<double> cudotu( int n, const complex<double>* x, int incX,
+                                            const complex<double>* y, int incY );
 
 template< typename VT1, bool TF1, typename VT2, bool TF2 >
 BLAZE_ALWAYS_INLINE ElementType_t<VT1> dotu( const CUDADynamicVector<VT1,TF1>& x, const CUDADynamicVector<VT2,TF2>& y );
@@ -101,7 +101,7 @@ BLAZE_ALWAYS_INLINE ElementType_t<VT1> dotu( const CUDADynamicVector<VT1,TF1>& x
 // This function performs the dense vector dot product for single precision operands based on
 // the BLAS cublasSdot() function.
 */
-BLAZE_ALWAYS_INLINE float dotu( int n, const float* x, int incX, const float* y, int incY )
+BLAZE_ALWAYS_INLINE float cudotu( int n, const float* x, int incX, const float* y, int incY )
 {
    cudaHandle_t handle;
    cublasCreate( &handle );
@@ -129,7 +129,7 @@ BLAZE_ALWAYS_INLINE float dotu( int n, const float* x, int incX, const float* y,
 // This function performs the dense vector dot product for double precision operands based on
 // the BLAS cublasDdot() function.
 */
-BLAZE_ALWAYS_INLINE double dotu( int n, const double* x, int incX, const double* y, int incY )
+BLAZE_ALWAYS_INLINE double cudotu( int n, const double* x, int incX, const double* y, int incY )
 {
    cudaHandle_t handle;
    cublasCreate( &handle );
@@ -157,8 +157,8 @@ BLAZE_ALWAYS_INLINE double dotu( int n, const double* x, int incX, const double*
 // This function performs the dense vector dot product for single precision complex operands
 // based on the BLAS cublasCdotu_sub() function.
 */
-BLAZE_ALWAYS_INLINE complex<float> dotu( int n, const complex<float>* x, int incX,
-                                         const complex<float>* y, int incY )
+BLAZE_ALWAYS_INLINE complex<float> cudotu( int n, const complex<float>* x, int incX,
+                                           const complex<float>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -195,8 +195,8 @@ BLAZE_ALWAYS_INLINE complex<float> dotu( int n, const complex<float>* x, int inc
 // This function performs the dense vector dot product for double precision complex operands
 // based on the BLAS cublasZdotu_sub() function.
 */
-BLAZE_ALWAYS_INLINE complex<double> dotu( int n, const complex<double>* x, int incX,
-                                          const complex<double>* y, int incY )
+BLAZE_ALWAYS_INLINE complex<double> cudotu( int n, const complex<double>* x, int incX,
+                                            const complex<double>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -239,7 +239,7 @@ ElementType_t<VT1> dotu( const CUDADynamicVector<VT1,TF1>& x, const CUDADynamicV
 
    const int n( numeric_cast<int>( (~x).size() ) );
 
-   return dotu( n, (~x).data(), 1, (~y).data(), 1 );
+   return cudotu( n, (~x).data(), 1, (~y).data(), 1 );
 }
 #endif
 //*************************************************************************************************

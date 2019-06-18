@@ -71,23 +71,23 @@ namespace blaze {
 //@{
 #if BLAZE_CUBLAS_MODE
 
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               float alpha, const float* A, int lda, const float* x, int incX,
-                               float beta, float* y, int incY );
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+                                 float alpha, const float* A, int lda, const float* x, int incX,
+                                 float beta, float* y, int incY );
 
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               double alpha, const double* A, int lda, const double* x, int incX,
-                               double beta, double* y, int incY );
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+                                 double alpha, const double* A, int lda, const double* x, int incX,
+                                 double beta, double* y, int incY );
 
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               const complex<float>* x, int incX, complex<float> beta,
-                               complex<float>* y, int incY );
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+                                 complex<float> alpha, const complex<float>* A, int lda,
+                                 const complex<float>* x, int incX, complex<float> beta,
+                                 complex<float>* y, int incY );
 
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               const complex<double>* x, int incX, complex<double> beta,
-                               complex<double>* y, int incY );
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+                                 complex<double> alpha, const complex<double>* A, int lda,
+                                 const complex<double>* x, int incX, complex<double> beta,
+                                 complex<double>* y, int incY );
 
 template< typename VT1, typename MT1, bool SO, typename VT2, typename ST >
 BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,false>& y, const CUDADynamicMatrix<MT1,SO>& A,
@@ -125,12 +125,12 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,true>& y, const CUDADynamic
 // This function performs the dense matrix/dense vector multiplication for single precision
 // operands based on the BLAS cublasSgemv() function.
 */
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               float alpha, const float* A, int lda, const float* x, int incX,
-                               float beta, float* y, int incY )
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+                                 float alpha, const float* A, int lda, const float* x, int incX,
+                                 float beta, float* y, int incY )
 {
-      cublasHandle_t handle;
-      cublasCreate( &handle );
+   cublasHandle_t handle;
+   cublasCreate( &handle );
    cublasSgemv( handle, order, transA, m, n, alpha, A, lda, x, incX, beta, y, incY );
    cublasDestroy( handle );
 }
@@ -161,12 +161,12 @@ BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m,
 // This function performs the dense matrix/dense vector multiplication for double precision
 // operands based on the BLAS cublasDgemv() function.
 */
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               double alpha, const double* A, int lda, const double* x, int incX,
-                               double beta, double* y, int incY )
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+                                 double alpha, const double* A, int lda, const double* x, int incX,
+                                 double beta, double* y, int incY )
 {
-      cublasHandle_t handle;
-      cublasCreate( &handle );
+   cublasHandle_t handle;
+   cublasCreate( &handle );
    cublasDgemv( handle, order, transA, m, n, alpha, A, lda, x, incX, beta, y, incY );
    cublasDestroy( handle );
 }
@@ -197,10 +197,10 @@ BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m,
 // This function performs the dense matrix/dense vector multiplication for single precision
 // complex operands based on the BLAS cublasCgemv() function.
 */
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<float> alpha, const complex<float>* A, int lda,
-                               const complex<float>* x, int incX, complex<float> beta,
-                               complex<float>* y, int incY )
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+                                 complex<float> alpha, const complex<float>* A, int lda,
+                                 const complex<float>* x, int incX, complex<float> beta,
+                                 complex<float>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
@@ -238,10 +238,10 @@ BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m,
 // This function performs the dense matrix/dense vector multiplication for double precision
 // complex operands based on the BLAS zblas_zgemv() function.
 */
-BLAZE_ALWAYS_INLINE void gemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
-                               complex<double> alpha, const complex<double>* A, int lda,
-                               const complex<double>* x, int incX, complex<double> beta,
-                               complex<double>* y, int incY )
+BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+                                 complex<double> alpha, const complex<double>* A, int lda,
+                                 const complex<double>* x, int incX, complex<double> beta,
+                                 complex<double>* y, int incY )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
@@ -298,8 +298,8 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,false>& y, const CUDADynami
    const int n  ( numeric_cast<int>( (~A).columns() ) );
    const int lda( numeric_cast<int>( (~A).spacing() ) );
 
-   gemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasNoTrans, m, n, alpha,
-         (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
+   cugemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasNoTrans, m, n, alpha,
+           (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
 }
 #endif
 //*************************************************************************************************
@@ -347,8 +347,8 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,true>& y, const CUDADynamic
    const int n  ( numeric_cast<int>( (~A).columns() ) );
    const int lda( numeric_cast<int>( (~A).spacing() ) );
 
-   gemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasTrans, m, n, alpha,
-         (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
+   cugemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasTrans, m, n, alpha,
+           (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
 }
 #endif
 //*************************************************************************************************
