@@ -527,11 +527,10 @@ inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( size_t m, size_t n )
 {
    if( IsVectorizable_v<Type> ) {
       for( size_t i=0UL; i<m_; ++i ) {
-         for( size_t j=n_; j<nn_; ++j ) {
-            v_[i*nn_+j] = Type();
-         }
+         cuda_transform(&v_[i*nn_], &v_[i*nn_+n_], &v_[i*nn_], []( auto const& ) { return Type(); } );
       }
    }
+   cudaDeviceSynchronize();
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
