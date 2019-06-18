@@ -31,7 +31,7 @@ inline auto time(F&& f)
 template<typename F>
 auto bench_avg(F&& f)
 {
-   uint32_t iter_n(20), warmup_n(5);
+   uint32_t constexpr iter_n(20), warmup_n(5);
 
    // Warmup
    for(uint32_t i(0); i < warmup_n; i++) f();
