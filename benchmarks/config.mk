@@ -10,10 +10,11 @@ LD  ?= clang++
 CXXFLAGS += -O3 -march=corei7-avx
 
 CXXFLAGS += -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION -DBLAZE_USE_HPX_THREADS \
+				-DNDEBUG \
 				-DBLAZE_CUDA_MODE -DBLAZE_CUDA_USE_THRUST# -DTHRUST_DEBUG_SYNC
 
-#CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
-#            -Wdouble-promotion -Wshadow
+CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
+            -Wdouble-promotion -Wshadow
 
 # Language
 CXXFLAGS += -std=c++17
