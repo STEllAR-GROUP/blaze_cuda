@@ -190,6 +190,61 @@ namespace detail {
 
 #ifdef BLAZE_CUDA_USE_THRUST
 
+namespace detail {
+
+template< typename IteratorType >
+class IteratorAdapter
+{
+   IteratorType it;
+
+public:
+
+   //**Type definitions****************************************************************************
+   using IteratorCategory = typename IteratorType::IteratorCategory; //!< The iterator category.
+   using ValueType        = typename IteratorType::ValueType;         //!< Type of the underlying elements.
+   using PointerType      = typename IteratorType::PointerType;      //!< Pointer return type.
+   using ReferenceType    = typename IteratorType::ReferenceType;    //!< Reference return type.
+   using DifferenceType   = typename IteratorType::DifferenceType;   //!< Difference between two iterators.
+
+   // STL iterator requirements
+   using iterator_category = IteratorCategory;  //!< The iterator category.
+   using value_type        = ValueType;         //!< Type of the underlying elements.
+   using pointer           = PointerType;       //!< Pointer return type.
+   using reference         = ReferenceType;     //!< Reference return type.
+   using difference_type   = DifferenceType;    //!< Difference between two iterators.
+
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE
+      IteratorAdapter( IteratorType const& it )
+      : it(it)
+   {}
+
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE ValueType
+      operator[]( ptrdiff_t inc ) const noexcept
+   {
+      return *IteratorAdapter( it + inc );
+   }
+
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE ValueType
+      operator*() const noexcept
+   {
+      return *it;
+   }
+
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto
+      operator-( IteratorAdapter const& other ) const noexcept
+   {
+      return it - other.it;
+   }
+
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto
+      operator+( ptrdiff_t inc ) const noexcept
+   {
+      return IteratorType( it + inc );
+   }
+};
+
+}  // namespace detail
+
 template < std::size_t Unroll = 16
          , typename InputIt1, typename InputIt2, typename OutputIt
          , typename F >
@@ -198,7 +253,12 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
                            , OutputIt out_begin
                            , F f )
 {
-   thrust::transform( thrust::device, in1_begin, in1_end, in2_begin, out_begin, f );
+   using namespace detail;
+   using AI1 = IteratorAdapter<InputIt1>;
+   using AI2 = IteratorAdapter<InputIt2>;
+   //using AO  = IteratorAdapter<OutputIt>;
+
+   thrust::transform( thrust::device, AI1(in1_begin), AI1(in1_end), AI2(in2_begin), out_begin, f );
 }
 
 template < std::size_t Unroll = 16
@@ -208,7 +268,11 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
                            , OutputIt out_begin
                            , F f )
 {
-   thrust::transform( thrust::device, in1_begin, in1_end, out_begin, f );
+   using namespace detail;
+   using AI1 = IteratorAdapter<InputIt1>;
+   //using AO  = IteratorAdapter<OutputIt>;
+
+   thrust::transform( thrust::device, AI1(in1_begin), AI1(in1_end), out_begin, f );
 }
 
 #else
