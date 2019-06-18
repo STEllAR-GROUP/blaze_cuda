@@ -40,6 +40,8 @@
 // Includes
 //*************************************************************************************************
 
+#include <cublas.h>
+
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
@@ -53,7 +55,7 @@
 #include <blaze/util/NumericCast.h>
 #include <blaze/util/StaticAssert.h>
 
-#include <blaze_cuda/math/expressions/CUDADynamicMatrix.h>
+#include <blaze_cuda/math/CUDADynamicMatrix.h>
 
 
 namespace blaze {

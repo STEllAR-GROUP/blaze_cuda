@@ -40,6 +40,8 @@
 // Includes
 //*************************************************************************************************
 
+#include <cublas.h>
+
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/BLASCompatible.h>
 #include <blaze/math/constraints/Computation.h>
