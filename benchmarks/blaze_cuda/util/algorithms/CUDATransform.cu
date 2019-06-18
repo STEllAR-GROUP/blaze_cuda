@@ -35,7 +35,7 @@ void bench_case( Exec const& )
       } );
 
       // Calculating results
-      auto const gb   = sizeof(elmt_t) * float(a.size()) / 1000000000.f;
+      auto const gb   = 2 * sizeof(elmt_t) * float(a.size()) / 1000000000.f;
       auto const s    = float(nanos(t).count()) / 1000000000.f;
       auto const gb_s = gb / s;
 
@@ -44,11 +44,11 @@ void bench_case( Exec const& )
 }
 
 
-int main( int, char*[] ) {
-   hpx::cout << "- GPU :\n";
+int main( int, char** ) {
+   std::cout << "- GPU :\n";
    bench_case( bm::exec::gpu() );
 
-   hpx::cout << "- CPU :\n";
+   std::cout << "- CPU :\n";
    bench_case( bm::exec::cpu() );
 
    return 0;
