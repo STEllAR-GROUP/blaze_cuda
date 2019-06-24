@@ -525,10 +525,9 @@ inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( size_t m, size_t n )
    , capacity_( m_*nn_ )                        // The maximum capacity of the matrix
    , v_       ( cuda_managed_allocate<Type>( capacity_ ) )   // The matrix elements
 {
-   if( IsVectorizable_v<Type> ) {
-      for( size_t i=0UL; i<m_; ++i ) {
-         cuda_transform(&v_[i*nn_], &v_[i*nn_+n_], &v_[i*nn_], []( auto const& ) { return Type(); } );
-      }
+   for( size_t i=0UL; i<m_; ++i ) {
+      cuda_transform(&v_[i*nn_], &v_[i*nn_+n_], &v_[i*nn_],
+         [] BLAZE_DEVICE_CALLABLE ( auto const& ) { return Type(); } );
    }
    cudaDeviceSynchronize();
 
@@ -551,11 +550,11 @@ template< typename Type  // Data type of the matrix
 inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( size_t m, size_t n, const Type& init )
    : CUDADynamicMatrix( m, n )
 {
-   for( size_t i=0UL; i<m; ++i ) {
-      for( size_t j=0UL; j<n_; ++j ) {
-         v_[i*nn_+j] = init;
-      }
+   for( size_t i=0UL; i<m_; ++i ) {
+      cuda_transform(&v_[i*nn_], &v_[i*nn_+n_], &v_[i*nn_],
+         [=] BLAZE_DEVICE_CALLABLE ( auto const& ) { return init; } );
    }
+   cudaDeviceSynchronize();
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
