@@ -526,7 +526,7 @@ inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( size_t m, size_t n )
    , v_       ( cuda_managed_allocate<Type>( capacity_ ) )   // The matrix elements
 {
    for( size_t i=0UL; i<m_; ++i ) {
-      cuda_transform(&v_[i*nn_], &v_[i*nn_+n_], &v_[i*nn_],
+      cuda_transform( begin(i), end(i), begin(i),
          [] BLAZE_DEVICE_CALLABLE ( auto const& ) { return Type(); } );
    }
    cudaDeviceSynchronize();
@@ -551,7 +551,7 @@ inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( size_t m, size_t n, const 
    : CUDADynamicMatrix( m, n )
 {
    for( size_t i=0UL; i<m_; ++i ) {
-      cuda_transform(&v_[i*nn_], &v_[i*nn_+n_], &v_[i*nn_],
+      cuda_transform( begin(i), end(i), begin(i),
          [=] BLAZE_DEVICE_CALLABLE ( auto const& ) { return init; } );
    }
    cudaDeviceSynchronize();
