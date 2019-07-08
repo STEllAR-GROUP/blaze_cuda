@@ -46,7 +46,6 @@
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/expressions/SparseMatrix.h>
 #include <blaze/math/functors/SchurAssign.h>
-#include <blaze/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
 #include <blaze/math/views/Submatrix.h>
@@ -58,6 +57,7 @@
 #include <blaze/util/Types.h>
 
 #include <blaze_cuda/math/expressions/DMatDMatMultExpr.h>
+#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 

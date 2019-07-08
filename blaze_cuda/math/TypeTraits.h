@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
-//  \file blaze_cuda/Math.h
-//  \brief Header file for the inclusion of the math module of the Blaze library
+//  \file blaze/math/TypeTraits.h
+//  \brief Header file for all type traits
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //
@@ -32,17 +32,14 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_CUDA_MATH_MODULE_H_
-#define _BLAZE_CUDA_MATH_MODULE_H_
+#ifndef _BLAZE_CUDA_MATH_TYPETRAITS_H_
+#define _BLAZE_CUDA_MATH_TYPETRAITS_H_
 
 
 //*************************************************************************************************
 // Includes
 //*************************************************************************************************
 
-#include <blaze_cuda/math/CUDA.h>
-#include <blaze_cuda/math/CUDADynamicMatrix.h>
-#include <blaze_cuda/math/CUDADynamicVector.h>
-#include <blaze_cuda/math/TypeTraits.h>
+#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 
 #endif
