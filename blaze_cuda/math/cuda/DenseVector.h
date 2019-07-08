@@ -64,6 +64,7 @@
 #include <blaze/util/FunctionTrace.h>
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Types.h>
+
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
 

@@ -1,9 +1,10 @@
 //=================================================================================================
 /*!
-//  \file blaze_cuda/Math.h
-//  \brief Header file for the inclusion of the math module of the Blaze library
+//  \file blaze_cuda/math/CUDA.h
+//  \brief Header file for the shared memory parallelization
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -32,37 +33,15 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_CUDA_MATH_MODULE_H_
-#define _BLAZE_CUDA_MATH_MODULE_H_
+#ifndef _BLAZE_CUDA_MATH_CUDA_H_
+#define _BLAZE_CUDA_MATH_CUDA_H_
 
 
 //*************************************************************************************************
 // Includes
 //*************************************************************************************************
 
-//#include <blaze_cuda/math/CUDACustomMatrix.h>
-//#include <blaze_cuda/math/CUDACustomVector.h>
-//#include <blaze_cuda/math/DiagonalMatrix.h>
-#include <blaze_cuda/math/CUDADynamicMatrix.h>
-#include <blaze_cuda/math/CUDADynamicVector.h>
-//#include <blaze_cuda/math/IdentityMatrix.h>
-//#include <blaze_cuda/math/HybridMatrix.h>
-//#include <blaze_cuda/math/HybridVector.h>
-//#include <blaze_cuda/math/LAPACK.h>
-//#include <blaze_cuda/math/LowerMatrix.h>
-//#include <blaze_cuda/math/StaticMatrix.h>
-//#include <blaze_cuda/math/StaticVector.h>
-//#include <blaze_cuda/math/StrictlyLowerMatrix.h>
-//#include <blaze_cuda/math/StrictlyUpperMatrix.h>
-//#include <blaze_cuda/math/SymmetricMatrix.h>
-//#include <blaze_cuda/math/UniformMatrix.h>
-//#include <blaze_cuda/math/UniformVector.h>
-//#include <blaze_cuda/math/UniLowerMatrix.h>
-//#include <blaze_cuda/math/UniUpperMatrix.h>
-//#include <blaze_cuda/math/UpperMatrix.h>
-//#include <blaze_cuda/math/Views.h>
-//#include <blaze_cuda/math/ZeroMatrix.h>
-//#include <blaze_cuda/math/ZeroVector.h>
-#include <blaze_cuda/math/CUDA.h>
+#include <blaze_cuda/math/cuda/DenseMatrix.h>
+#include <blaze_cuda/math/cuda/DenseVector.h>
 
 #endif
