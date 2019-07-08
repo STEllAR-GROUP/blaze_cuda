@@ -40,62 +40,13 @@
 // Includes
 //*************************************************************************************************
 
+#include <blaze/math/expressions/DMatDMatMultExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
 
 #include <blaze_cuda/math/dense/CUDADynamicMatrix.h>
 #include <blaze_cuda/math/cublas/gemm.h>
 
 namespace blaze {
-
-//**BLAS-based assignment to dense matrices (default)*******************************************
-   /*!\brief Default assignment of a scaled dense matrix-dense matrix multiplication
-   //        (\f$ C=s*A*B \f$).
-   // \ingroup dense_matrix
-   //
-   // \param C The target left-hand side dense matrix.
-   // \param A The left-hand side multiplication operand.
-   // \param B The right-hand side multiplication operand.
-   // \param scalar The scaling factor.
-   // \return void
-   //
-   // This function relays to the default implementation of the assignment of a large scaled
-   // dense matrix-dense matrix multiplication expression to a dense matrix.
-   */
-   template< typename ET1    // Type of the left-hand side target matrix
-           , typename ET2    // Type of the left-hand side matrix operand
-           , typename ET3 >  // Type of the right-hand side matrix operand
-   static inline auto selectBlasAssignKernel( CUDADynamicMatrix<ET1>& C,
-      const CUDADynamicMatrix<ET2>& A, const CUDADynamicMatrix<ET3>& B )
-   {
-      static_assert(std::is_same_v<ET1, ET2> && std::is_same_v<ET2, ET3>, "message");
-
-      gemm( C, A, B, ET1(1), ET1(0) );
-   }
-   //**********************************************************************************************
-
-   //**Default assignment to dense matrices (small matrices)***************************************
-   /*! \cond BLAZE_INTERNAL */
-   /*!\brief Default assignment of a small dense matrix-dense matrix multiplication (\f$ C=A*B \f$).
-   // \ingroup dense_matrix
-   //
-   // \param C The target left-hand side dense matrix.
-   // \param A The left-hand side multiplication operand.
-   // \param B The right-hand side multiplication operand.
-   // \return void
-   //
-   // This function relays to the default implementation of the assignment of a dense matrix-
-   // dense matrix multiplication expression to a dense matrix.
-   */
-   template< typename ET1    // Type of the left-hand side target matrix
-           , typename ET2    // Type of the left-hand side matrix operand
-           , typename ET3 >  // Type of the right-hand side matrix operand
-   static inline auto selectSmallAssignKernel( CUDADynamicMatrix<ET1>& C,
-      const CUDADynamicMatrix<ET2>& A, const CUDADynamicMatrix<ET3>& B )
-   {
-      selectBlasAssignKernel( C, A, B );
-   }
-   /*! \endcond */
-   //**********************************************************************************************
 
 template < typename ET   // Type of the target dense matrix
          , bool SO       // Storage order of the target dense matrix
@@ -105,7 +56,8 @@ template < typename ET   // Type of the target dense matrix
          , bool HF       // Hermitian flag
          , bool LF       // Lower flag
          , bool UF >     // Upper flag
-   inline auto smpAssign( CUDADynamicMatrix<ET,SO>& lhs, const DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>& rhs )
+inline auto cudaAssign( DynamicMatrix<ET,SO>& lhs,
+   const DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>& rhs )
    {
       BLAZE_FUNCTION_TRACE;
 
@@ -134,7 +86,7 @@ template < typename ET   // Type of the target dense matrix
       BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
       BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
 
-      selectBlasAssignKernel( lhs, A, B );
+      gemm( ~lhs, A, B, ET(1), ET(0) );
    }
 
 } // namespace blaze

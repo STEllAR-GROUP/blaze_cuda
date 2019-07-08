@@ -130,6 +130,7 @@
 #include <blaze_cuda/util/Memory.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
+#include <blaze_cuda/math/cuda/DenseMatrix.h>
 
 namespace blaze {
 
@@ -693,7 +694,7 @@ inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( const CUDADynamicMatrix& m
 {
    BLAZE_INTERNAL_ASSERT( capacity_ <= m.capacity_, "Invalid capacity estimation" );
 
-   smpAssign( *this, m );
+   cudaAssign( *this, m );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -739,7 +740,7 @@ inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( const Matrix<MT,SO2>& m )
       reset();
    }
 
-   smpAssign( *this, ~m );
+   cudaAssign( *this, ~m );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -1208,7 +1209,7 @@ inline CUDADynamicMatrix<Type,SO>& CUDADynamicMatrix<Type,SO>::operator=( const 
    if( &rhs == this ) return *this;
 
    resize( rhs.m_, rhs.n_, false );
-   smpAssign( *this, ~rhs );
+   cudaAssign( *this, ~rhs );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 
@@ -1279,7 +1280,7 @@ inline CUDADynamicMatrix<Type,SO>& CUDADynamicMatrix<Type,SO>::operator=( const 
       resize( (~rhs).rows(), (~rhs).columns(), false );
       if( IsSparseMatrix_v<MT> )
          reset();
-      smpAssign( *this, ~rhs );
+      cudaAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -3082,7 +3083,7 @@ inline CUDADynamicMatrix<Type,true>::CUDADynamicMatrix( const CUDADynamicMatrix&
 {
    BLAZE_INTERNAL_ASSERT( capacity_ <= m.capacity_, "Invalid capacity estimation" );
 
-   smpAssign( *this, m );
+   cudaAssign( *this, m );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -3130,7 +3131,7 @@ inline CUDADynamicMatrix<Type,true>::CUDADynamicMatrix( const Matrix<MT,SO>& m )
       reset();
    }
 
-   smpAssign( *this, ~m );
+   cudaAssign( *this, ~m );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -3593,7 +3594,7 @@ inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator=( co
    if( &rhs == this ) return *this;
 
    resize( rhs.m_, rhs.n_, false );
-   smpAssign( *this, ~rhs );
+   cudaAssign( *this, ~rhs );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 
@@ -3666,7 +3667,7 @@ inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator=( co
       resize( (~rhs).rows(), (~rhs).columns(), false );
       if( IsSparseMatrix_v<MT> )
          reset();
-      smpAssign( *this, ~rhs );
+      cudaAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );

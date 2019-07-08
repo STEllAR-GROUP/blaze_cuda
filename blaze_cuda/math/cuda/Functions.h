@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze_cuda/math/smp/cuda/Functions.h
+//  \file blaze_cuda/math/cuda/Functions.h
 //  \brief Header file for the CUDA-based SMP utility functions
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved

@@ -1,7 +1,7 @@
 //=================================================================================================
 /*!
 //  \file blaze_cuda/math/cuda/DenseMatrix.h
-//  \brief Header file for the CUDA-based dense matrix SMP implementation
+//  \brief Header file for the CUDA-based dense matrix CUDA implementation
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
@@ -47,12 +47,9 @@
 #include <blaze/math/expressions/SparseMatrix.h>
 #include <blaze/math/functors/SchurAssign.h>
 #include <blaze/math/typetraits/IsCUDAAssignable.h>
-#include <blaze/math/typetraits/IsSMPAssignable.h>
-#include <blaze/math/smp/SerialSection.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
 #include <blaze/math/views/Submatrix.h>
-#include <blaze/system/SMP.h>
 #include <blaze/util/algorithms/Min.h>
 #include <blaze/util/Assert.h>
 #include <blaze/util/EnableIf.h>
@@ -156,8 +153,8 @@ void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const SparseMatrix<MT2,SO2>& rhs, OP
 //
 // This function implements the CUDA-based assignment to a dense matrix. Due to the
 // explicit application of the SFINAE principle, this function can only be selected by the
-// compiler in case both operands are SMP-assignable and the element types of both operands
-// are not SMP-assignable.\n
+// compiler in case both operands are CUDA-assignable and the element types of both operands
+// are not CUDA-assignable.\n
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
 // in erroneous results and/or in compilation errors. Instead of using this function use the
@@ -167,13 +164,12 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto smpAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
-   -> EnableIf_t< IsDenseMatrix_v<MT1> && IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+inline auto cudaAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<MT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<MT2> );
+   //BLAZE_CONSTRAINT_MUST_NOT_BE_CUDA_ASSIGNABLE( ElementType_t<MT1> );
+   //BLAZE_CONSTRAINT_MUST_NOT_BE_CUDA_ASSIGNABLE( ElementType_t<MT2> );
 
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
@@ -203,8 +199,8 @@ inline auto smpAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //
 // This function implements the CUDA-based addition assignment to a dense matrix. Due to
 // the explicit application of the SFINAE principle, this function can only be selected by the
-// compiler in case both operands are SMP-assignable and the element types of both operands are
-// not SMP-assignable.\n
+// compiler in case both operands are CUDA-assignable and the element types of both operands are
+// not CUDA-assignable.\n
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
 // in erroneous results and/or in compilation errors. Instead of using this function use the
@@ -214,8 +210,7 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto smpAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
-   -> EnableIf_t< IsDenseMatrix_v<MT1> && IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+inline auto cudaAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -241,7 +236,7 @@ inline auto smpAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based subtracction assignment to a dense matrix.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side matrix to be subtracted.
@@ -249,8 +244,8 @@ inline auto smpAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //
 // This function implements the default CUDA-based subtraction assignment of a matrix to a
 // dense matrix. Due to the explicit application of the SFINAE principle, this function can only
-// be selected by the compiler in case both operands are SMP-assignable and the element types of
-// both operands are not SMP-assignable.\n
+// be selected by the compiler in case both operands are CUDA-assignable and the element types of
+// both operands are not CUDA-assignable.\n
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
 // in erroneous results and/or in compilation errors. Instead of using this function use the
@@ -260,8 +255,7 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto smpSubAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
-   -> EnableIf_t< IsDenseMatrix_v<MT1> && IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+inline auto cudaSubAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -295,8 +289,8 @@ inline auto smpSubAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //
 // This function implements the CUDA-based Schur product assignment to a dense matrix. Due
 // to the explicit application of the SFINAE principle, this function can only be selected by the
-// compiler in case both operands are SMP-assignable and the element types of both operands are
-// not SMP-assignable.\n
+// compiler in case both operands are CUDA-assignable and the element types of both operands are
+// not CUDA-assignable.\n
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
 // in erroneous results and/or in compilation errors. Instead of using this function use the
@@ -306,13 +300,12 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto smpSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
-   -> EnableIf_t< IsDenseMatrix_v<MT1> && IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+inline auto cudaSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<MT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<MT2> );
+   //BLAZE_CONSTRAINT_MUST_NOT_BE_CUDA_ASSIGNABLE( ElementType_t<MT1> );
+   //BLAZE_CONSTRAINT_MUST_NOT_BE_CUDA_ASSIGNABLE( ElementType_t<MT2> );
 
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
@@ -333,17 +326,17 @@ inline auto smpSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
-/*!\brief Implementation of the HPX-based SMP multiplication assignment to a dense vector.
-// \ingroup smp
+/*!\brief Implementation of the HPX-based CUDA multiplication assignment to a dense vector.
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side dense vector to be multiplied.
 // \return void
 //
-// This function implements the HPX-based SMP multiplication assignment to a dense vector.
+// This function implements the HPX-based CUDA multiplication assignment to a dense vector.
 // Due to the explicit application of the SFINAE principle, this function can only be selected
-// by the compiler in case both operands are SMP-assignable and the element types of both
-// operands are not SMP-assignable.\n
+// by the compiler in case both operands are CUDA-assignable and the element types of both
+// operands are not CUDA-assignable.\n
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
 // in erroneous results and/or in compilation errors. Instead of using this function use the
@@ -353,8 +346,7 @@ template< typename VT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpMultAssign( Matrix<VT1,TF1>& lhs, const Matrix<VT2,TF2>& rhs )
-   -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+inline auto cudaMultAssign( Matrix<VT1,TF1>& lhs, const Matrix<VT2,TF2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
