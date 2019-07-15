@@ -43,12 +43,11 @@
 #include <blaze/math/expressions/DMatDMatMultExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
 
-#include <blaze_cuda/math/dense/CUDADynamicMatrix.h>
 #include <blaze_cuda/math/cublas/gemm.h>
 
 namespace blaze {
 
-template < typename ET   // Type of the target dense matrix
+template < typename MT   // Type of the target dense matrix
          , bool SO       // Storage order of the target dense matrix
          , typename MT1  // Type of the left-hand side dense matrix
          , typename MT2  // Type of the right-hand side dense matrix
@@ -56,38 +55,79 @@ template < typename ET   // Type of the target dense matrix
          , bool HF       // Hermitian flag
          , bool LF       // Lower flag
          , bool UF >     // Upper flag
-inline auto cudaAssign( DynamicMatrix<ET,SO>& lhs,
-   const DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>& rhs )
-   {
-      BLAZE_FUNCTION_TRACE;
+inline auto cudaAssign( DenseMatrix<MT,SO>& lhs, const DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
 
-      BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-      if( (~lhs).rows() == 0UL || (~lhs).columns() == 0UL ) {
-         return;
-      }
-      else if( rhs.leftOperand().columns() == 0UL ) {
-         reset( ~lhs );
-         return;
-      }
-
-      using ExpType = DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>;
-      using LT = typename ExpType::LT;
-      using RT = typename ExpType::RT;
-
-      LT A( rhs.leftOperand() );    // Evaluation of the left-hand side dense matrix operand
-      RT B( rhs.rightOperand() );   // Evaluation of the right-hand side dense matrix operand
-
-      BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.leftOperand().rows()    , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( A.columns() == rhs.leftOperand().columns() , "Invalid number of columns" );
-      BLAZE_INTERNAL_ASSERT( B.rows()    == rhs.rightOperand().rows()   , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( B.columns() == rhs.rightOperand().columns(), "Invalid number of columns" );
-      BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
-      BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
-
-      gemm( ~lhs, A, B, ET(1), ET(0) );
+   if( (~lhs).rows() == 0UL || (~lhs).columns() == 0UL ) {
+      return;
    }
+   else if( rhs.leftOperand().columns() == 0UL ) {
+      reset( ~lhs );
+      return;
+   }
+
+   using ExpType = DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>;
+   using ET = typename MT::ElementType;
+   using LT = typename ExpType::LT;
+   using RT = typename ExpType::RT;
+
+   LT A( rhs.leftOperand() );    // Evaluation of the left-hand side dense matrix operand
+   RT B( rhs.rightOperand() );   // Evaluation of the right-hand side dense matrix operand
+
+   BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.leftOperand().rows()    , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( A.columns() == rhs.leftOperand().columns() , "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( B.rows()    == rhs.rightOperand().rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( B.columns() == rhs.rightOperand().columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
+
+   gemm( ~lhs, A, B, ET(1), ET(0) );
+}
+
+template < typename MT   // Type of the target dense matrix
+         , bool SO       // Storage order of the target dense matrix
+         , typename MT1  // Type of the left-hand side dense matrix
+         , typename MT2  // Type of the right-hand side dense matrix
+         , bool SF       // Symmetry flag
+         , bool HF       // Hermitian flag
+         , bool LF       // Lower flag
+         , bool UF >     // Upper flag
+inline auto cudaAddAssign( DenseMatrix<MT,SO>& lhs, const DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>& rhs )
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   if( (~lhs).rows() == 0UL || (~lhs).columns() == 0UL ) {
+      return;
+   }
+   else if( rhs.leftOperand().columns() == 0UL ) {
+      reset( ~lhs );
+      return;
+   }
+
+   using ExpType = DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>;
+   using ET = typename MT::ElementType;
+   using LT = typename ExpType::LT;
+   using RT = typename ExpType::RT;
+
+   LT A( rhs.leftOperand() );    // Evaluation of the left-hand side dense matrix operand
+   RT B( rhs.rightOperand() );   // Evaluation of the right-hand side dense matrix operand
+
+   BLAZE_INTERNAL_ASSERT( A.rows()    == rhs.leftOperand().rows()    , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( A.columns() == rhs.leftOperand().columns() , "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( B.rows()    == rhs.rightOperand().rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( B.columns() == rhs.rightOperand().columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
+
+   gemm( ~lhs, A, B, ET(1), ET(1) );
+}
 
 } // namespace blaze
 
