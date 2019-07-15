@@ -275,12 +275,11 @@ class CUDADynamicMatrix
    /*! The \a smpAssignable compilation flag indicates whether the matrix can be used in SMP
        (shared memory parallel) assignments (both on the left-hand and right-hand side of the
        assignment). */
-   static constexpr bool smpAssignable = !IsSMPAssignable_v<Type>;
+   static constexpr bool smpAssignable = false;
 
    //! Compilation flag for CUDA assignments.
-   /*! The \a smpAssignable compilation flag indicates whether the matrix can be used in SMP
-       (shared memory parallel) assignments (both on the left-hand and right-hand side of the
-       assignment). */
+   /*! The \a cudaAssignable compilation flag indicates whether the matrix can be used in CUDA
+       assignments (both on the left-hand and right-hand side of the assignment). */
    static constexpr bool cudaAssignable = !IsCUDAAssignable_v<Type>;
    //**********************************************************************************************
 
@@ -430,25 +429,78 @@ class CUDADynamicMatrix
 
    inline bool canSMPAssign() const noexcept;
 
-   template< typename MT > inline auto assign( const DenseMatrix<MT,SO>& rhs );
-   template< typename MT > inline void assign( const DenseMatrix<MT,!SO>&  rhs );
-   template< typename MT > inline void assign( const SparseMatrix<MT,SO>&  rhs );
-   template< typename MT > inline void assign( const SparseMatrix<MT,!SO>& rhs );
+   template< typename MT > inline auto assign( const DenseMatrix<MT,SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto assign( const DenseMatrix<MT,!SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto assign( const SparseMatrix<MT,SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto assign( const SparseMatrix<MT,!SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
 
-   template< typename MT > inline auto addAssign( const DenseMatrix<MT,SO>& rhs );
-   template< typename MT > inline void addAssign( const DenseMatrix<MT,!SO>&  rhs );
-   template< typename MT > inline void addAssign( const SparseMatrix<MT,SO>&  rhs );
-   template< typename MT > inline void addAssign( const SparseMatrix<MT,!SO>& rhs );
+   template< typename MT > inline auto addAssign( const DenseMatrix<MT,SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto addAssign( const DenseMatrix<MT,!SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto addAssign( const SparseMatrix<MT,SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto addAssign( const SparseMatrix<MT,!SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
 
-   template< typename MT > inline auto subAssign( const DenseMatrix<MT,SO>& rhs );
-   template< typename MT > inline void subAssign( const DenseMatrix<MT,!SO>&  rhs );
-   template< typename MT > inline void subAssign( const SparseMatrix<MT,SO>&  rhs );
-   template< typename MT > inline void subAssign( const SparseMatrix<MT,!SO>& rhs );
+   template< typename MT > inline auto subAssign( const DenseMatrix<MT,SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto subAssign( const DenseMatrix<MT,!SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto subAssign( const SparseMatrix<MT,SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto subAssign( const SparseMatrix<MT,!SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
 
-   template< typename MT > inline auto schurAssign( const DenseMatrix<MT,SO>& rhs );
-   template< typename MT > inline void schurAssign( const DenseMatrix<MT,!SO>&  rhs );
-   template< typename MT > inline void schurAssign( const SparseMatrix<MT,SO>&  rhs );
-   template< typename MT > inline void schurAssign( const SparseMatrix<MT,!SO>& rhs );
+   template< typename MT > inline auto schurAssign( const DenseMatrix<MT,SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto schurAssign( const DenseMatrix<MT,!SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto schurAssign( const SparseMatrix<MT,SO>&  rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto schurAssign( const SparseMatrix<MT,!SO>& rhs )
+      -> EnableIf_t< IsCUDAAssignable_v<MT> >;
+
+
+   template< typename MT > inline auto assign( const DenseMatrix<MT,SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto assign( const DenseMatrix<MT,!SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto assign( const SparseMatrix<MT,SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto assign( const SparseMatrix<MT,!SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+
+   template< typename MT > inline auto addAssign( const DenseMatrix<MT,SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto addAssign( const DenseMatrix<MT,!SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto addAssign( const SparseMatrix<MT,SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto addAssign( const SparseMatrix<MT,!SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+
+   template< typename MT > inline auto subAssign( const DenseMatrix<MT,SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto subAssign( const DenseMatrix<MT,!SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto subAssign( const SparseMatrix<MT,SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto subAssign( const SparseMatrix<MT,!SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+
+   template< typename MT > inline auto schurAssign( const DenseMatrix<MT,SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto schurAssign( const DenseMatrix<MT,!SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto schurAssign( const SparseMatrix<MT,SO>&  rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
+   template< typename MT > inline auto schurAssign( const SparseMatrix<MT,!SO>& rhs )
+      -> DisableIf_t< IsCUDAAssignable_v<MT> >;
    //@}
    //**********************************************************************************************
 
@@ -736,6 +788,8 @@ template< typename MT    // Type of the foreign matrix
 inline CUDADynamicMatrix<Type,SO>::CUDADynamicMatrix( const Matrix<MT,SO2>& m )
    : CUDADynamicMatrix( (~m).rows(), (~m).columns() )
 {
+   using blaze::assign;
+
    if( IsSparseMatrix_v<MT> ) {
       reset();
    }
@@ -1262,6 +1316,8 @@ template< typename MT    // Type of the right-hand side matrix
         , bool SO2 >     // Storage order of the right-hand side matrix
 inline CUDADynamicMatrix<Type,SO>& CUDADynamicMatrix<Type,SO>::operator=( const Matrix<MT,SO2>& rhs )
 {
+   using blaze::assign;
+
    using TT = decltype( trans( *this ) );
    using CT = decltype( ctrans( *this ) );
    using IT = decltype( inv( *this ) );
@@ -1312,10 +1368,10 @@ inline CUDADynamicMatrix<Type,SO>& CUDADynamicMatrix<Type,SO>::operator+=( const
 
    if( (~rhs).canAlias( this ) ) {
       const ResultType_t<MT> tmp( ~rhs );
-      smpAddAssign( *this, tmp );
+      addAssign( *this, tmp );
    }
    else {
-      smpAddAssign( *this, ~rhs );
+      addAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -1347,10 +1403,10 @@ inline CUDADynamicMatrix<Type,SO>& CUDADynamicMatrix<Type,SO>::operator-=( const
 
    if( (~rhs).canAlias( this ) ) {
       const ResultType_t<MT> tmp( ~rhs );
-      smpSubAssign( *this, tmp );
+      subAssign( *this, tmp );
    }
    else {
-      smpSubAssign( *this, ~rhs );
+      subAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -1382,10 +1438,10 @@ inline CUDADynamicMatrix<Type,SO>& CUDADynamicMatrix<Type,SO>::operator%=( const
 
    if( (~rhs).canAlias( this ) ) {
       const ResultType_t<MT> tmp( ~rhs );
-      smpSchurAssign( *this, tmp );
+      schurAssign( *this, tmp );
    }
    else {
-      smpSchurAssign( *this, ~rhs );
+      schurAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -1994,7 +2050,7 @@ template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 inline bool CUDADynamicMatrix<Type,SO>::canSMPAssign() const noexcept
 {
-   return true;
+   return false;
 }
 //*************************************************************************************************
 
@@ -2003,7 +2059,7 @@ inline bool CUDADynamicMatrix<Type,SO>::canSMPAssign() const noexcept
 /*!\brief Default implementation of the assignment of a row-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix to be assigned.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2014,6 +2070,7 @@ template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
 inline auto CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2038,7 +2095,7 @@ inline auto CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,SO>& rhs )
 /*!\brief Default implementation of the assignment of a column-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix to be assigned.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2048,7 +2105,8 @@ inline auto CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,SO>& rhs )
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
-inline void CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2076,7 +2134,7 @@ inline void CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,!SO>& rhs )
 /*!\brief Default implementation of the assignment of a row-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix to be assigned.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2086,7 +2144,8 @@ inline void CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,!SO>& rhs )
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2102,7 +2161,7 @@ inline void CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,SO>& rhs )
 /*!\brief Default implementation of the assignment of a column-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix to be assigned.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2112,7 +2171,8 @@ inline void CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,SO>& rhs )
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2130,7 +2190,7 @@ inline void CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,!SO>& rhs 
 /*!\brief Default implementation of the addition assignment of a row-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix to be added.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2141,6 +2201,7 @@ template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
 inline auto CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2180,7 +2241,7 @@ inline auto CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,SO>& rhs
 /*!\brief Default implementation of the addition assignment of a column-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix to be added.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2190,7 +2251,8 @@ inline auto CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,SO>& rhs
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
-inline void CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2230,7 +2292,7 @@ inline void CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,!SO>& rh
 /*!\brief Default implementation of the addition assignment of a row-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix to be added.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2240,7 +2302,8 @@ inline void CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,!SO>& rh
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2256,7 +2319,7 @@ inline void CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,SO>& rh
 /*!\brief Default implementation of the addition assignment of a column-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix to be added.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2266,7 +2329,8 @@ inline void CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,SO>& rh
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2284,7 +2348,7 @@ inline void CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,!SO>& r
 /*!\brief Default implementation of the subtraction assignment of a row-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix to be subtracted.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2295,6 +2359,7 @@ template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
 inline auto CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2334,7 +2399,7 @@ inline auto CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,SO>& rhs
 /*!\brief Default implementation of the subtraction assignment of a column-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix to be subtracted.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2344,7 +2409,8 @@ inline auto CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,SO>& rhs
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
-inline void CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2384,7 +2450,7 @@ inline void CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,!SO>& rh
 /*!\brief Default implementation of the subtraction assignment of a row-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix to be subtracted.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2394,7 +2460,8 @@ inline void CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,!SO>& rh
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2410,7 +2477,7 @@ inline void CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,SO>& rh
 /*!\brief Default implementation of the subtraction assignment of a column-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix to be subtracted.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2420,7 +2487,8 @@ inline void CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,SO>& rh
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2438,7 +2506,7 @@ inline void CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,!SO>& r
 /*!\brief Default implementation of the Schur product assignment of a row-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix for the Schur product.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2449,6 +2517,7 @@ template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
 inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
@@ -2473,7 +2542,7 @@ inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,SO>& r
 /*!\brief Default implementation of the Schur product assignment of a column-major dense matrix.
 //
 // \param rhs The right-hand side dense matrix for the Schur product.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2483,7 +2552,8 @@ inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,SO>& r
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side dense matrix
-inline void CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
 
@@ -2511,7 +2581,7 @@ inline void CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,!SO>& 
 /*!\brief Default implementation of the Schur product assignment of a row-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix for the Schur product.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2521,7 +2591,8 @@ inline void CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,!SO>& 
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    using blaze::reset;
 
@@ -2551,7 +2622,7 @@ inline void CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,SO>& 
 /*!\brief Default implementation of the Schur product assignment of a column-major sparse matrix.
 //
 // \param rhs The right-hand side sparse matrix for the Schur product.
-// \return void
+// \return auto
 //
 // This function must \b NOT be called explicitly! It is used internally for the performance
 // optimized evaluation of expression templates. Calling this function explicitly might result
@@ -2561,7 +2632,8 @@ inline void CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,SO>& 
 template< typename Type  // Data type of the matrix
         , bool SO >      // Storage order
 template< typename MT >  // Type of the right-hand side sparse matrix
-inline void CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,!SO>& rhs )
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,!SO>& rhs )
+   -> DisableIf_t< IsCUDAAssignable_v<MT> >
 {
    using blaze::reset;
 
@@ -2585,6 +2657,443 @@ inline void CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,!SO>&
          reset( v_[i*nn_+j] );
       }
    }
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the assignment of a row-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix to be assigned.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::assign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   const size_t jpos( n_ & size_t(-2) );
+   BLAZE_INTERNAL_ASSERT( ( n_ - ( n_ % 2UL ) ) == jpos, "Invalid end calculation" );
+
+   cudaAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the assignment of a column-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix to be assigned.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::assign( const DenseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the assignment of a row-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix to be assigned.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the assignment of a column-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix to be assigned.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::assign( const SparseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a row-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix to be added.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaAddAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaAddAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a column-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix to be added.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const DenseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a row-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix to be added.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaAddAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaAddAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the addition assignment of a column-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix to be added.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::addAssign( const SparseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the subtraction assignment of a row-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix to be subtracted.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaSubAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaSubAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the subtraction assignment of a column-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix to be subtracted.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const DenseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the subtraction assignment of a row-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix to be subtracted.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaSubAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaSubAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the subtraction assignment of a column-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix to be subtracted.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::subAssign( const SparseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the Schur product assignment of a row-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix for the Schur product.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaSchurAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaSchurAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the Schur product assignment of a column-major dense matrix.
+//
+// \param rhs The right-hand side dense matrix for the Schur product.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side dense matrix
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const DenseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the Schur product assignment of a row-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix for the Schur product.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::cudaSchurAssign;
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   cudaSchurAssign( *this, ~rhs );
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Default implementation of the Schur product assignment of a column-major sparse matrix.
+//
+// \param rhs The right-hand side sparse matrix for the Schur product.
+// \return auto
+//
+// This function must \b NOT be called explicitly! It is used internally for the performance
+// optimized evaluation of expression templates. Calling this function explicitly might result
+// in erroneous results and/or in compilation errors. Instead of using this function use the
+// assignment operator.
+*/
+template< typename Type  // Data type of the matrix
+        , bool SO >      // Storage order
+template< typename MT >  // Type of the right-hand side sparse matrix
+inline auto CUDADynamicMatrix<Type,SO>::schurAssign( const SparseMatrix<MT,!SO>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT> >
+{
+   using blaze::reset;
+
+   BLAZE_CONSTRAINT_MUST_NOT_BE_SYMMETRIC_MATRIX_TYPE( MT );
+
+   BLAZE_INTERNAL_ASSERT( m_ == (~rhs).rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( n_ == (~rhs).columns(), "Invalid number of columns" );
+
+   // TODO
 }
 //*************************************************************************************************
 
@@ -2664,13 +3173,12 @@ class CUDADynamicMatrix<Type,true>
    /*! The \a smpAssignable compilation flag indicates whether the matrix can be used in SMP
        (shared memory parallel) assignments (both on the left-hand and right-hand side of the
        assignment). */
-   static constexpr bool smpAssignable = !IsSMPAssignable_v<Type>;
+   static constexpr bool smpAssignable = false;
    //**********************************************************************************************
 
-   //! Compilation flag for SMP assignments.
-   /*! The \a smpAssignable compilation flag indicates whether the matrix can be used in SMP
-       (shared memory parallel) assignments (both on the left-hand and right-hand side of the
-       assignment). */
+   //! Compilation flag for CUDA assignments.
+   /*! The \a cudaAssignable compilation flag indicates whether the matrix can be used in CUDA
+       assignments (both on the left-hand and right-hand side of the assignment). */
    static constexpr bool cudaAssignable = !IsCUDAAssignable_v<Type>;
    //**********************************************************************************************
 
@@ -3083,7 +3591,7 @@ inline CUDADynamicMatrix<Type,true>::CUDADynamicMatrix( const CUDADynamicMatrix&
 {
    BLAZE_INTERNAL_ASSERT( capacity_ <= m.capacity_, "Invalid capacity estimation" );
 
-   cudaAssign( *this, m );
+  cudaAassign( *this, m );
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }
@@ -3591,6 +4099,8 @@ inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator=( co
 template< typename Type >  // Data type of the matrix
 inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator=( const CUDADynamicMatrix& rhs )
 {
+   using blaze::assign;
+
    if( &rhs == this ) return *this;
 
    resize( rhs.m_, rhs.n_, false );
@@ -3649,6 +4159,8 @@ template< typename MT      // Type of the right-hand side matrix
         , bool SO >        // Storage order of the right-hand side matrix
 inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator=( const Matrix<MT,SO>& rhs )
 {
+   using blaze::assign;
+
    using TT = decltype( trans( *this ) );
    using CT = decltype( ctrans( *this ) );
    using IT = decltype( inv( *this ) );
@@ -3700,10 +4212,10 @@ inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator+=( c
 
    if( (~rhs).canAlias( this ) ) {
       const ResultType_t<MT> tmp( ~rhs );
-      smpAddAssign( *this, tmp );
+      addAssign( *this, tmp );
    }
    else {
-      smpAddAssign( *this, ~rhs );
+      addAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -3736,10 +4248,10 @@ inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator-=( c
 
    if( (~rhs).canAlias( this ) ) {
       const ResultType_t<MT> tmp( ~rhs );
-      smpSubAssign( *this, tmp );
+      subAssign( *this, tmp );
    }
    else {
-      smpSubAssign( *this, ~rhs );
+      subAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -3772,10 +4284,10 @@ inline CUDADynamicMatrix<Type,true>& CUDADynamicMatrix<Type,true>::operator%=( c
 
    if( (~rhs).canAlias( this ) ) {
       const ResultType_t<MT> tmp( ~rhs );
-      smpSchurAssign( *this, tmp );
+      schurAssign( *this, tmp );
    }
    else {
-      smpSchurAssign( *this, ~rhs );
+      schurAssign( *this, ~rhs );
    }
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
@@ -4392,7 +4904,7 @@ inline bool CUDADynamicMatrix<Type,true>::isAliased( const Other* alias ) const 
 template< typename Type >  // Data type of the matrix
 inline bool CUDADynamicMatrix<Type,true>::canSMPAssign() const noexcept
 {
-   return ( rows() * columns() >= SMP_DMATASSIGN_THRESHOLD );
+   return false;
 }
 /*! \endcond */
 //*************************************************************************************************
