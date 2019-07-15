@@ -110,10 +110,12 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
                            , F f )
 {
    using namespace detail;
-   using AI1 = ThrustIteratorAdapter<InputIt1>;
    using AI2 = ThrustIteratorAdapter<InputIt2>;
 
-   thrust::transform( thrust::device, AI1(in1_begin), AI1(in1_end), AI2(in2_begin), out_begin, f );
+   thrust::transform( thrust::device,
+      in1_begin, in1_end,  // Meant to be the left-hand side
+      AI2( in2_begin ),    // Adaptor for the right-hand side
+      out_begin, f );
 }
 
 template < std::size_t Unroll = 16
