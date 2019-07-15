@@ -44,10 +44,12 @@
 #include <blaze/math/Aliases.h>
 #include <blaze/math/AlignmentFlag.h>
 #include <blaze/math/expressions/DenseMatrix.h>
+#include <blaze/math/expressions/DMatDMatAddExpr.h>
 #include <blaze/math/expressions/SparseMatrix.h>
 #include <blaze/math/functors/SchurAssign.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
+#include <blaze/math/typetraits/IsOperation.h>
 #include <blaze/math/views/Submatrix.h>
 #include <blaze/util/algorithms/Min.h>
 #include <blaze/util/Assert.h>
@@ -57,6 +59,8 @@
 #include <blaze/util/Types.h>
 
 #include <blaze_cuda/math/expressions/DMatDMatMultExpr.h>
+#include <blaze_cuda/math/expressions/DMatDMatAddExpr.h>
+
 #include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
@@ -72,12 +76,12 @@ namespace blaze {
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Backend of the CUDA-based (compound) assignment of a dense matrix to a dense matrix.
-// \ingroup math
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side dense matrix to be assigned.
 // \param op The (compound) assignment operation.
-// \return void
+// \return auto
 //
 // This function is the backend implementation of the CUDA-based assignment of a dense
 // matrix to a dense matrix.\n
@@ -91,12 +95,19 @@ template< typename MT1   // Type of the left-hand side dense matrix
         , typename MT2   // Type of the right-hand side dense matrix
         , bool SO2       // Storage order of the right-hand side dense matrix
         , typename OP >  // Type of the assignment operation
-void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP op )
+auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP op )
 {
+   BLAZE_FUNCTION_TRACE;
+
    if constexpr ( SO1 == rowMajor && SO2 == rowMajor )
    {
-      for( auto i = 0; i < (~lhs).rows(); i++ )
-         cuda_transform( (~rhs).begin(i), (~rhs).end(i), (~lhs).begin(i), op );
+      for( auto i = size_t( 0 ); i < (~lhs).rows(); i++ ) {
+         cuda_transform( (~lhs).begin(i), (~lhs).end(i),
+            (~rhs).begin(i),
+            (~lhs).begin(i),
+            op );
+      }
+
       CUDA_ERROR_CHECK;
    }
 }
@@ -107,12 +118,12 @@ void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP 
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Backend of the CUDA-based (compound) assignment of a sparse matrix to a dense matrix.
-// \ingroup math
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side sparse matrix to be assigned.
 // \param op The (compound) assignment operation.
-// \return void
+// \return auto
 //
 // This function is the backend implementation of the CUDA-based assignment of a sparse
 // matrix to a dense matrix.\n
@@ -126,8 +137,10 @@ template< typename MT1   // Type of the left-hand side dense matrix
         , typename MT2   // Type of the right-hand side sparse matrix
         , bool SO2       // Storage order of the right-hand side sparse matrix
         , typename OP >  // Type of the assignment operation
-void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const SparseMatrix<MT2,SO2>& rhs, OP op )
+inline auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const SparseMatrix<MT2,SO2>& rhs, OP op )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
+   BLAZE_FUNCTION_TRACE;
    // TODO
 }
 /*! \endcond */
@@ -145,11 +158,11 @@ void cudaAssign( DenseMatrix<MT1,SO1>& lhs, const SparseMatrix<MT2,SO2>& rhs, OP
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based assignment to a dense matrix.
-// \ingroup math
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side matrix to be assigned.
-// \return void
+// \return auto
 //
 // This function implements the CUDA-based assignment to a dense matrix. Due to the
 // explicit application of the SFINAE principle, this function can only be selected by the
@@ -174,7 +187,7 @@ inline auto cudaAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == (~rhs).rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == (~rhs).columns(), "Invalid number of columns" );
 
-   cudaAssign( ~lhs, ~rhs, [] BLAZE_DEVICE_CALLABLE ( auto const& e ) { return e; } );
+   cudaAssign( ~lhs, ~rhs, [] BLAZE_DEVICE_CALLABLE ( auto const&, auto const& e ) { return e; } );
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -191,11 +204,11 @@ inline auto cudaAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based addition assignment to a dense matrix.
-// \ingroup math
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side matrix to be added.
-// \return void
+// \return auto
 //
 // This function implements the CUDA-based addition assignment to a dense matrix. Due to
 // the explicit application of the SFINAE principle, this function can only be selected by the
@@ -211,6 +224,7 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
 inline auto cudaAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -240,7 +254,7 @@ inline auto cudaAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side matrix to be subtracted.
-// \return void
+// \return auto
 //
 // This function implements the default CUDA-based subtraction assignment of a matrix to a
 // dense matrix. Due to the explicit application of the SFINAE principle, this function can only
@@ -256,6 +270,7 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
 inline auto cudaSubAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -281,11 +296,11 @@ inline auto cudaSubAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based Schur product assignment to a dense matrix.
-// \ingroup math
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side matrix for the Schur product.
-// \return void
+// \return auto
 //
 // This function implements the CUDA-based Schur product assignment to a dense matrix. Due
 // to the explicit application of the SFINAE principle, this function can only be selected by the
@@ -301,6 +316,7 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
 inline auto cudaSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -331,7 +347,7 @@ inline auto cudaSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side dense vector to be multiplied.
-// \return void
+// \return auto
 //
 // This function implements the HPX-based CUDA multiplication assignment to a dense vector.
 // Due to the explicit application of the SFINAE principle, this function can only be selected
@@ -342,11 +358,12 @@ inline auto cudaSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT1  // Type of the left-hand side dense vector
+template< typename MT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
-        , typename VT2  // Type of the right-hand side vector
+        , typename MT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto cudaMultAssign( Matrix<VT1,TF1>& lhs, const Matrix<VT2,TF2>& rhs )
+inline auto cudaMultAssign( Matrix<MT1,TF1>& lhs, const Matrix<MT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
