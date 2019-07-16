@@ -53,7 +53,7 @@ namespace blaze {
 //
 // \param lhs The target left-hand side dense matrix.
 // \param rhs The right-hand side addition expression to be assigned.
-// \return void
+// \return auto
 //
 // This function implements the performance optimized assignment of a dense matrix-dense
 // matrix addition expression to a dense matrix. Due to the explicit application of the
@@ -88,8 +88,47 @@ inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,
       cudaAddAssign( ~lhs, rhs.rightOperand() );
    }
 }
-   /*! \endcond */
-   //**********************************************************************************************
+/*! \endcond */
+//**********************************************************************************************
+
+//**Addition assignment to dense matrices*******************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Addition assignment of a dense matrix-dense matrix addition to a dense matrix.
+// \ingroup dense_matrix
+//
+// \param lhs The target left-hand side dense matrix.
+// \param rhs The right-hand side addition expression to be added.
+// \return auto
+//
+// This function implements the performance optimized addition assignment of a dense matrix-
+// dense matrix addition expression to a dense matrix. Due to the explicit application of
+// the SFINAE principle, this function can only be selected by the compiler in case either
+// of the operands requires an intermediate evaluation.
+*/
+template< typename MT  // Type of the target dense matrix
+        , bool SO2     // Storage order of the target dense matrix
+        , typename MT1
+        , typename MT2
+        , bool SO >
+inline auto cudaAddAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
+   -> EnableIf_t< DMatDMatAddExpr<MT1,MT2,SO>::useAssign >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   if( !RequiresEvaluation_v<MT2> ) {
+      cudaAddAssign( ~lhs, rhs.rightOperand() );
+      cudaAddAssign( ~lhs, rhs.leftOperand() );
+   }
+   else {
+      cudaAddAssign( ~lhs, rhs.leftOperand() );
+      cudaAddAssign( ~lhs, rhs.rightOperand() );
+   }
+}
+/*! \endcond */
+//**********************************************************************************************
 
 } // namespace blaze
 
