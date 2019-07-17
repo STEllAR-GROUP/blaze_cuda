@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/expressions/DMatDMatAddExpr.h
+//  \file blaze_cuda/math/expressions/DMatDMatAddExpr.h
 //  \brief Header file for the dense matrix/dense matrix multiplication expression
 //
 //  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
@@ -77,14 +77,14 @@ inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,
       cudaAddAssign( ~lhs, rhs.rightOperand() );
    }
    else if( !IsOperation_v<MT2> && isSame( ~lhs, rhs.rightOperand() ) ) {
-      cudaAddAssign( ~lhs, rhs.leftOperand() );
+      cudaAddAssign( ~lhs, rhs.leftOperand()  );
    }
    else if( !RequiresEvaluation_v<MT2> ) {
       cudaAssign   ( ~lhs, rhs.rightOperand() );
-      cudaAddAssign( ~lhs, rhs.leftOperand() );
+      cudaAddAssign( ~lhs, rhs.leftOperand()  );
    }
    else {
-      cudaAssign   ( ~lhs, rhs.leftOperand() );
+      cudaAssign   ( ~lhs, rhs.leftOperand()  );
       cudaAddAssign( ~lhs, rhs.rightOperand() );
    }
 }
@@ -126,6 +126,85 @@ inline auto cudaAddAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,M
       cudaAddAssign( ~lhs, rhs.leftOperand() );
       cudaAddAssign( ~lhs, rhs.rightOperand() );
    }
+}
+/*! \endcond */
+//**********************************************************************************************
+
+//**Subtraction assignment to dense matrices****************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Subtraction assignment of a dense matrix-dense matrix addition to a dense matrix.
+// \ingroup dense_matrix
+//
+// \param lhs The target left-hand side dense matrix.
+// \param rhs The right-hand side addition expression to be subtracted.
+// \return void
+//
+// This function implements the performance optimized subtraction assignment of a dense matrix-
+// dense matrix addition expression to a dense matrix. Due to the explicit application of
+// the SFINAE principle, this function can only be selected by the compiler in case either
+// of the operands requires an intermediate evaluation.
+*/
+template< typename MT  // Type of the target dense matrix
+        , bool SO2     // Storage order of the target dense matrix
+        , typename MT1
+        , typename MT2
+        , bool SO >
+inline auto cudaSubAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
+   -> EnableIf_t< DMatDMatAddExpr<MT1,MT2,SO>::useAssign >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   if( !RequiresEvaluation_v<MT2> ) {
+      cudaSubAssign( ~lhs, rhs.rightOperand() );
+      cudaSubAssign( ~lhs, rhs.leftOperand() );
+   }
+   else {
+      cudaSubAssign( ~lhs, rhs.leftOperand() );
+      cudaSubAssign( ~lhs, rhs.rightOperand() );
+   }
+}
+/*! \endcond */
+//**********************************************************************************************
+
+//**Schur product assignment to dense matrices**************************************************
+/*! \cond BLAZE_INTERNAL */
+/*!\brief Schur product assignment of a dense matrix-dense matrix addition to a dense matrix.
+// \ingroup dense_matrix
+//
+// \param lhs The target left-hand side dense matrix.
+// \param rhs The right-hand side addition expression for the Schur product.
+// \return void
+//
+// This function implements the performance optimized Schur product assignment of a dense
+// matrix-dense matrix addition expression to a dense matrix. Due to the explicit application
+// of the SFINAE principle, this function can only be selected by the compiler in case either
+// of the operands requires an intermediate evaluation.
+*/
+template< typename MT  // Type of the target dense matrix
+        , bool SO2     // Storage order of the target dense matrix
+        , typename MT1
+        , typename MT2
+        , bool SO >
+inline auto schurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
+   -> EnableIf_t< DMatDMatAddExpr<MT1,MT2,SO>::useAssign >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   using ExpressionType = DMatDMatAddExpr<MT1,MT2,SO>;
+   using ResultType = typename ExpressionType::ResultType;
+
+   BLAZE_CONSTRAINT_MUST_BE_DENSE_MATRIX_TYPE( ResultType );
+   BLAZE_CONSTRAINT_MUST_BE_MATRIX_WITH_STORAGE_ORDER( ResultType, SO );
+   BLAZE_CONSTRAINT_MUST_NOT_REQUIRE_EVALUATION( ResultType );
+
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   const ResultType tmp( serial( rhs ) );
+   cudaSchurAssign( ~lhs, tmp );
 }
 /*! \endcond */
 //**********************************************************************************************
