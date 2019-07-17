@@ -9,7 +9,7 @@ int main( int, char const *[] )
 
    bz::CUDADynamicMatrix< float > cm( 10, 10, 1.f );
 
-   cm = (cm + cm) * cm;
+   cm = cm * cm + cm * cm;
 
    std::cout << cm << '\n';
 }

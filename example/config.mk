@@ -12,11 +12,11 @@ LD  ?= clang++
 # Compile flags
 CXXFLAGS += -O3 -march=native
 
-CXXFLAGS += -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION -DBLAZE_USE_HPX_THREADS \
-				-DBLAZE_CUDA_MODE -DBLAZE_BLAS_MODE #-DBLAZE_CUDA_USE_THRUST
+CXXFLAGS += -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION=1 \
+				-DBLAZE_CUDA_MODE=1 -DBLAZE_BLAS_MODE=1 -DBLAZE_CUDA_USE_THRUST=1
 
-CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
-            -Wdouble-promotion -Wshadow
+#CXXFLAGS += -Wall -Wextra -Werror -Wnull-dereference \
+#            -Wdouble-promotion -Wshadow
 
 # Language
 CXXFLAGS += -std=c++17
