@@ -33,8 +33,8 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_CUDA_MATH_EXPRESSIONS_DMATDMATDDEXPR_H_
-#define _BLAZE_CUDA_MATH_EXPRESSIONS_DMATDMATDDEXPR_H_
+#ifndef _BLAZE_CUDA_MATH_EXPRESSIONS_DMATDMATADDEXPR_H_
+#define _BLAZE_CUDA_MATH_EXPRESSIONS_DMATDMATADDEXPR_H_
 
 
 //*************************************************************************************************
@@ -188,7 +188,7 @@ template< typename MT  // Type of the target dense matrix
         , typename MT1
         , typename MT2
         , bool SO >
-inline auto schurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
+inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
    -> EnableIf_t< DMatDMatAddExpr<MT1,MT2,SO>::useAssign >
 {
    BLAZE_FUNCTION_TRACE;
