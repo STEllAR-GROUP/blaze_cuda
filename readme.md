@@ -20,9 +20,9 @@ The `example` folder provides a simple `Makefile` that can be used as a referenc
 * [X] Adding IsCUDAEnabled conditional specializations to `DVecDVec*Expr`
 * [X] Adapting basic expression iterators for vectors
 * [X] Adapting functors to make them CUDA-compatible
+* [X] **cuBLAS**
+* [X] Cleanup: Refactor CUDADynamicVector's code (Indent, documentation, etc.)
+* [X] Extending functionality to matrices
 * [ ] Adapting fancier expressions (reductions, etc)
-* [ ] **cuBLAS**
-* [ ] Cleanup: Refactor CUDADynamicVector's code (Indent, documentation, etc.)
-* [ ] Extending functionality to matrices
 * [ ] Getting Matrix/Vector operations to work
 * [ ] Extending functionality to tensors
