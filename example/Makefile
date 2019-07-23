@@ -26,7 +26,7 @@ all: $(NAME)
 
 # Linking
 $(NAME): $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(LDFLAGS)
+	$(CU) -o $@ $(OBJ) $(LDFLAGS)
 
 # Dependencies
 -include $(DEPS)
