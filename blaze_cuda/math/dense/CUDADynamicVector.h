@@ -74,9 +74,9 @@
 #include <blaze/math/typetraits/HasMutableDataAccess.h>
 #include <blaze/math/typetraits/HighType.h>
 #include <blaze/math/typetraits/IsAligned.h>
-#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/typetraits/IsColumnVector.h>
 #include <blaze/math/typetraits/IsContiguous.h>
+#include <blaze/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
 #include <blaze/math/typetraits/IsDenseVector.h>
 #include <blaze/math/typetraits/IsMatrix.h>
@@ -114,6 +114,7 @@
 #include <blaze/util/typetraits/IsVectorizable.h>
 #include <blaze/util/typetraits/RemoveConst.h>
 
+#include <blaze_cuda/math/DenseVector.h>
 #include <blaze_cuda/util/Memory.h>
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>

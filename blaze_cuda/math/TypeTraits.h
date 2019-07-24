@@ -40,6 +40,6 @@
 // Includes
 //*************************************************************************************************
 
-#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
+//#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
 
 #endif

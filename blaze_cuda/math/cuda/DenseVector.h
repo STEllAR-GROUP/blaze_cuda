@@ -54,7 +54,7 @@
 #include <blaze/math/smp/SerialSection.h>
 #include <blaze/math/smp/Functions.h>
 #include <blaze/math/typetraits/IsDenseVector.h>
-#include <blaze_cuda/math/typetraits/IsCUDAAssignable.h>
+#include <blaze/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/typetraits/IsSIMDCombinable.h>
 #include <blaze/math/views/Subvector.h>
 #include <blaze/system/SMP.h>
