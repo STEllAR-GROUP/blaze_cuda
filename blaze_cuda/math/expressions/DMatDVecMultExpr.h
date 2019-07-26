@@ -44,6 +44,9 @@
 #include <blaze/math/expressions/DMatDVecMultExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
 
+#include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
+
+
 namespace blaze {
 
 //**Assignment to dense matrices****************************************************************
@@ -194,6 +197,14 @@ inline auto cudaMultAssign( DenseVector<VT1,false>& lhs, const DMatDVecMultExpr<
 }
 /*! \endcond */
 //**********************************************************************************************
+
+template< typename MT, typename VT >
+struct RequiresCUDAEvaluation< DMatDVecMultExpr<MT,VT>
+   , EnableIf_t< IsCUDAAssignable_v< DMatDVecMultExpr<MT,VT> > > >
+{
+public:
+   static constexpr bool value = true;
+};
 
 } // namespace blaze
 

@@ -43,6 +43,7 @@
 
 #include <blaze/math/expressions/DMatDMatMapExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
+#include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
 
 namespace blaze {
 
@@ -225,6 +226,14 @@ inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatMapExpr<MT1
 }
 /*! \endcond */
 //**********************************************************************************************
+
+template< typename MT1, typename MT2, typename OP, bool SO >
+struct RequiresCUDAEvaluation< DMatDMatMapExpr<MT1,MT2,OP,SO>
+   , EnableIf_t< IsCUDAAssignable_v< DMatDMatMapExpr<MT1,MT2,OP,SO> > > >
+{
+public:
+   static constexpr bool value = RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2>;
+};
 
 } // namespace blaze
 

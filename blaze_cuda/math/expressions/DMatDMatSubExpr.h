@@ -44,6 +44,9 @@
 #include <blaze/math/expressions/DMatDMatSubExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
 
+#include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
+
+
 namespace blaze {
 
 //**Assignment to dense matrices****************************************************************
@@ -161,6 +164,14 @@ inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatSubExpr<MT1
 }
 /*! \endcond */
 //**********************************************************************************************
+
+template< typename MT1, typename MT2, bool SO >
+struct RequiresCUDAEvaluation< DMatDMatSubExpr<MT1,MT2,SO>
+   , EnableIf_t< IsCUDAAssignable_v< DMatDMatSubExpr<MT1,MT2,SO> > > >
+{
+public:
+   static constexpr bool value = RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2>;
+};
 
 } // namespace blaze
 

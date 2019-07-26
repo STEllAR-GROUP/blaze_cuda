@@ -44,6 +44,7 @@
 #include <blaze/math/traits/DeclSymTrait.h>
 
 #include <blaze_cuda/math/cublas/gemm.h>
+#include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
 
 namespace blaze {
 
@@ -128,6 +129,19 @@ inline auto cudaAddAssign( DenseMatrix<MT,SO>& lhs, const DMatDMatMultExpr<MT1,M
 
    gemm( ~lhs, A, B, ET(1), ET(1) );
 }
+
+template < typename MT1  // Type of the left-hand side dense matrix
+         , typename MT2  // Type of the right-hand side dense matrix
+         , bool SF       // Symmetry flag
+         , bool HF       // Hermitian flag
+         , bool LF       // Lower flag
+         , bool UF >     // Upper flag
+struct RequiresCUDAEvaluation< DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF>
+   , EnableIf_t< IsCUDAAssignable_v< DMatDMatMultExpr<MT1,MT2,SF,HF,LF,UF> > > >
+{
+public:
+   static constexpr bool value = true;
+};
 
 } // namespace blaze
 
