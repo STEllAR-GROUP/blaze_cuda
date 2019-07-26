@@ -66,7 +66,7 @@ template< typename MT  // Type of the target dense matrix
             , typename MT2
             , bool SO >   // Storage order of the target dense matrix
 inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatSubExpr<MT1,MT2,SO>& rhs )
-   -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+   -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -95,7 +95,7 @@ template< typename MT  // Type of the target dense matrix
             , typename MT2
             , bool SO >
 inline auto cudaAddAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatSubExpr<MT1,MT2,SO>& rhs )
-    -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+    -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
     BLAZE_FUNCTION_TRACE;
 
@@ -124,7 +124,7 @@ template< typename MT  // Type of the target dense matrix
             , typename MT2
             , bool SO >
 inline auto cudaSubAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatSubExpr<MT1,MT2,SO>& rhs )
-    -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+    -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -153,7 +153,7 @@ template< typename MT  // Type of the target dense matrix
             , typename MT2
             , bool SO >
 inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatSubExpr<MT1,MT2,SO>& rhs )
-    -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+    -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 

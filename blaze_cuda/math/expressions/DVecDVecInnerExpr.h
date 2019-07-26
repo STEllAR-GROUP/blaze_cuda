@@ -43,8 +43,10 @@
 
 #include <blaze/math/expressions/DVecDVecInnerExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
+#include <blaze/math/functors/Add.h>
 
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
+#include <blaze_cuda/util/algorithms/CUDAReduce.h>
 
 namespace blaze {
 
@@ -52,7 +54,8 @@ template< typename ET1    // Type of the left-hand side dense vector
         , typename ET2 >  // Type of the right-hand side dense vector
 inline auto dvecdvecinner( const CUDADynamicVector<ET1,true>& lhs, const CUDADynamicVector<ET2,false>& rhs )
 {
-   return MultTrait_t< ET1, ET2 >();
+   //using M_t = DVecDVecMultExpr<CUDADynamicVector<ET1,true>, CUDADynamicVector<ET2,false>, false>;
+   //cuda_reduce( M_t( lhs, rhs ), ET1(1), Add() );
 }
 
 } // namespace blaze

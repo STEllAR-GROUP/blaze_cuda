@@ -43,6 +43,7 @@
 
 #include <blaze/math/expressions/DMatDMatAddExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
+#include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
 
 namespace blaze {
 
@@ -66,7 +67,7 @@ template< typename MT  // Type of the target dense matrix
         , typename MT2
         , bool SO >   // Storage order of the target dense matrix
 inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
-   -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+   -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -79,7 +80,7 @@ inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,
    else if( !IsOperation_v<MT2> && isSame( ~lhs, rhs.rightOperand() ) ) {
       cudaAddAssign( ~lhs, rhs.leftOperand()  );
    }
-   else if( !RequiresEvaluation_v<MT2> ) {
+   else if( !RequiresCUDAEvaluation_v<MT2> ) {
       cudaAssign   ( ~lhs, rhs.rightOperand() );
       cudaAddAssign( ~lhs, rhs.leftOperand()  );
    }
@@ -111,14 +112,14 @@ template< typename MT  // Type of the target dense matrix
         , typename MT2
         , bool SO >
 inline auto cudaAddAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
-   -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+   -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-   if( !RequiresEvaluation_v<MT2> ) {
+   if( !RequiresCUDAEvaluation_v<MT2> ) {
       cudaAddAssign( ~lhs, rhs.rightOperand() );
       cudaAddAssign( ~lhs, rhs.leftOperand() );
    }
@@ -150,14 +151,14 @@ template< typename MT  // Type of the target dense matrix
         , typename MT2
         , bool SO >
 inline auto cudaSubAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
-   -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+   -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-   if( !RequiresEvaluation_v<MT2> ) {
+   if( !RequiresCUDAEvaluation_v<MT2> ) {
       cudaSubAssign( ~lhs, rhs.rightOperand() );
       cudaSubAssign( ~lhs, rhs.leftOperand() );
    }
@@ -189,7 +190,7 @@ template< typename MT  // Type of the target dense matrix
         , typename MT2
         , bool SO >
 inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1,MT2,SO>& rhs )
-   -> EnableIf_t< RequiresEvaluation_v<MT1> || RequiresEvaluation_v<MT2> >
+   -> EnableIf_t< RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -208,6 +209,14 @@ inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatDMatAddExpr<MT1
 }
 /*! \endcond */
 //**********************************************************************************************
+
+template< typename MT1, typename MT2, bool SO >
+struct RequiresCUDAEvaluation< DMatDMatAddExpr<MT1,MT2,SO>
+, EnableIf_t< IsCUDAAssignable_v< DMatDMatAddExpr<MT1,MT2,SO> > > >
+{
+public:
+   static constexpr bool value = RequiresCUDAEvaluation_v<MT1> || RequiresCUDAEvaluation_v<MT2>;
+};
 
 } // namespace blaze
 
