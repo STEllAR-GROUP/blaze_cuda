@@ -150,7 +150,7 @@ namespace detail {
       const auto n_out_begin = out_begin + global_id;
 
       unroll<Unroll>( [&] ( auto const& I ) {
-         auto delta = I() * grid_size;
+         auto const delta = I() * grid_size;
          *(n_out_begin + delta) = f( *(n_in_begin + delta) );
       } );
    }
@@ -225,11 +225,11 @@ namespace detail {
             , typename InputIt2
             , typename OutputIt
             , typename F >
-   inline void cuda_transform( InputIt1 in1_begin
-                                 , InputIt1 in1_end
-                                 , InputIt2 in2_begin
-                                 , OutputIt out_begin
-                                 , F const& f )
+   inline void cuda_transform ( InputIt1 in1_begin
+                              , InputIt1 in1_end
+                              , InputIt2 in2_begin
+                              , OutputIt out_begin
+                              , F const& f )
    {
       using std::size_t;
 

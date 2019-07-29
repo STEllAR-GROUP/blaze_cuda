@@ -60,12 +60,11 @@ namespace blaze {
 
 template< typename VT, bool TF, typename T, typename OP >
 inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
-   -> EnableIf_t< IsSMPAssignable_v<VT>, T >
 {
    return thrust::reduce( thrust::device, (~vec).begin(), (~vec).end(), init, op );
 }
 
-#else
+#else // !BLAZE_CUDA_USE_THRUST
 
 namespace cuda_reduce_detail {
 
@@ -183,7 +182,6 @@ void __global__ reduce_kernel ( InputIt in_beg, OutputIt inout_beg, T init, BinO
 
 template< typename VT, bool TF, typename T, typename OP >
 inline auto cuda_reduce( DenseVector<VT, TF> const& vec, T init, OP op )
-   -> EnableIf_t< IsSMPAssignable_v<VT>, T >
 {
    return cuda_reduce_detail::reduce( (~vec).begin(), (~vec).end(), init, op );
 }
