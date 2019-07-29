@@ -41,21 +41,33 @@
 // Includes
 //*************************************************************************************************
 
+#include <utility>
+
+#include <thrust/reduce.h>
+#include <thrust/execution_policy.h>
+
 #include <blaze/math/expressions/DVecDVecInnerExpr.h>
 #include <blaze/math/traits/DeclSymTrait.h>
 #include <blaze/math/functors/Add.h>
+#include <blaze/math/functors/Mult.h>
+#include <blaze/system/CUDAAttributes.h>
 
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
 #include <blaze_cuda/util/algorithms/CUDAReduce.h>
+#include <blaze_cuda/util/ZipTransformIterator.h>
+
 
 namespace blaze {
 
 template< typename ET1    // Type of the left-hand side dense vector
         , typename ET2 >  // Type of the right-hand side dense vector
-inline auto dvecdvecinner( const CUDADynamicVector<ET1,true>& lhs, const CUDADynamicVector<ET2,false>& rhs )
+inline auto dvecdvecinner( const CUDADynamicVector<ET1,true>& lhs
+   , const CUDADynamicVector<ET2,false>& rhs )
 {
-   //using M_t = DVecDVecMultExpr<CUDADynamicVector<ET1,true>, CUDADynamicVector<ET2,false>, false>;
-   //cuda_reduce( M_t( lhs, rhs ), ET1(1), Add() );
+   using blaze::ZipTransformIterator;
+   auto beg_in  = ZipTransformIterator( lhs.begin(), rhs.begin(), blaze::Mult() );
+   auto beg_end = ZipTransformIterator( lhs.end()  , rhs.end()  , blaze::Mult() );
+   return thrust::reduce( thrust::device, beg_in, beg_end, ET1(0), blaze::Add() );
 }
 
 } // namespace blaze
