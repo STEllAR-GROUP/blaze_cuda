@@ -45,6 +45,7 @@
 #include <blaze/math/traits/DeclSymTrait.h>
 #include <blaze/math/typetraits/IsCUDAAssignable.h>
 
+#include <blaze_cuda/math/cublas/geam.h>
 #include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
 
 
