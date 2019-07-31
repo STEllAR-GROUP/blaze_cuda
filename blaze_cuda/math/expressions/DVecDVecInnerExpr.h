@@ -54,7 +54,7 @@
 
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
 #include <blaze_cuda/util/algorithms/CUDAReduce.h>
-#include <blaze_cuda/util/ZipTransformIterator.h>
+#include <blaze_cuda/util/BinopIterator.h>
 
 
 namespace blaze {
@@ -64,10 +64,12 @@ template< typename ET1    // Type of the left-hand side dense vector
 inline auto dvecdvecinner( const CUDADynamicVector<ET1,true>& lhs
    , const CUDADynamicVector<ET2,false>& rhs )
 {
-   using blaze::ZipTransformIterator;
-   auto beg_in  = ZipTransformIterator( lhs.begin(), rhs.begin(), blaze::Mult() );
-   auto beg_end = ZipTransformIterator( lhs.end()  , rhs.end()  , blaze::Mult() );
-   return thrust::reduce( thrust::device, beg_in, beg_end, ET1(0), blaze::Add() );
+   using blaze::BinopIterator;
+
+   return thrust::reduce( thrust::device,
+      BinopIterator( lhs.begin(), rhs.begin(), blaze::Mult() ),
+      BinopIterator( lhs.end()  , rhs.end()  , blaze::Mult() ),
+      ET1(0), blaze::Add() );
 }
 
 } // namespace blaze

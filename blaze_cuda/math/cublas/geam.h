@@ -90,9 +90,9 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
                                  const complex<double> *beta, const complex<double> *B, int ldb,
                                  complex<double> *C, int ldc );
 
-//template< typename MT1, bool SO1, typename MT2, bool SO2, typename MT3, bool SO3, typename ST >
-//BLAZE_ALWAYS_INLINE void cugeam( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,SO2>& A,
-//                                 const DenseMatrix<MT3,SO3>& B, ST alpha, ST beta );
+template< typename MT1, bool SO1, typename MT2, bool SO2, typename MT3, bool SO3, typename ST >
+BLAZE_ALWAYS_INLINE void cugeam( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,SO2>& A,
+                                 const DenseMatrix<MT3,SO3>& B, ST alpha, ST beta );
 
 #endif
 //@}
@@ -321,10 +321,10 @@ BLAZE_ALWAYS_INLINE void geam ( CUDADynamicMatrix<MT1,SO1>& C, const CUDADynamic
    const int ldb( numeric_cast<int>( (~B).spacing() ) );
    const int ldc( numeric_cast<int>( (~C).spacing() ) );
 
-   cugeam( ( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
-           ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
-           ( SO1 == SO3 )?( CblasNoTrans ):( CblasTrans ),
-           m, n, k, alpha, (~A).data(), lda, (~B).data(), ldb, beta, (~C).data(), ldc );
+   //cugeam( ( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
+   //        ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
+   //        ( SO1 == SO3 )?( CblasNoTrans ):( CblasTrans ),
+   //        m, n, k, alpha, (~A).data(), lda, (~B).data(), ldb, beta, (~C).data(), ldc );
 }
 #endif
 //*************************************************************************************************

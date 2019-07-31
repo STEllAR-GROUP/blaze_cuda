@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze_cuda/util/ZipTransformIterator.h
+//  \file blaze_cuda/util/BinopIterator.h
 //  \brief Header file for zip transform iterator
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
@@ -32,8 +32,8 @@
 */
 //=================================================================================================
 
-#ifndef _BLAZE_CUDA_UTIL_ZIPTRANSFORMITERATOR_H_
-#define _BLAZE_CUDA_UTIL_ZIPTRANSFORMITERATOR_H_
+#ifndef _BLAZE_CUDA_UTIL_BINOPITERATOR_H_
+#define _BLAZE_CUDA_UTIL_BINOPITERATOR_H_
 
 
 //*************************************************************************************************
@@ -48,10 +48,8 @@
 
 namespace blaze {
 
-template < typename LeftInputIterator
-         , typename RightInputIterator
-         , typename OP >
-class ZipTransformIterator
+template < typename LeftInputIterator, typename RightInputIterator, typename OP >
+class BinopIterator
 {
 private:
    LeftInputIterator  _lit;
@@ -59,8 +57,7 @@ private:
    OP _op;
 
 public:
-
-   inline BLAZE_DEVICE_CALLABLE ZipTransformIterator  ( LeftInputIterator const& lit
+   inline BLAZE_DEVICE_CALLABLE BinopIterator  ( LeftInputIterator const& lit
                                                       , RightInputIterator const& rit
                                                       , OP const& op)
    : _lit(lit), _rit(rit), _op(op) {}
@@ -73,49 +70,49 @@ public:
 
    inline BLAZE_DEVICE_CALLABLE value_type operator *  () { return _op(*_lit  , *_rit  ); }
 
-   inline BLAZE_DEVICE_CALLABLE ZipTransformIterator operator ++ (int) {
-      return ZipTransformIterator( _lit++, _rit++ );
+   inline BLAZE_DEVICE_CALLABLE BinopIterator operator ++ (int) {
+      return BinopIterator( _lit++, _rit++ );
    }
-   inline BLAZE_DEVICE_CALLABLE ZipTransformIterator operator -- (int) {
-      return ZipTransformIterator( _lit--, _rit-- );
+   inline BLAZE_DEVICE_CALLABLE BinopIterator operator -- (int) {
+      return BinopIterator( _lit--, _rit-- );
    }
-   inline BLAZE_DEVICE_CALLABLE ZipTransformIterator& operator ++ ()    {
+   inline BLAZE_DEVICE_CALLABLE BinopIterator& operator ++ ()    {
       ++_lit; ++_rit;
       return *this;
    }
-   inline BLAZE_DEVICE_CALLABLE ZipTransformIterator& operator -- ()    {
+   inline BLAZE_DEVICE_CALLABLE BinopIterator& operator -- ()    {
       --_lit; --_rit;
       return *this;
    }
 
-   inline BLAZE_DEVICE_CALLABLE bool operator == ( ZipTransformIterator const& other ) {
+   inline BLAZE_DEVICE_CALLABLE bool operator == ( BinopIterator const& other ) {
       return _lit == other._lit;
    }
 
-   inline BLAZE_DEVICE_CALLABLE bool operator != ( ZipTransformIterator const& other ) {
+   inline BLAZE_DEVICE_CALLABLE bool operator != ( BinopIterator const& other ) {
       return _lit != other._lit;
    }
 
-   inline BLAZE_DEVICE_CALLABLE bool operator <  ( ZipTransformIterator const& other ) {
+   inline BLAZE_DEVICE_CALLABLE bool operator <  ( BinopIterator const& other ) {
       return _lit < other._lit;
    }
 
-   inline BLAZE_DEVICE_CALLABLE bool operator >  ( ZipTransformIterator const& other ) {
+   inline BLAZE_DEVICE_CALLABLE bool operator >  ( BinopIterator const& other ) {
       return _lit > other._lit;
    }
 
-   inline BLAZE_DEVICE_CALLABLE ZipTransformIterator operator+  (std::size_t inc) {
-      return ZipTransformIterator( _lit + inc, _rit + inc, _op );
+   inline BLAZE_DEVICE_CALLABLE BinopIterator operator+  (std::size_t inc) {
+      return BinopIterator( _lit + inc, _rit + inc, _op );
    }
 
    inline BLAZE_DEVICE_CALLABLE value_type operator[] (std::size_t inc) {
-      return *ZipTransformIterator( _lit + inc, _rit + inc, _op );
+      return *BinopIterator( _lit + inc, _rit + inc, _op );
    }
 };
 
 template < typename LeftInputIterator , typename RightInputIterator , typename OP >
-ZipTransformIterator ( LeftInputIterator, RightInputIterator, OP )
-   -> ZipTransformIterator<LeftInputIterator,RightInputIterator,OP>;
+BinopIterator ( LeftInputIterator, RightInputIterator, OP )
+   -> BinopIterator<LeftInputIterator,RightInputIterator,OP>;
 
 } // namespace blaze
 
