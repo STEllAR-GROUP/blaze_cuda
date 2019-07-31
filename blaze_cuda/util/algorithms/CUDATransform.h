@@ -39,14 +39,14 @@
 
 #include <blaze_cuda/util/algorithms/Unroll.h>
 
-#ifdef BLAZE_CUDA_USE_THRUST
+#ifndef BLAZE_CUDA_NO_THRUST
 #  include <thrust/transform.h>
 #  include <thrust/execution_policy.h>
 #endif
 
 namespace blaze {
 
-#ifdef BLAZE_CUDA_USE_THRUST
+#ifndef BLAZE_CUDA_NO_THRUST
 
 namespace detail {
 
@@ -131,7 +131,7 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
    thrust::transform( thrust::device, AI1(in1_begin), AI1(in1_end), out_begin, f );
 }
 
-#else // ifdef BLAZE_CUDA_USE_THRUST
+#else // ifndef BLAZE_CUDA_NO_THRUST
 
 namespace detail {
 
@@ -295,7 +295,7 @@ inline void cuda_transform ( InputIt1 in1_begin , InputIt1 in1_end
    detail::cuda_transform( in1_begin, in1_end, out_begin, f );
 }
 
-#endif   // ifdef BLAZE_CUDA_USE_THRUST
+#endif   // ifndef BLAZE_CUDA_NO_THRUST
 
 }  // namespace blaze
 
