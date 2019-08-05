@@ -59,6 +59,13 @@
 
 namespace blaze {
 
+namespace detail_blas_helper {
+
+//auto retranspose( CBLAS_ORDER const& or, cublasOperation_t const& op ) {
+//}
+
+}  // namespace detail_blas_helper
+
 //=================================================================================================
 //
 //  BLAS WRAPPER FUNCTIONS (GEMM)
@@ -68,20 +75,20 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name BLAS wrapper functions (gemm) */
 //@{
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, float alpha, const float* A, int lda,
                                  const float* B, int ldb, float beta, float* C, int ldc );
 
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, double alpha, const double* A, int lda,
                                  const double* B, int ldb, double beta, float* C, int ldc );
 
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, complex<float> alpha, const complex<float>* A,
                                  int lda, const complex<float>* B, int ldb, complex<float> beta,
                                  float* C, int ldc );
 
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, complex<double> alpha, const complex<double>* A,
                                  int lda, const complex<double>* B, int ldb, complex<double> beta,
                                  float* C, int ldc );
@@ -117,22 +124,22 @@ BLAZE_ALWAYS_INLINE void cugemm( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,
 // This function performs the dense matrix/dense matrix multiplication for single precision
 // matrices based on the BLAS cblas_sgemm() function.
 */
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, float alpha, const float* A, int lda,
                                  const float* B, int ldb, float beta, float* C, int ldc )
 {
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasStatus_t cublasSgemm(cublasHandle_t handle,
-                           cublasOperation_t transa, cublasOperation_t transb,
-                           int m, int n, int k,
-                           const float           *alpha,
-                           const float           *A, int lda,
-                           const float           *B, int ldb,
-                           const float           *beta,
-                           float           *C, int ldc)
-   cublasSgemm( handle, order, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   //cublasStatus_t cublasSgemm(cublasHandle_t handle,
+   //                        cublasOperation_t transa, cublasOperation_t transb,
+   //                        int m, int n, int k,
+   //                        const float           *alpha,
+   //                        const float           *A, int lda,
+   //                        const float           *B, int ldb,
+   //                        const float           *beta,
+   //                        float           *C, int ldc)
+   cublasSgemm( handle, transA, transB, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -161,14 +168,14 @@ BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLA
 // This function performs the dense matrix/dense matrix multiplication for double precision
 // matrices based on the BLAS cblas_dgemm() function.
 */
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, double alpha, const double* A, int lda,
                                  const double* B, int ldb, double beta, double* C, int ldc )
 {
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasDgemm( handle, order, transA, transB, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasDgemm( handle, transA, transB, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -197,7 +204,7 @@ BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLA
 // This function performs the dense matrix/dense matrix multiplication for single precision
 // complex matrices based on the BLAS cblas_cgemm() function.
 */
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, complex<float> alpha, const complex<float>* A,
                                  int lda, const complex<float>* B, int ldb, complex<float> beta,
                                  complex<float>* C, int ldc )
@@ -205,11 +212,11 @@ BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLA
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasCgemm( handle, order, transA, transB, m, n, k, reinterpret_cast<const float*>( &alpha ),
-                reinterpret_cast<const float*>( A ), lda, reinterpret_cast<const float*>( B ),
-                ldb, reinterpret_cast<const float*>( &beta ), reinterpret_cast<float*>( C ), ldc );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasCgemm( handle, transA, transB, m, n, k, reinterpret_cast<const cuComplex*>( &alpha ),
+                reinterpret_cast<const cuComplex*>( A ), lda, reinterpret_cast<const cuComplex*>( B ),
+                ldb, reinterpret_cast<const cuComplex*>( &beta ), reinterpret_cast<cuComplex*>( C ), ldc );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -238,7 +245,7 @@ BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLA
 // This function performs the dense matrix/dense matrix multiplication for double precision
 // complex matrices based on the BLAS cblas_zgemm() function.
 */
-BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB,
+BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
                                  int m, int n, int k, complex<double> alpha, const complex<double>* A,
                                  int lda, const complex<double>* B, int ldb, complex<double> beta,
                                  complex<double>* C, int ldc )
@@ -246,11 +253,11 @@ BLAZE_ALWAYS_INLINE void cugemm( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, CBLA
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasZgemm( handle, order, transA, transB, m, n, k, reinterpret_cast<const double*>( &alpha ),
-                reinterpret_cast<const double*>( A ), lda, reinterpret_cast<const double*>( B ),
-                ldb, reinterpret_cast<const double*>( &beta ), reinterpret_cast<double*>( C ), ldc );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasZgemm( handle, transA, transB, m, n, k, reinterpret_cast<const cuDoubleComplex*>( &alpha ),
+                reinterpret_cast<const cuDoubleComplex*>( A ), lda, reinterpret_cast<const cuDoubleComplex*>( B ),
+                ldb, reinterpret_cast<const cuDoubleComplex*>( &beta ), reinterpret_cast<cuDoubleComplex*>( C ), ldc );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -278,9 +285,9 @@ template< typename MT1   // Type of the left-hand side target matrix
         , typename MT3   // Type of the right-hand side matrix operand
         , bool SO3       // Storage order of the right-hand side matrix operand
         , typename ST >  // Type of the scalar factors
-BLAZE_ALWAYS_INLINE void cugemm ( DynamicMatrix<MT1,SO1>& C,
-   const DynamicMatrix<MT2,SO2>& A,
-   const DynamicMatrix<MT3,SO3>& B,
+BLAZE_ALWAYS_INLINE void cugemm ( DenseMatrix<MT1,SO1>& C,
+   const DenseMatrix<MT2,SO2>& A,
+   const DenseMatrix<MT3,SO3>& B,
    ST alpha, ST beta )
 {
    //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -302,9 +309,10 @@ BLAZE_ALWAYS_INLINE void cugemm ( DynamicMatrix<MT1,SO1>& C,
    const int ldb( numeric_cast<int>( (~B).spacing() ) );
    const int ldc( numeric_cast<int>( (~C).spacing() ) );
 
-   cugemm( ( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
-           ( SO1 == SO2 )?( CblasNoTrans ):( CblasTrans ),
-           ( SO1 == SO3 )?( CblasNoTrans ):( CblasTrans ),
+   //( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
+
+   cugemm( ( SO1 == SO2 )?( CUBLAS_OP_N ):( CUBLAS_OP_T ),
+           ( SO1 == SO3 )?( CUBLAS_OP_N ):( CUBLAS_OP_T ),
            m, n, k, alpha, (~A).data(), lda, (~B).data(), ldb, beta, (~C).data(), ldc );
 }
 //*************************************************************************************************
