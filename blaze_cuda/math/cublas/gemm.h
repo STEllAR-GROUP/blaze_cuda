@@ -49,6 +49,7 @@
 #include <blaze/math/constraints/MutableDataAccess.h>
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/typetraits/IsRowMajorMatrix.h>
+#include <blaze/math/StorageOrder.h>
 #include <blaze/system/BLAS.h>
 #include <blaze/system/Inline.h>
 #include <blaze/util/Assert.h>
@@ -76,22 +77,32 @@ namespace detail_blas_helper {
 /*!\name BLAS wrapper functions (gemm) */
 //@{
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, float alpha, const float* A, int lda,
-                                 const float* B, int ldb, float beta, float* C, int ldc );
+                                 int m, int n, int k, float alpha,
+                                 const float* A, int lda,
+                                 const float* B, int ldb,
+                                 float beta,
+                                       float* C, int ldc );
 
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, double alpha, const double* A, int lda,
-                                 const double* B, int ldb, double beta, float* C, int ldc );
+                                 int m, int n, int k, double alpha,
+                                 const double* A, int lda,
+                                 const double* B, int ldb,
+                                 double beta,
+                                       double* C, int ldc );
 
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, complex<float> alpha, const complex<float>* A,
-                                 int lda, const complex<float>* B, int ldb, complex<float> beta,
-                                 float* C, int ldc );
+                                 int m, int n, int k, complex<float> alpha,
+                                 const complex<float>* A, int lda,
+                                 const complex<float>* B, int ldb,
+                                 complex<float> beta,
+                                       complex<float>* C, int ldc );
 
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, complex<double> alpha, const complex<double>* A,
-                                 int lda, const complex<double>* B, int ldb, complex<double> beta,
-                                 float* C, int ldc );
+                                 int m, int n, int k, complex<double> alpha,
+                                 const complex<double>* A, int lda,
+                                 const complex<double>* B, int ldb,
+                                 complex<double> beta,
+                                       complex<double>* C, int ldc );
 
 template< typename MT1, bool SO1, typename MT2, bool SO2, typename MT3, bool SO3, typename ST >
 BLAZE_ALWAYS_INLINE void cugemm( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,SO2>& A,
@@ -125,19 +136,14 @@ BLAZE_ALWAYS_INLINE void cugemm( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,
 // matrices based on the BLAS cblas_sgemm() function.
 */
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, float alpha, const float* A, int lda,
-                                 const float* B, int ldb, float beta, float* C, int ldc )
+                                 int m, int n, int k, float alpha,
+                                 const float* A, int lda,
+                                 const float* B, int ldb,
+                                 float beta,
+                                       float* C, int ldc )
 {
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   //cublasStatus_t cublasSgemm(cublasHandle_t handle,
-   //                        cublasOperation_t transa, cublasOperation_t transb,
-   //                        int m, int n, int k,
-   //                        const float           *alpha,
-   //                        const float           *A, int lda,
-   //                        const float           *B, int ldb,
-   //                        const float           *beta,
-   //                        float           *C, int ldc)
    cublasSgemm( handle, transA, transB, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc );
    cublasDestroy_v2( handle );
 }
@@ -169,8 +175,11 @@ BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t tra
 // matrices based on the BLAS cblas_dgemm() function.
 */
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, double alpha, const double* A, int lda,
-                                 const double* B, int ldb, double beta, double* C, int ldc )
+                                 int m, int n, int k, double alpha,
+                                 const double* A, int lda,
+                                 const double* B, int ldb,
+                                 double beta,
+                                       double* C, int ldc )
 {
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
@@ -205,17 +214,22 @@ BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t tra
 // complex matrices based on the BLAS cblas_cgemm() function.
 */
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, complex<float> alpha, const complex<float>* A,
-                                 int lda, const complex<float>* B, int ldb, complex<float> beta,
-                                 complex<float>* C, int ldc )
+                                 int m, int n, int k, complex<float> alpha,
+                                 const complex<float>* A, int lda,
+                                 const complex<float>* B, int ldb,
+                                 complex<float> beta,
+                                       complex<float>* C, int ldc )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   cublasCgemm( handle, transA, transB, m, n, k, reinterpret_cast<const cuComplex*>( &alpha ),
-                reinterpret_cast<const cuComplex*>( A ), lda, reinterpret_cast<const cuComplex*>( B ),
-                ldb, reinterpret_cast<const cuComplex*>( &beta ), reinterpret_cast<cuComplex*>( C ), ldc );
+   cublasCgemm( handle, transA, transB, m, n, k,
+      reinterpret_cast<const cuComplex*>( &alpha ),
+      reinterpret_cast<const cuComplex*>( A ), lda,
+      reinterpret_cast<const cuComplex*>( B ), ldb,
+      reinterpret_cast<const cuComplex*>( &beta ),
+      reinterpret_cast<      cuComplex*>( C ), ldc );
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -246,17 +260,22 @@ BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t tra
 // complex matrices based on the BLAS cblas_zgemm() function.
 */
 BLAZE_ALWAYS_INLINE void cugemm( cublasOperation_t transA, cublasOperation_t transB,
-                                 int m, int n, int k, complex<double> alpha, const complex<double>* A,
-                                 int lda, const complex<double>* B, int ldb, complex<double> beta,
-                                 complex<double>* C, int ldc )
+                                 int m, int n, int k, complex<double> alpha,
+                                 const complex<double>* A, int lda,
+                                 const complex<double>* B, int ldb,
+                                 complex<double> beta,
+                                       complex<double>* C, int ldc )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   cublasZgemm( handle, transA, transB, m, n, k, reinterpret_cast<const cuDoubleComplex*>( &alpha ),
-                reinterpret_cast<const cuDoubleComplex*>( A ), lda, reinterpret_cast<const cuDoubleComplex*>( B ),
-                ldb, reinterpret_cast<const cuDoubleComplex*>( &beta ), reinterpret_cast<cuDoubleComplex*>( C ), ldc );
+   cublasZgemm( handle, transA, transB, m, n, k,
+      reinterpret_cast<const cuDoubleComplex*>( &alpha ),
+      reinterpret_cast<const cuDoubleComplex*>( A ), lda,
+      reinterpret_cast<const cuDoubleComplex*>( B ), ldb,
+      reinterpret_cast<const cuDoubleComplex*>( &beta ),
+      reinterpret_cast<      cuDoubleComplex*>( C ), ldc );
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -286,17 +305,17 @@ template< typename MT1   // Type of the left-hand side target matrix
         , bool SO3       // Storage order of the right-hand side matrix operand
         , typename ST >  // Type of the scalar factors
 BLAZE_ALWAYS_INLINE void cugemm ( DenseMatrix<MT1,SO1>& C,
-   const DenseMatrix<MT2,SO2>& A,
-   const DenseMatrix<MT3,SO3>& B,
-   ST alpha, ST beta )
+                            const DenseMatrix<MT2,SO2>& A,
+                            const DenseMatrix<MT3,SO3>& B,
+                            ST alpha, ST beta )
 {
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT3 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT3 );
 
-   //BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT1 );
-   //BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT2 );
-   //BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT3 );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT1 );
+   BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT2 );
+   BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT3 );
 
    //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
    //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
@@ -309,11 +328,24 @@ BLAZE_ALWAYS_INLINE void cugemm ( DenseMatrix<MT1,SO1>& C,
    const int ldb( numeric_cast<int>( (~B).spacing() ) );
    const int ldc( numeric_cast<int>( (~C).spacing() ) );
 
-   //( IsRowMajorMatrix_v<MT1> )?( CblasRowMajor ):( CblasColMajor ),
-
-   cugemm( ( SO1 == SO2 )?( CUBLAS_OP_N ):( CUBLAS_OP_T ),
-           ( SO1 == SO3 )?( CUBLAS_OP_N ):( CUBLAS_OP_T ),
-           m, n, k, alpha, (~A).data(), lda, (~B).data(), ldb, beta, (~C).data(), ldc );
+   if ( SO1 == columnMajor ) {
+      cugemm( ( SO2 ? CUBLAS_OP_N : CUBLAS_OP_T ),
+              ( SO3 ? CUBLAS_OP_N : CUBLAS_OP_T ),
+              m, n, k, alpha,
+              (~A).data(), lda,
+              (~B).data(), ldb,
+              beta,
+              (~C).data(), ldc );
+   }
+   else {
+      cugemm( ( SO3 ? CUBLAS_OP_T : CUBLAS_OP_N ),
+              ( SO2 ? CUBLAS_OP_T : CUBLAS_OP_N ),
+              n, m, k, alpha,
+              (~B).data(), ldb,
+              (~A).data(), lda,
+              beta,
+              (~C).data(), ldc );
+   }
 }
 //*************************************************************************************************
 
