@@ -74,15 +74,11 @@ public:
    BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE
       ThrustIteratorAdapter( IteratorType const& it ): it(it) {}
 
-   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE ValueType
-      operator[]( ptrdiff_t inc ) const noexcept
-   {
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE ValueType operator[]( ptrdiff_t inc ) const noexcept {
       return *ThrustIteratorAdapter( it + inc );
    }
 
-   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE ValueType
-      operator*() const noexcept
-   {
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE ValueType operator*() const noexcept {
       return *it;
    }
 
@@ -92,9 +88,7 @@ public:
       return it - other.it;
    }
 
-   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto
-      operator+( ptrdiff_t inc ) const noexcept
-   {
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto operator+( ptrdiff_t inc ) const noexcept {
       return IteratorType( it + inc );
    }
 };
