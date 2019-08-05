@@ -73,8 +73,16 @@ inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>& r
 {
    BLAZE_FUNCTION_TRACE;
 
+   using ExpressionType = DMatTransExpr<MT1,SO>;
+   using ResultType = typename ExpressionType::ResultType;
+   using ET = typename MT::ElementType;
+
+   ResultType tmp( serial( rhs ) );
+
    //BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
    //BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   cugeam( ~lhs, tmp, ET(1), CUBLAS_OP_T );
 }
 /*! \endcond */
 //**********************************************************************************************
@@ -101,8 +109,17 @@ inline auto cudaAddAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>
 {
    BLAZE_FUNCTION_TRACE;
 
+   using ExpressionType = DMatTransExpr<MT1,SO>;
+   using ResultType = typename ExpressionType::ResultType;
+
+   ResultType tmp( serial( rhs ) );
+
    //BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
    //BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   cugeam( ~lhs, ~lhs, ~rhs,
+         typename MT::ElementType(1), CUBLAS_OP_N ,
+         typename MT::ElementType(1), CUBLAS_OP_T );
 }
 /*! \endcond */
 //**********************************************************************************************
@@ -129,8 +146,17 @@ inline auto cudaSubAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>
 {
    BLAZE_FUNCTION_TRACE;
 
+   using ExpressionType = DMatTransExpr<MT1,SO>;
+   using ResultType = typename ExpressionType::ResultType;
+
+   ResultType tmp( serial( rhs ) );
+
    //BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
    //BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+
+   cugeam( ~lhs, ~lhs, ~rhs,
+         typename MT::ElementType( 1), CUBLAS_OP_N ,
+         typename MT::ElementType(-1), CUBLAS_OP_T );
 }
 /*! \endcond */
 //**********************************************************************************************
@@ -156,13 +182,18 @@ template< typename MT  // Type of the target dense matrix
 inline auto cudaSchurAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
+
+   using ExpressionType = DMatTransExpr<MT1,SO>;
+   using ResultType = typename ExpressionType::ResultType;
+
+   ResultType tmp( serial( rhs ) );
 }
 /*! \endcond */
 //**********************************************************************************************
 
 template< typename MT, bool SO >
-struct RequiresCUDAEvaluation< DMatTransExpr<MT, SO>,
-   EnableIf_t< IsCUDAAssignable_v<MT> > >
+struct RequiresCUDAEvaluation< DMatTransExpr<MT, SO>
+   , EnableIf_t< IsCUDAAssignable_v<MT> > >
 {
 public:
    static constexpr bool value = true;

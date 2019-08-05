@@ -86,7 +86,7 @@ inline auto cudaAssign( DenseMatrix<MT,SO>& lhs, const DMatDMatMultExpr<MT1,MT2,
    BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
 
-   gemm( ~lhs, A, B, ET(1), ET(0) );
+   cugemm( ~lhs, ~A, ~B, ET(1), ET(0) );
 }
 
 template < typename MT   // Type of the target dense matrix
@@ -127,7 +127,7 @@ inline auto cudaAddAssign( DenseMatrix<MT,SO>& lhs, const DMatDMatMultExpr<MT1,M
    BLAZE_INTERNAL_ASSERT( A.rows()    == (~lhs).rows()     , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( B.columns() == (~lhs).columns()  , "Invalid number of columns" );
 
-   gemm( ~lhs, A, B, ET(1), ET(1) );
+   cugemm( ~lhs, A, B, ET(1), ET(1) );
 }
 
 template < typename MT1, typename MT2, bool SF, bool HF, bool LF, bool UF >
