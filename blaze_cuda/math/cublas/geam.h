@@ -40,7 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <cublas.h>
+#include <cublas_v2.h>
 
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/BLASCompatible.h>
@@ -133,9 +133,9 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
                                        float *C, int ldc )
 {
    cublasHandle_t handle;
-   cublasCreate( &handle );
+   cublasCreate_v2( &handle );
    cublasSgeam( handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, C, ldc );
-   cublasDestroy( handle );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -173,9 +173,9 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
                                        double *C, int ldc )
 {
    cublasHandle_t handle;
-   cublasCreate( &handle );
+   cublasCreate_v2( &handle );
    cublasDgeam( handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, C, ldc );
-   cublasDestroy( handle );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -215,12 +215,12 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
    cublasHandle_t handle;
-   cublasCreate( &handle );
+   cublasCreate_v2( &handle );
    cublasCgeam( handle, transa, transb, m, n,
       reinterpret_cast<const float*>( &alpha ), reinterpret_cast<const float*>( A ), lda,
       reinterpret_cast<const float*>( &beta ) , reinterpret_cast<const float*>( B ), ldb,
                reinterpret_cast<const float*>( C ), ldc );
-   cublasDestroy( handle );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -260,12 +260,12 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
    cublasHandle_t handle;
-   cublasCreate( &handle );
+   cublasCreate_v2( &handle );
    cublasZgeam( handle, transa, transb, m, n,
       reinterpret_cast<const double*>( &alpha ),   reinterpret_cast<const float*>( A ), lda,
       reinterpret_cast<const double*>( &beta ) ,   reinterpret_cast<const float*>( B ), ldb,
                                                    reinterpret_cast<const float*>( C ), ldc );
-   cublasDestroy( handle );
+   cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
 
@@ -296,8 +296,8 @@ template< typename MT1   // Type of the left-hand side target matrix
 BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
                             const DenseMatrix<MT2,SO2>& A,
                             const DenseMatrix<MT3,SO3>& B,
-                            ST alpha, CBLAS_TRANSPOSE transa ,
-                            ST beta , CBLAS_TRANSPOSE transb )
+                            ST alpha, cublasOperation_t transa ,
+                            ST beta , cublasOperation_t transb )
 {
    //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
    //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
@@ -365,9 +365,10 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
    const int ldc( numeric_cast<int>( (~C).spacing() ) );
 
    cugeam( transa, CUBLAS_OP_N, m, n,
-      alpha, (~A).data(), lda   ,
+      alpha,
+      (~A).data(), lda,
       ST(0), nullptr    , int(0),
-             (~C).data(), ldc   );
+      (~C).data(), ldc );
 }
 //*************************************************************************************************
 
