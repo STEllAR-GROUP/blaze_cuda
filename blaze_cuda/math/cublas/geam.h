@@ -56,6 +56,8 @@
 #include <blaze/util/NumericCast.h>
 #include <blaze/util/StaticAssert.h>
 
+#include <blaze_cuda/util/CUDAManagedAllocator.h>
+
 
 namespace blaze {
 
@@ -69,22 +71,22 @@ namespace blaze {
 /*!\name BLAS wrapper functions (geam) */
 //@{
 
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb, int m, int n,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb, int m, int n,
                                  const float alpha, const float *A, int lda,
                                  const float beta , const float *B, int ldb,
                                                           float *C, int ldc );
 
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb, int m, int n,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb, int m, int n,
                                  const double alpha, const double *A, int lda,
                                  const double beta , const double *B, int ldb,
                                                            double *C, int ldc );
 
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb, int m, int n,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb, int m, int n,
                                  const complex<float> alpha, const complex<float> *A, int lda,
                                  const complex<float> beta , const complex<float> *B, int ldb,
                                                                    complex<float> *C, int ldc );
 
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb, int m, int n,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb, int m, int n,
                                  const complex<double> alpha, const complex<double> *A, int lda,
                                  const complex<double> beta , const complex<double> *B, int ldb,
                                                                     complex<double> *C, int ldc );
@@ -124,7 +126,7 @@ BLAZE_ALWAYS_INLINE void cugeam( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,
 // This function performs the dense matrix/dense matrix multiplication for single precision
 // matrices based on the BLAS cblas_sgeam() function.
 */
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
                                  const float alpha,
                                  const float *A, int lda,
@@ -164,7 +166,7 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
 // This function performs the dense matrix/dense matrix multiplication for double precision
 // matrices based on the BLAS cblas_dgeam() function.
 */
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
                                  const double alpha,
                                  const double *A, int lda,
@@ -204,7 +206,7 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
 // This function performs the dense matrix/dense matrix multiplication for single precision
 // complex matrices based on the BLAS cblas_cgeam() function.
 */
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
                                  const complex<float> alpha,
                                  const complex<float> *A, int lda,
@@ -217,9 +219,11 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
    cublasCgeam( handle, transa, transb, m, n,
-      reinterpret_cast<const float*>( &alpha ), reinterpret_cast<const float*>( A ), lda,
-      reinterpret_cast<const float*>( &beta ) , reinterpret_cast<const float*>( B ), ldb,
-               reinterpret_cast<const float*>( C ), ldc );
+      reinterpret_cast<const cuComplex*>( &alpha ),
+      reinterpret_cast<const cuComplex*>( A ), lda,
+      reinterpret_cast<const cuComplex*>( &beta ),
+      reinterpret_cast<const cuComplex*>( B ), ldb,
+      reinterpret_cast<      cuComplex*>( C ), ldc );
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -249,7 +253,7 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
 // This function performs the dense matrix/dense matrix multiplication for double precision
 // complex matrices based on the BLAS cblas_zgeam() function.
 */
-BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
+BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
                                  const complex<double> alpha,
                                  const complex<double> *A, int lda,
@@ -262,9 +266,11 @@ BLAZE_ALWAYS_INLINE void cugeam( CBLAS_TRANSPOSE transa, CBLAS_TRANSPOSE transb,
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
    cublasZgeam( handle, transa, transb, m, n,
-      reinterpret_cast<const double*>( &alpha ),   reinterpret_cast<const float*>( A ), lda,
-      reinterpret_cast<const double*>( &beta ) ,   reinterpret_cast<const float*>( B ), ldb,
-                                                   reinterpret_cast<const float*>( C ), ldc );
+      reinterpret_cast<const cuDoubleComplex*>( &alpha ),
+      reinterpret_cast<const cuDoubleComplex*>( A ), lda,
+      reinterpret_cast<const cuDoubleComplex*>( &beta ),
+      reinterpret_cast<const cuDoubleComplex*>( B ), ldb,
+      reinterpret_cast<      cuDoubleComplex*>( C ), ldc );
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -299,17 +305,17 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
                             ST alpha, cublasOperation_t transa ,
                             ST beta , cublasOperation_t transb )
 {
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT3 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT3 );
 
-   //BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT1 );
-   //BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT2 );
-   //BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT3 );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT1 );
+   BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT2 );
+   BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT3 );
 
-   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
-   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
-   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
 
    const int m  ( numeric_cast<int>( (~A).rows() )    );
    const int n  ( numeric_cast<int>( (~B).columns() ) );
@@ -348,27 +354,26 @@ template< typename MT1   // Type of the left-hand side target matrix
         , typename ST >  // Type of the scalar factors
 BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
                             const DenseMatrix<MT2,SO2>& A,
-                            ST alpha, CBLAS_TRANSPOSE transa )
+                            ST alpha, cublasOperation_t transa )
 {
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
-   //BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
+   BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT2 );
 
-   //BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT1 );
-   //BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT2 );
+   BLAZE_CONSTRAINT_MUST_HAVE_MUTABLE_DATA_ACCESS( MT1 );
+   BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT2 );
 
-   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
-   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
+   BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
-   const int m  ( numeric_cast<int>( (~A).rows() )    );
-   const int n  ( numeric_cast<int>( (~A).columns() ) );
+   const int m  ( numeric_cast<int>( (~C).rows()    ) );
+   const int n  ( numeric_cast<int>( (~C).columns() ) );
    const int lda( numeric_cast<int>( (~A).spacing() ) );
    const int ldc( numeric_cast<int>( (~C).spacing() ) );
 
-   cugeam( transa, CUBLAS_OP_N, m, n,
-      alpha,
-      (~A).data(), lda,
-      ST(0), nullptr    , int(0),
-      (~C).data(), ldc );
+   cugeam( transa, CUBLAS_OP_N, n, m,
+      alpha, (~A).data(), lda,
+      0    , (~C).data(), ldc,
+             (~C).data(), ldc );
 }
 //*************************************************************************************************
 

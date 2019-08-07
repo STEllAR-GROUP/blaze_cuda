@@ -79,10 +79,10 @@ inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>& r
 
    ResultType tmp( serial( rhs ) );
 
-   //BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-   //BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
-   cugeam( ~lhs, tmp, ET(1), CUBLAS_OP_T );
+   cugeam( ~lhs, ~tmp, ET(1), CUBLAS_OP_T );
 }
 /*! \endcond */
 //**********************************************************************************************
@@ -114,8 +114,8 @@ inline auto cudaAddAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>
 
    ResultType tmp( serial( rhs ) );
 
-   //BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-   //BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
    cugeam( ~lhs, ~lhs, ~rhs,
          typename MT::ElementType(1), CUBLAS_OP_N ,
@@ -151,8 +151,8 @@ inline auto cudaSubAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>
 
    ResultType tmp( serial( rhs ) );
 
-   //BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
-   //BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
+   BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
+   BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
 
    cugeam( ~lhs, ~lhs, ~rhs,
          typename MT::ElementType( 1), CUBLAS_OP_N ,
