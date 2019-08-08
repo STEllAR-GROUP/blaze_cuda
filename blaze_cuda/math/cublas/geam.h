@@ -57,6 +57,7 @@
 #include <blaze/util/StaticAssert.h>
 
 #include <blaze_cuda/util/CUDAManagedAllocator.h>
+#include <blaze_cuda/util/CUBLASErrorManagement.h>
 
 
 namespace blaze {
@@ -128,15 +129,20 @@ BLAZE_ALWAYS_INLINE void cugeam( DenseMatrix<MT1,SO1>& C, const DenseMatrix<MT2,
 */
 BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
-                                 const float alpha,
-                                 const float *A, int lda,
-                                 const float beta,
-                                 const float *B, int ldb,
-                                       float *C, int ldc )
+                                 const float alpha, const float *A, int lda,
+                                 const float beta , const float *B, int ldb,
+                                                          float *C, int ldc )
 {
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   cublasSgeam( handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, C, ldc );
+
+   auto status = cublasSgeam( handle, transa, transb, m, n,
+      &alpha, A, lda,
+      &beta , B, ldb,
+              C, ldc );
+
+   CUBLAS_ERROR_CHECK( status );
+
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -168,15 +174,20 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
 */
 BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
-                                 const double alpha,
-                                 const double *A, int lda,
-                                 const double beta,
-                                 const double *B, int ldb,
-                                       double *C, int ldc )
+                                 const double alpha, const double *A, int lda,
+                                 const double beta , const double *B, int ldb,
+                                                           double *C, int ldc )
 {
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   cublasDgeam( handle, transa, transb, m, n, &alpha, A, lda, &beta, B, ldb, C, ldc );
+
+   auto status = cublasDgeam( handle, transa, transb, m, n,
+      &alpha, A, lda,
+      &beta , B, ldb,
+              C, ldc );
+
+   CUBLAS_ERROR_CHECK( status );
+
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -208,22 +219,24 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
 */
 BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
-                                 const complex<float> alpha,
-                                 const complex<float> *A, int lda,
-                                 const complex<float> beta,
-                                 const complex<float> *B, int ldb,
-                                       complex<float> *C, int ldc )
+                                 const complex<float> alpha, const complex<float> *A, int lda,
+                                 const complex<float> beta , const complex<float> *B, int ldb,
+                                                                   complex<float> *C, int ldc )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   cublasCgeam( handle, transa, transb, m, n,
-      reinterpret_cast<const cuComplex*>( &alpha ),
-      reinterpret_cast<const cuComplex*>( A ), lda,
-      reinterpret_cast<const cuComplex*>( &beta ),
-      reinterpret_cast<const cuComplex*>( B ), ldb,
-      reinterpret_cast<      cuComplex*>( C ), ldc );
+
+   auto status = cublasCgeam( handle, transa, transb, m, n,
+      reinterpret_cast<const cuFloatComplex*>( &alpha ),
+      reinterpret_cast<const cuFloatComplex*>( A ), lda,
+      reinterpret_cast<const cuFloatComplex*>( &beta ),
+      reinterpret_cast<const cuFloatComplex*>( B ), ldb,
+      reinterpret_cast<      cuFloatComplex*>( C ), ldc );
+
+   CUBLAS_ERROR_CHECK( status );
+
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -255,22 +268,24 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
 */
 BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t transb,
                                  int m, int n,
-                                 const complex<double> alpha,
-                                 const complex<double> *A, int lda,
-                                 const complex<double> beta,
-                                 const complex<double> *B, int ldb,
-                                       complex<double> *C, int ldc )
+                                 const complex<double> alpha, const complex<double> *A, int lda,
+                                 const complex<double> beta , const complex<double> *B, int ldb,
+                                                                    complex<double> *C, int ldc )
 {
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
-   cublasZgeam( handle, transa, transb, m, n,
+
+   auto status = cublasZgeam( handle, transa, transb, m, n,
       reinterpret_cast<const cuDoubleComplex*>( &alpha ),
       reinterpret_cast<const cuDoubleComplex*>( A ), lda,
       reinterpret_cast<const cuDoubleComplex*>( &beta ),
       reinterpret_cast<const cuDoubleComplex*>( B ), ldb,
       reinterpret_cast<      cuDoubleComplex*>( C ), ldc );
+
+   CUBLAS_ERROR_CHECK( status );
+
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
@@ -372,7 +387,7 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
 
    cugeam( transa, CUBLAS_OP_N, n, m,
       alpha, (~A).data(), lda,
-      0    , (~C).data(), ldc,
+      ST(0), (~C).data(), ldc,
              (~C).data(), ldc );
 }
 //*************************************************************************************************
