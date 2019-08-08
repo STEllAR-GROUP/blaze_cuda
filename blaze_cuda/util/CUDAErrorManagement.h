@@ -41,13 +41,12 @@
 #include <cuda_runtime.h>
 
 #define CUDA_ERROR_CHECK                                                      \
-   if( auto err = cudaGetLastError(); err != cudaSuccess )                    \
-   {                                                                          \
-      std::stringstream ss;                                                   \
-      ss << "CUDA Runtime error at: " << __FILE__ << ':' << __LINE__          \
-         << ", in function: " << __func__ << ". CUDA error string: "          \
-         << cudaGetErrorString( err );                                        \
-      throw std::runtime_error( ss.str() );                                   \
-   }
-
+if( auto err = cudaGetLastError(); err != cudaSuccess )                    \
+{                                                                          \
+   std::stringstream ss;                                                   \
+   ss << "CUDA Runtime error at: " << __FILE__ << ':' << __LINE__          \
+      << ", in function: " << __func__ << ". CUDA error string: "          \
+      << cudaGetErrorString( err );                                        \
+   throw std::runtime_error( ss.str() );                                   \
+}
 #endif
