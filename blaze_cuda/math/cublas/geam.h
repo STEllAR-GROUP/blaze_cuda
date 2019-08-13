@@ -343,16 +343,19 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
    BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
    BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT3> );
 
-   const int m  ( numeric_cast<int>( (~A).rows() )    );
-   const int n  ( numeric_cast<int>( (~B).columns() ) );
-   const int lda( numeric_cast<int>( (~A).spacing() ) );
-   const int ldb( numeric_cast<int>( (~B).spacing() ) );
-   const int ldc( numeric_cast<int>( (~C).spacing() ) );
+   const int m  ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).rows() : (~C).columns() ) );
+   const int n  ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).columns() : (~C).rows() ) );
+   const int lda( numeric_cast<int>( SO2 == blaze::columnMajor ? (~A).rows() : (~A).columns() ) );
+   const int ldb( numeric_cast<int>( SO3 == blaze::columnMajor ? (~B).rows() : (~B).columns() ) );
+   const int ldc( numeric_cast<int>( m ) );
 
-   //cugeam( transa, transb, m, n,
-   //   alpha, (~A).data(), lda,
-   //   beta,  (~B).data(), ldb,
-   //          (~C).data(), ldc );
+   const cublasOperation_t ta( SO1 == SO2 ? transa : invertCublasOperation( transa ) );
+   const cublasOperation_t tb( SO1 == SO2 ? transb : invertCublasOperation( transb ) );
+
+   cugeam( ta, tb, m, n,
+      alpha, (~A).data(), lda,
+      beta,  (~B).data(), ldb,
+             (~C).data(), ldc );
 }
 //*************************************************************************************************
 
@@ -391,16 +394,16 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
    BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
    BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
-   const int m ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).rows() : (~C).columns() ) );
-   const int n ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).columns() : (~C).rows() ) );
-   const int ldc( numeric_cast<int>( m ) );
+   const int m  ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).rows() : (~C).columns() ) );
+   const int n  ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).columns() : (~C).rows() ) );
    const int lda( numeric_cast<int>( SO2 == blaze::columnMajor ? (~A).rows() : (~A).columns() ) );
+   const int ldc( numeric_cast<int>( m ) );
 
-   cublasOperation_t const transop = SO1 == SO2 ? transa : invertCublasOperation(transa);
+   const cublasOperation_t ta ( SO1 == SO2 ? transa : invertCublasOperation(transa) );
 
-   cugeam( transop, CUBLAS_OP_N, m, n,
+   cugeam( ta, ta, m, n,
       alpha, (~A).data(), lda ,
-      ST(0), (~C).data(), ldc ,
+      ST(0), (~A).data(), lda ,
              (~C).data(), ldc );
 }
 //*************************************************************************************************
