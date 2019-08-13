@@ -62,7 +62,7 @@ if( (status) != CUBLAS_STATUS_SUCCESS ) \
 { \
    std::stringstream ss; \
    ss << "cuBLAS error at: " << __FILE__ << ':' << __LINE__ \
-      << ", in function: " << __func__ << ". CUBLAS (status): " \
+      << ", in function: " << __func__ << ". Status: " \
       << blaze::cublasStatusToString( (status) ); \
    throw std::runtime_error( ss.str() ); \
 }
