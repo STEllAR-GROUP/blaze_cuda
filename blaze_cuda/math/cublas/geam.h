@@ -136,6 +136,7 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
 
+   // NB: Parameter numbering starts from handle = 0
    auto status = cublasSgeam( handle, transa, transb, m, n,
       &alpha, A, lda,
       &beta , B, ldb,
@@ -181,6 +182,7 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
 
+   // NB: Parameter numbering starts from handle = 0
    auto status = cublasDgeam( handle, transa, transb, m, n,
       &alpha, A, lda,
       &beta , B, ldb,
@@ -228,6 +230,7 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
 
+   // NB: Parameter numbering starts from handle = 0
    auto status = cublasCgeam( handle, transa, transb, m, n,
       reinterpret_cast<const cuFloatComplex*>( &alpha ),
       reinterpret_cast<const cuFloatComplex*>( A ), lda,
@@ -277,6 +280,7 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
    cublasHandle_t handle;
    cublasCreate_v2( &handle );
 
+   // NB: Parameter numbering starts from handle = 0
    auto status = cublasZgeam( handle, transa, transb, m, n,
       reinterpret_cast<const cuDoubleComplex*>( &alpha ),
       reinterpret_cast<const cuDoubleComplex*>( A ), lda,
@@ -289,6 +293,13 @@ BLAZE_ALWAYS_INLINE void cugeam( cublasOperation_t transa, cublasOperation_t tra
    cublasDestroy_v2( handle );
 }
 //*************************************************************************************************
+
+
+cublasOperation_t invertCublasOperation( cublasOperation_t const& op ) {
+   if ( op == CUBLAS_OP_T ) return CUBLAS_OP_N;
+   if ( op == CUBLAS_OP_N ) return CUBLAS_OP_T;
+   return CUBLAS_OP_C;
+}
 
 
 //*************************************************************************************************
@@ -338,10 +349,10 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
    const int ldb( numeric_cast<int>( (~B).spacing() ) );
    const int ldc( numeric_cast<int>( (~C).spacing() ) );
 
-   cugeam( transa, transb, m, n,
-      alpha, (~A).data(), lda,
-      beta,  (~B).data(), ldb,
-             (~C).data(), ldc );
+   //cugeam( transa, transb, m, n,
+   //   alpha, (~A).data(), lda,
+   //   beta,  (~B).data(), ldb,
+   //          (~C).data(), ldc );
 }
 //*************************************************************************************************
 
@@ -380,14 +391,16 @@ BLAZE_ALWAYS_INLINE void cugeam ( DenseMatrix<MT1,SO1>& C,
    BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
    BLAZE_CONSTRAINT_MUST_BE_BLAS_COMPATIBLE_TYPE( ElementType_t<MT2> );
 
-   const int m  ( numeric_cast<int>( (~C).rows()    ) );
-   const int n  ( numeric_cast<int>( (~C).columns() ) );
-   const int lda( numeric_cast<int>( (~A).spacing() ) );
-   const int ldc( numeric_cast<int>( (~C).spacing() ) );
+   const int m ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).rows() : (~C).columns() ) );
+   const int n ( numeric_cast<int>( SO1 == blaze::columnMajor ? (~C).columns() : (~C).rows() ) );
+   const int ldc( numeric_cast<int>( m ) );
+   const int lda( numeric_cast<int>( SO2 == blaze::columnMajor ? (~A).rows() : (~A).columns() ) );
 
-   cugeam( transa, CUBLAS_OP_N, n, m,
-      alpha, (~A).data(), lda,
-      ST(0), (~C).data(), ldc,
+   cublasOperation_t const transop = SO1 == SO2 ? transa : invertCublasOperation(transa);
+
+   cugeam( transop, CUBLAS_OP_N, m, n,
+      alpha, (~A).data(), lda ,
+      ST(0), (~C).data(), ldc ,
              (~C).data(), ldc );
 }
 //*************************************************************************************************
