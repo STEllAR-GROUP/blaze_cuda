@@ -78,7 +78,6 @@ inline auto cudaAssign( DenseMatrix<MT,SO2>& lhs, const DMatTransExpr<MT1,SO>& r
    using ET = typename MT::ElementType;
 
    ResultType tmp( serial( rhs.operand() ) );
-   std::cout << tmp << '\n';
 
    BLAZE_INTERNAL_ASSERT( (~lhs).rows()    == rhs.rows()   , "Invalid number of rows"    );
    BLAZE_INTERNAL_ASSERT( (~lhs).columns() == rhs.columns(), "Invalid number of columns" );
