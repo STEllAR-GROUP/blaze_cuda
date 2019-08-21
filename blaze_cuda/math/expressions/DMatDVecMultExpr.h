@@ -3,7 +3,7 @@
 //  \file blaze_cuda/math/expressions/DMatDVecMultExpr.h
 //  \brief Header file for the dense matrix/dense matrix multiplication expression
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
@@ -45,6 +45,7 @@
 #include <blaze/math/traits/DeclSymTrait.h>
 
 #include <blaze_cuda/math/typetraits/RequiresCUDAEvaluation.h>
+#include <blaze_cuda/math/cublas/gemv.h>
 
 
 namespace blaze {
@@ -70,11 +71,11 @@ inline auto cudaAssign( DenseVector<VT1,false>& lhs, const DMatDVecMultExpr<MT,V
 {
    BLAZE_FUNCTION_TRACE;
 
-   using ET = typename DenseVector<VT1,false>::ElementType;
+   using ET = typename VT1::ElementType;
    using LT = typename DMatDVecMultExpr<MT,VT2>::LT;
    using RT = typename DMatDVecMultExpr<MT,VT2>::RT;
 
-   gemv( ~lhs, LT( rhs.leftOperand() ), RT( rhs.rightOperand() ), ET(1), ET(0) );
+   cugemv( ~lhs, LT( rhs.leftOperand() ), RT( rhs.rightOperand() ), ET(1), ET(0) );
 }
 /*! \endcond */
 //**********************************************************************************************
@@ -100,11 +101,11 @@ inline auto cudaAddAssign( DenseVector<VT1,false>& lhs, const DMatDVecMultExpr<M
 {
    BLAZE_FUNCTION_TRACE;
 
-   using ET = typename DenseVector<VT1,false>::ElementType;
+   using ET = typename VT1::ElementType;
    using LT = typename DMatDVecMultExpr<MT,VT2>::LT;
    using RT = typename DMatDVecMultExpr<MT,VT2>::RT;
 
-   gemv( ~lhs, LT( rhs.leftOperand() ), RT( rhs.rightOperand() ), ET(1), ET(1) );
+   cugemv( ~lhs, LT( rhs.leftOperand() ), RT( rhs.rightOperand() ), ET(1), ET(1) );
 }
 /*! \endcond */
 //**********************************************************************************************
@@ -124,17 +125,18 @@ inline auto cudaAddAssign( DenseVector<VT1,false>& lhs, const DMatDVecMultExpr<M
 // of the operands requires an intermediate evaluation.
 */
 template< typename VT1
+        , bool SO
         , typename VT2
         , typename MT >
-inline auto cudaSubAssign( DenseVector<VT1,false>& lhs, const DMatDVecMultExpr<MT,VT2>& rhs )
+inline auto cudaSubAssign( DenseVector<VT1,SO>& lhs, const DMatDVecMultExpr<MT,VT2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   using ET = typename DenseVector<VT1,false>::ElementType;
+   using ET = typename VT1::ElementType;
    using LT = typename DMatDVecMultExpr<MT,VT2>::LT;
    using RT = typename DMatDVecMultExpr<MT,VT2>::RT;
 
-   gemv( ~lhs, LT( rhs.leftOperand() ), RT( rhs.rightOperand() ), ET(-1), ET(1) );
+   cugemv( ~lhs, LT( rhs.leftOperand() ), RT( rhs.rightOperand() ), ET(-1), ET(1) );
 }
 /*! \endcond */
 //**********************************************************************************************

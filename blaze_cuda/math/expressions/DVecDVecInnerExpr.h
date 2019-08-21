@@ -3,7 +3,7 @@
 //  \file blaze_cuda/math/expressions/DVecDVecInnerExpr.h
 //  \brief Header file for the dense vector/dense vector inner product expression
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
@@ -50,7 +50,7 @@
 #include <blaze/math/traits/DeclSymTrait.h>
 #include <blaze/math/functors/Add.h>
 #include <blaze/math/functors/Mult.h>
-#include <blaze/system/CUDAAttributes.h>
+#include <blaze/system/HostDevice.h>
 
 #include <blaze_cuda/math/dense/CUDADynamicVector.h>
 #include <blaze_cuda/util/algorithms/CUDAReduce.h>

@@ -3,7 +3,7 @@
 //  \file blaze/util/Memory.h
 //  \brief Header file for CUDA memory allocation and deallocation functionality
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under

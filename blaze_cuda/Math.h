@@ -3,7 +3,7 @@
 //  \file blaze_cuda/Math.h
 //  \brief Header file for the inclusion of the math module of the Blaze library
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -43,6 +43,8 @@
 #include <blaze_cuda/math/CUDA.h>
 #include <blaze_cuda/math/CUDADynamicMatrix.h>
 #include <blaze_cuda/math/CUDADynamicVector.h>
+#include <blaze_cuda/math/DynamicMatrix.h>
+#include <blaze_cuda/math/DynamicVector.h>
 #include <blaze_cuda/math/TypeTraits.h>
 
 #endif

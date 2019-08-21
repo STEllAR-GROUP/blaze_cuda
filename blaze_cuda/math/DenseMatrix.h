@@ -3,7 +3,6 @@
 //  \file blaze_cuda/math/DenseMatrix.h
 //  \brief Header file for all basic DenseMatrix functionality
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
@@ -81,7 +80,6 @@
 #include <blaze_cuda/math/expressions/DMatSerialExpr.h>
 #include <blaze_cuda/math/expressions/DMatSoftmaxExpr.h>
 #include <blaze_cuda/math/expressions/DMatStdDevExpr.h>
-#include <blaze_cuda/math/expressions/DMatSVecMultExpr.h>
 #include <blaze_cuda/math/expressions/DMatTDMatAddExpr.h>
 #include <blaze_cuda/math/expressions/DMatTDMatMapExpr.h>
 #include <blaze_cuda/math/expressions/DMatTDMatMultExpr.h>
@@ -92,12 +90,9 @@
 #include <blaze_cuda/math/expressions/DVecDVecOuterExpr.h>
 #include <blaze_cuda/math/expressions/TDMatDMatMultExpr.h>
 #include <blaze_cuda/math/expressions/TDMatDVecMultExpr.h>
-#include <blaze_cuda/math/expressions/TDMatSVecMultExpr.h>
 #include <blaze_cuda/math/expressions/TDMatTDMatMultExpr.h>
 #include <blaze_cuda/math/expressions/TDVecDMatMultExpr.h>
 #include <blaze_cuda/math/expressions/TDVecTDMatMultExpr.h>
-#include <blaze_cuda/math/expressions/TSVecDMatMultExpr.h>
-#include <blaze_cuda/math/expressions/TSVecTDMatMultExpr.h>
 //#include <blaze_cuda/math/Matrix.h>
 
 #endif

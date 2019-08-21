@@ -3,7 +3,7 @@
 //  \file blaze_cuda/math/cublas/gemv.h
 //  \brief Header file for BLAS general matrix/vector multiplication functions (gemv)
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary
@@ -40,7 +40,7 @@
 // Includes
 //*************************************************************************************************
 
-#include <cublas.h>
+#include <cublas_v2.h>
 
 #include <blaze/math/Aliases.h>
 #include <blaze/math/constraints/BLASCompatible.h>
@@ -54,8 +54,8 @@
 #include <blaze/util/NumericCast.h>
 #include <blaze/util/StaticAssert.h>
 
-#include <blaze_cuda/math/CUDADynamicMatrix.h>
-#include <blaze_cuda/math/CUDADynamicVector.h>
+#include <blaze_cuda/math/DenseMatrix.h>
+#include <blaze_cuda/math/DenseVector.h>
 
 
 namespace blaze {
@@ -69,41 +69,40 @@ namespace blaze {
 //*************************************************************************************************
 /*!\name BLAS wrapper functions (gemv) */
 //@{
-#if BLAZE_CUBLAS_MODE
-
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  float alpha, const float* A, int lda, const float* x, int incX,
                                  float beta, float* y, int incY );
 
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  double alpha, const double* A, int lda, const double* x, int incX,
                                  double beta, double* y, int incY );
 
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  complex<float> alpha, const complex<float>* A, int lda,
                                  const complex<float>* x, int incX, complex<float> beta,
                                  complex<float>* y, int incY );
 
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER layout, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  complex<double> alpha, const complex<double>* A, int lda,
                                  const complex<double>* x, int incX, complex<double> beta,
                                  complex<double>* y, int incY );
 
 template< typename VT1, typename MT1, bool SO, typename VT2, typename ST >
-BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,false>& y, const CUDADynamicMatrix<MT1,SO>& A,
-                               const CUDADynamicVector<VT2,false>& x, ST alpha, ST beta );
+BLAZE_ALWAYS_INLINE void cugemv(       DenseVector<VT1,blaze::columnMajor>& y,
+                                 const DenseMatrix<MT1,SO>& A,
+                                 const DenseVector<VT2,blaze::columnMajor>& x,
+                                 ST alpha, ST beta );
 
 template< typename VT1, typename VT2, typename MT1, bool SO, typename ST >
-BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,true>& y, const CUDADynamicVector<VT2,true>& x,
-                               const CUDADynamicMatrix<MT1,SO>& A, ST alpha, ST beta );
-
-#endif
+BLAZE_ALWAYS_INLINE void cugemv(       DenseVector<VT1,blaze::rowMajor>& y,
+                                 const DenseVector<VT2,blaze::rowMajor>& x,
+                                 const DenseMatrix<MT1,SO>& A,
+                                 ST alpha, ST beta );
 //@}
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if BLAZE_CUBLAS_MODE
 /*!\brief BLAS kernel for a dense matrix/dense vector multiplication for single precision operands
 //        (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
 // \ingroup blas
@@ -125,21 +124,19 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,true>& y, const CUDADynamic
 // This function performs the dense matrix/dense vector multiplication for single precision
 // operands based on the BLAS cublasSgemv() function.
 */
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  float alpha, const float* A, int lda, const float* x, int incX,
                                  float beta, float* y, int incY )
 {
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasSgemv( handle, order, transA, m, n, alpha, A, lda, x, incX, beta, y, incY );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasSgemv( handle, transA, m, n, &alpha, A, lda, x, incX, &beta, y, incY );
+   cublasDestroy_v2( handle );
 }
-#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if BLAZE_CUBLAS_MODE
 /*!\brief BLAS kernel for a dense matrix/dense vector multiplication for double precision operands
 //        (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
 // \ingroup blas
@@ -161,21 +158,19 @@ BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int 
 // This function performs the dense matrix/dense vector multiplication for double precision
 // operands based on the BLAS cublasDgemv() function.
 */
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  double alpha, const double* A, int lda, const double* x, int incX,
                                  double beta, double* y, int incY )
 {
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasDgemv( handle, order, transA, m, n, alpha, A, lda, x, incX, beta, y, incY );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasDgemv( handle, transA, m, n, &alpha, A, lda, x, incX, &beta, y, incY );
+   cublasDestroy_v2( handle );
 }
-#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if BLAZE_CUBLAS_MODE
 /*!\brief BLAS kernel for a dense matrix/dense vector multiplication for single precision complex
 //        operands (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
 // \ingroup blas
@@ -197,7 +192,7 @@ BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int 
 // This function performs the dense matrix/dense vector multiplication for single precision
 // complex operands based on the BLAS cublasCgemv() function.
 */
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  complex<float> alpha, const complex<float>* A, int lda,
                                  const complex<float>* x, int incX, complex<float> beta,
                                  complex<float>* y, int incY )
@@ -205,18 +200,19 @@ BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int 
    BLAZE_STATIC_ASSERT( sizeof( complex<float> ) == 2UL*sizeof( float ) );
 
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasCgemv( handle, order, transA, m, n, reinterpret_cast<const float*>( &alpha ),
-                reinterpret_cast<const float*>( A ), lda, reinterpret_cast<const float*>( x ),
-                incX, reinterpret_cast<const float*>( &beta ), reinterpret_cast<float*>( y ), incY );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasCgemv( handle, transA, m, n,
+      reinterpret_cast<const cuFloatComplex*>( &alpha ),
+      reinterpret_cast<const cuFloatComplex*>( A ), lda,
+      reinterpret_cast<const cuFloatComplex*>( x ), incX,
+      reinterpret_cast<const cuFloatComplex*>( &beta ),
+      reinterpret_cast<cuFloatComplex*>( y ), incY );
+   cublasDestroy_v2( handle );
 }
-#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if BLAZE_CUBLAS_MODE
 /*!\brief BLAS kernel for a dense matrix/dense vector multiplication for double precision complex
 //        operands (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
 // \ingroup blas
@@ -238,7 +234,7 @@ BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int 
 // This function performs the dense matrix/dense vector multiplication for double precision
 // complex operands based on the BLAS zblas_zgemv() function.
 */
-BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int m, int n,
+BLAZE_ALWAYS_INLINE void cugemv( cublasOperation_t transA, int m, int n,
                                  complex<double> alpha, const complex<double>* A, int lda,
                                  const complex<double>* x, int incX, complex<double> beta,
                                  complex<double>* y, int incY )
@@ -246,18 +242,19 @@ BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int 
    BLAZE_STATIC_ASSERT( sizeof( complex<double> ) == 2UL*sizeof( double ) );
 
    cublasHandle_t handle;
-   cublasCreate( &handle );
-   cublasZgemv( handle, order, transA, m, n, reinterpret_cast<const double*>( &alpha ),
-                reinterpret_cast<const double*>( A ), lda, reinterpret_cast<const double*>( x ),
-                incX, reinterpret_cast<const double*>( &beta ), reinterpret_cast<double*>( y ), incY );
-   cublasDestroy( handle );
+   cublasCreate_v2( &handle );
+   cublasZgemv( handle, transA, m, n,
+      reinterpret_cast<const cuDoubleComplex*>( &alpha ),
+      reinterpret_cast<const cuDoubleComplex*>( A ), lda,
+      reinterpret_cast<const cuDoubleComplex*>( x ), incX,
+      reinterpret_cast<const cuDoubleComplex*>( &beta ),
+      reinterpret_cast<cuDoubleComplex*>( y ), incY );
+   cublasDestroy_v2( handle );
 }
-#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if BLAZE_CUBLAS_MODE
 /*!\brief BLAS kernel for a dense matrix/dense vector multiplication
 //        (\f$ \vec{y}=\alpha*A*\vec{x}+\beta*\vec{y} \f$).
 // \ingroup blas
@@ -269,7 +266,7 @@ BLAZE_ALWAYS_INLINE void cugemv( CBLAS_ORDER order, CBLAS_TRANSPOSE transA, int 
 // \param beta The scaling factor for \f$ \vec{y} \f$.
 // \return void
 //
-// This function performs the dense matrix/dense vector multiplication based on the BLAS gemv()
+// This function performs the dense matrix/dense vector multiplication based on the BLAS cugemv()
 // functions. Note that the function only works for vectors and matrices with \c float, \c double,
 // \c complex<float>, or \c complex<double> element type. The attempt to call the function with
 // vectors and matrices of any other element type results in a compile time error.
@@ -279,8 +276,9 @@ template< typename VT1   // Type of the left-hand side target vector
         , bool SO        // Storage order of the left-hand side matrix operand
         , typename VT2   // Type of the right-hand side vector operand
         , typename ST >  // Type of the scalar factors
-BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,false>& y, const CUDADynamicMatrix<MT1,SO>& A,
-                               const CUDADynamicVector<VT2,false>& x, ST alpha, ST beta )
+BLAZE_ALWAYS_INLINE void cugemv( DenseVector<VT1,false>& y,
+                                 const DenseMatrix<MT1,SO>& A,
+                                 const DenseVector<VT2,false>& x, ST alpha, ST beta )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT1 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -290,23 +288,21 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,false>& y, const CUDADynami
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT1 );
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( VT2 );
 
-   BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
-   BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT2> );
+   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT1> );
+   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
+   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT2> );
 
-   const int m  ( numeric_cast<int>( (~A).rows() )    );
-   const int n  ( numeric_cast<int>( (~A).columns() ) );
-   const int lda( numeric_cast<int>( (~A).spacing() ) );
+   const int m  ( numeric_cast<int>( SO == blaze::columnMajor ? (~A).rows() : (~A).columns() ) );
+   const int n  ( numeric_cast<int>( SO == blaze::columnMajor ? (~A).columns() : (~A).rows() ) );
+   const int lda( numeric_cast<int>( n ) );
 
-   cugemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasNoTrans, m, n, alpha,
+   cugemv( SO == blaze::columnMajor ? CUBLAS_OP_N : CUBLAS_OP_T, m, n, alpha,
            (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
 }
-#endif
 //*************************************************************************************************
 
 
 //*************************************************************************************************
-#if BLAZE_CUBLAS_MODE
 /*!\brief BLAS kernel for a transpose dense vector/dense matrix multiplication
 //        (\f$ \vec{y}^T=\alpha*\vec{x}^T*A+\beta*\vec{y}^T \f$).
 // \ingroup blas
@@ -319,7 +315,7 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,false>& y, const CUDADynami
 // \return void
 //
 // This function performs the transpose dense vector/dense matrix multiplication based on the
-// BLAS gemv() functions. Note that the function only works for vectors and matrices with \c float,
+// BLAS cugemv() functions. Note that the function only works for vectors and matrices with \c float,
 // \c double, \c complex<float>, or \c complex<double> element type. The attempt to call the
 // function with vectors and matrices of any other element type results in a compile time error.
 */
@@ -328,8 +324,9 @@ template< typename VT1   // Type of the left-hand side target vector
         , typename MT1   // Type of the right-hand side matrix operand
         , bool SO        // Storage order of the right-hand side matrix operand
         , typename ST >  // Type of the scalar factors
-BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,true>& y, const CUDADynamicVector<VT2,true>& x,
-                               const CUDADynamicMatrix<MT1,SO>& A, ST alpha, ST beta )
+BLAZE_ALWAYS_INLINE void cugemv( DenseVector<VT1,true>& y,
+                                 const DenseVector<VT2,true>& x,
+                                 const DenseMatrix<MT1,SO>& A, ST alpha, ST beta )
 {
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( VT1 );
    BLAZE_CONSTRAINT_MUST_NOT_BE_COMPUTATION_TYPE( MT1 );
@@ -339,18 +336,17 @@ BLAZE_ALWAYS_INLINE void gemv( CUDADynamicVector<VT1,true>& y, const CUDADynamic
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( VT2 );
    BLAZE_CONSTRAINT_MUST_HAVE_CONST_DATA_ACCESS  ( MT1 );
 
-   BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
-   BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT2> );
+   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT1> );
+   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<MT1> );
+   //BLAZE_CONSTRAINT_MUST_BE_CUBLAS_COMPATIBLE_TYPE( ElementType_t<VT2> );
 
-   const int m  ( numeric_cast<int>( (~A).rows() )    );
-   const int n  ( numeric_cast<int>( (~A).columns() ) );
-   const int lda( numeric_cast<int>( (~A).spacing() ) );
+   const int m  ( numeric_cast<int>( SO == blaze::columnMajor ? (~A).rows() : (~A).columns() ) );
+   const int n  ( numeric_cast<int>( SO == blaze::columnMajor ? (~A).columns() : (~A).rows() ) );
+   const int lda( numeric_cast<int>( m ) );
 
-   cugemv( ( SO )?( CblasColMajor ):( CblasRowMajor ), CblasTrans, m, n, alpha,
+   cugemv( SO == blaze::columnMajor ? CUBLAS_OP_N : CUBLAS_OP_T, m, n, alpha,
            (~A).data(), lda, (~x).data(), 1, beta, (~y).data(), 1 );
 }
-#endif
 //*************************************************************************************************
 
 } // namespace blaze

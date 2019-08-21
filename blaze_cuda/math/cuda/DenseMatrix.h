@@ -3,7 +3,7 @@
 //  \file blaze_cuda/math/cuda/DenseMatrix.h
 //  \brief Header file for the CUDA-based dense matrix CUDA implementation
 //
-//  Copyright (C) 2012-2019 Klaus Iglberger - All Rights Reserved
+//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
@@ -46,7 +46,7 @@
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/expressions/DMatDMatAddExpr.h>
 #include <blaze/math/expressions/SparseMatrix.h>
-#include <blaze/math/functors/SchurAssign.h>
+//#include <blaze/math/functors/SchurAssign.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>

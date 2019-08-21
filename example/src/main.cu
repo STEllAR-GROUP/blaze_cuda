@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstddef>
 
 #include <blaze_cuda/Blaze.h>
 
@@ -7,9 +6,19 @@ int main( int, char const *[] )
 {
    namespace bz = blaze;
 
-   bz::CUDADynamicMatrix< float > cm( 10, 10, 1.f );
+   using mat_t = bz::CUDADynamicMatrix< float, blaze::rowMajor >;
+   using vec_t = bz::CUDADynamicVector< float, true >;
 
-   cm = cm * cm + cm * cm;
+   vec_t va( 10 ), vc( 5 );
+   mat_t mb( 10, 5 );
 
-   std::cout << cm << '\n';
+   auto svc = bz::subvector( vc, 0, 5 );
+   static_assert( !bz::IsCUDAAssignable_v< decltype(svc) > );
+
+   //decltype(vc*mb) a("123");
+
+   bz::cudaAssign( va, vc * mb );
+
+   std::cout << va << '\n';
+   std::cout << mb << '\n';
 }

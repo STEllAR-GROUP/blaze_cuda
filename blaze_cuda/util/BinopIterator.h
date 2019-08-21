@@ -43,7 +43,7 @@
 #include <utility>
 #include <iterator>
 
-#include <blaze/system/CUDAAttributes.h>
+#include <blaze/system/HostDevice.h>
 
 
 namespace blaze {
