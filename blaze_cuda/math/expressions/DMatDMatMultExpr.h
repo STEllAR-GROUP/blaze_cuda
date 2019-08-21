@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/expressions/DMatDMatMultExpr.h
+//  \file blaze_cuda/math/expressions/DMatDMatMultExpr.h
 //  \brief Header file for the dense matrix/dense matrix multiplication expression
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

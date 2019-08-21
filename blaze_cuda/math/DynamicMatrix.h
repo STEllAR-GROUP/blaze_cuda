@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/DynamicMatrix.h
+//  \file blaze_cuda/math/DynamicMatrix.h
 //  \brief Header file for the complete DynamicMatrix implementation
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/TypeTraits.h
+//  \file blaze_cuda/math/TypeTraits.h
 //  \brief Header file for all type traits
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

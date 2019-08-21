@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/dense/CUDADynamicVector.h
+//  \file blaze_cuda/math/dense/CUDADynamicVector.h
 //  \brief Header file for the implementation of an arbitrarily sized vector
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

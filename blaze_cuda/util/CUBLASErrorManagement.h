@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/CUBLASErrorManagement.h
+//  \file blaze_cuda/util/CUBLASErrorManagement.h
 //  \brief Header file for CUDAReduce's implementation
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

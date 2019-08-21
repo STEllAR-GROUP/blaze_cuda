@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/Memory.h
+//  \file blaze_cuda/util/Memory.h
 //  \brief Header file for CUDA memory allocation and deallocation functionality
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

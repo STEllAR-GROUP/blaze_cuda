@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/algorithms/CUDAReduce.h
+//  \file blaze_cuda/util/algorithms/CUDAReduce.h
 //  \brief Header file for CUDAReduce's implementation
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

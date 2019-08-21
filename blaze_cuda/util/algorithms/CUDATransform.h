@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/CUDATransform.h
+//  \file blaze_cuda/util/CUDATransform.h
 //  \brief Header file for CUDATransform's implementation
 //
 //  Copyright (C) 2019 Jules Pénuchot - All Rights Reserved

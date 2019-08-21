@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/CUDAAllocator.h
+//  \file blaze_cuda/util/CUDAAllocator.h
 //  \brief Header file for the CUDAAllocator implementation
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

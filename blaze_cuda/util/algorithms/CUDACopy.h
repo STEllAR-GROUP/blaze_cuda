@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/CUDACopy.h
+//  \file blaze_cuda/util/CUDACopy.h
 //  \brief Header file for the IsCUDAEnabled type trait
 //
 //  Copyright (C) 2019 Jules Pénuchot - All Rights Reserved

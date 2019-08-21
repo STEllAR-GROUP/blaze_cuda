@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/dense/CUDADynamicMatrix.h
+//  \file blaze_cuda/math/dense/CUDADynamicMatrix.h
 //  \brief Header file for the implementation of a dynamic MxN matrix
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

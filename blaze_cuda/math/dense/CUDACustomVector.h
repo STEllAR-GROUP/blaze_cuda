@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/dense/CUDACustomVector.h
+//  \file blaze_cuda/math/dense/CUDACustomVector.h
 //  \brief Header file for the implementation of a customizable vector
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

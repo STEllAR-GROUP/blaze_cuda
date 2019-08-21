@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/util/Unroll.h
+//  \file blaze_cuda/util/Unroll.h
 //  \brief Header file for arbitrary template unrolling function template
 //
 //  Copyright (C) 2019 Jules Pénuchot - All Rights Reserved

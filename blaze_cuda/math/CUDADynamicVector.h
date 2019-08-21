@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/DynamicVector.h
+//  \file blaze_cuda/math/DynamicVector.h
 //  \brief Header file for the complete CUDADynamicVector implementation
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved

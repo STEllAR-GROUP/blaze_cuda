@@ -1,6 +1,6 @@
 //=================================================================================================
 /*!
-//  \file blaze/math/CUDACustomVector.h
+//  \file blaze_cuda/math/CUDACustomVector.h
 //  \brief Header file for the complete CUDACustomVector implementation
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
