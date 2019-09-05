@@ -1,0 +1,287 @@
+    ____  __                    ________  ______  ___
+   / __ )/ /___ _____  ___     / ____/ / / / __ \/   |
+  / __  / / __ `/_  / / _ \   / /   / / / / / / / /| |
+ / /_/ / / /_/ / / /_/  __/  / /___/ /_/ / /_/ / ___ |
+/_____/_/\__,_/ /___/\___/   \____/\____/_____/_/  |_|
+
+
+      Jules Pénuchot
+
+
+-  Intern @ Stellar Group (LSU, Baton Rouge, LA, USA) with Dr. Hartmut Kaiser
+   *  Blaze CUDA (https://github.com/stellar-group/blaze_cuda)
+
+
+-  Intern @ Parallel Systems (LRI, Orsay, France) with Dr. Joel Falcou
+   *  2017 - Generic programming: SIMD optimization
+   *  2018 - Abstraction on parallel runtimes (StarPU)
+
+
+                                 .01/13
+    ____  __                    ________  ______  ___  ___
+   / __ )/ /___ _____  ___     / ____/ / / / __ \/   |/__ \
+  / __  / / __ `/_  / / _ \   / /   / / / / / / / /| | / _/
+ / /_/ / / /_/ / / /_/  __/  / /___/ /_/ / /_/ / ___ |/_/
+/_____/_/\__,_/ /___/\___/   \____/\____/_____/_/  |_(_)
+
+
+      What is Blaze CUDA?
+
+
+X  Not a fork
+X  Not a replacement
+
+
+→  An extension
+→  Interoperable with Blaze
+→  Provides drop-in replacement container types
+   & assignment strategies for CUDA computation
+
+                                 .02/13
+   ____        __  ___
+  / __ \__  __/ /_/ (_)___  ___
+ / / / / / / / __/ / / __ \/ _ \
+/ /_/ / /_/ / /_/ / / / / /  __/
+\____/\__,_/\__/_/_/_/ /_/\___/
+
+-  Blaze:
+   *  Brief introduction
+   *  Types - Expression templates: Compile-time representation of expressions
+   *  Functions - assign() overloads: Evaluation strategies
+
+
+-  Blaze CUDA:
+   *  Types - Extending: CUDA-compatible data containers
+   *  Functions - cudaAssign() overloads: CUDA evaluation strategies
+   *  Plumbery - CUDA compatibility: Attributes & typetraits
+
+
+
+                                 .03/13
+    ____  __
+   / __ )/ /___ _____  ___
+  / __  / / __ `/_  / / _ \
+ / /_/ / / /_/ / / /_/  __/
+/_____/_/\__,_/ /___/\___/
+
+
+Implementation of Smart Expression Templates (SET)
+
+Expression Templates:
+   -  Types that represent expressions
+   -  Element-wise computation
+
+Smart Expression Templates:
+   -  Expression templates
+   -  More than just element-wise computations (BLAS, LAPACK, ...)
+
+→  High level code, high performance assembly
+
+                                 .04/13
+    ____  __                    __
+   / __ )/ /___ _____  ___     / /___  ______  ___  _____
+  / __  / / __ `/_  / / _ \   / __/ / / / __ \/ _ \/ ___/
+ / /_/ / / /_/ / / /_/  __/  / /_/ /_/ / /_/ /  __(__  )
+/_____/_/\__,_/ /___/\___/   \__/\__, / .___/\___/____/
+                                /____/_/
+
+-  Abstract types:   DenseVector, DenseMatrix, ...
+-  Data containers:  DynamicMatrix, DynamicVector, CompressedVector, ...
+-  Expressions:      DMatDMatMultExpr, DMatDMatAddExpr, DMatDVecMultExpr, ...
+
+Blaze operators only build expression types:
+
+DyVec + DyVec
+   -> DVecDVecAddExpr<DyVec,DyVec>
+
+DVecDVecAddExpr<DyVec,DyVec> * DyVec
+   -> DVecDVecMultExpr<DVecDVecAddExpr<DyVec,DyVec>,DyVec>
+
+                                 .05/13
+    ____  __                    __
+   / __ )/ /___ _____  ___     / /___  ______  ___  _____
+  / __  / / __ `/_  / / _ \   / __/ / / / __ \/ _ \/ ___/
+ / /_/ / / /_/ / / /_/  __/  / /_/ /_/ / /_/ /  __(__  )
+/_____/_/\__,_/ /___/\___/   \__/\__, / .___/\___/____/
+                                /____/_/
+
+
+Blaze types provide:
+
+   -  Subscript operators (element access & computations)
+
+   -  Iterators (element access & computations)
+
+   -  Compile-time attributes (Storage order, SMP-assignable, ...)
+
+→  Types alone implement Expression Templates
+
+
+                                 .06/13
+    ____  __                    __
+   / __ )/ /___ _____  ___     / /___  ______  ___  _____
+  / __  / / __ `/_  / / _ \   / __/ / / / __ \/ _ \/ ___/
+ / /_/ / / /_/ / / /_/  __/  / /_/ /_/ / /_/ /  __(__  )
+/_____/_/\__,_/ /___/\___/   \__/\__, / .___/\___/____/
+                                /____/_/
+
+Type hierarchy:
+   -  Vector
+      *  DenseVector
+         -  DynamicVector
+         -  StaticVector
+         -  DVecDVecAddExpr
+         -  DVecDVecSubExpr
+         -  ...
+      *  SparseVector
+         -  CompressedVector
+   -  Matrix
+      ...
+                                 .07/13
+    ____  __                    __
+   / __ )/ /___ _____  ___     / /___  ______  ___  _____
+  / __  / / __ `/_  / / _ \   / __/ / / / __ \/ _ \/ ___/
+ / /_/ / / /_/ / / /_/  __/  / /_/ /_/ / /_/ /  __(__  )
+/_____/_/\__,_/ /___/\___/   \__/\__, / .___/\___/____/
+                                /____/_/
+
+Use of Curiously Recurring Template Pattern (CRTP):
+
+   struct Concrete: Abstract<Concrete> {};
+
+DynamicVector<...>: DenseVector<DynamicVector<...>>: Vector<DenseVector<...>>
+
+   template<typename VT>
+   void do_stuff( DenseVector<VT> const& v );   // v can be casted into a VT
+
+→  Semantically lossless abstraction, resolvable at compile-time by overloading
+   (unlike virtual inheritance)
+
+                                 .08/13
+    ______                 __  _
+   / ____/_  ______  _____/ /_(_)___  ____  _____
+  / /_  / / / / __ \/ ___/ __/ / __ \/ __ \/ ___/
+ / __/ / /_/ / / / / /__/ /_/ / /_/ / / / (__  )
+/_/    \__,_/_/ /_/\___/\__/_/\____/_/ /_/____/
+
+Types allow for easy computation with a
+universal element-wise assignment function.
+
+Pros: cheap, easy, performant in various complex cases
+
+Cons: terrible in many simple cases
+
+DVecDVecAddExpr ? Cache-friendly, generates better assembly
+DMatDMatMultExpr? Terrybly cache-unfriendly!
+
+→  We need better strategies...
+   Why not combine them?
+
+                                 .09/13
+    ______                 __  _
+   / ____/_  ______  _____/ /_(_)___  ____  _____
+  / /_  / / / / __ \/ ___/ __/ / __ \/ __ \/ ___/
+ / __/ / /_/ / / / / /__/ /_/ / /_/ / / / (__  )
+/_/    \__,_/_/ /_/\___/\__/_/\____/_/ /_/____/
+
+How? By overloading assign()! assign( DenseVector<VT> &lhs, ... const& rhs )
+
+General case (DenseVector<VT>): Element-wise assignment
+
+Specific cases (DMatDMatMultExpr & others): Own assign() implementations
+
+Specific implementations can use:
+   -  BLAS
+   -  LAPACK
+DMatDMatMultExpr can use GEMM!
+
+→  SMART Expression Templates: selective strategies
+
+                                 .10/13
+    ____  __                    ________  ______  ___
+   / __ )/ /___ _____  ___     / ____/ / / / __ \/   |
+  / __  / / __ `/_  / / _ \   / /   / / / / / / / /| |
+ / /_/ / / /_/ / / /_/  __/  / /___/ /_/ / /_/ / ___ |
+/_____/_/\__,_/ /___/\___/   \____/\____/_____/_/  |_|
+
+
+How to reuse Blaze's code?
+
+
+-  Reuse strategies implemented for CPUs on GPUs? Sadly not.
+
+-  Reuse the types? Sure we do!
+
+
+→  Adding CUDA-compatible containers, build expressions on top of them,
+   and implement new assignment strategies with cudaAssign() overloads.
+
+
+                                 .11/13
+  ______
+ /_  __/_  ______  ___  _____
+  / / / / / / __ \/ _ \/ ___/
+ / / / /_/ / /_/ /  __(__  )
+/_/  \__, / .___/\___/____/
+    /____/_/
+
+Only CUDA-allocated container types are required:
+
+-  CUDADynamicMatrix: DenseMatrix<...>: ...
+-  CUDADynamicVector: DenseVector<...>: ...
+
+Inheriting from DenseMatrix/DenseVector makes the reuse of
+expression templates possible, along with their features:
+iterators, typetraits, ...
+
+   →  (Almost) Free code! (Minor modifications to Blaze were required)
+      Totally conflict-free
+
+                                 .12/13
+    ______                 __  _
+   / ____/_  ______  _____/ /_(_)___  ____  _____
+  / /_  / / / / __ \/ ___/ __/ / __ \/ __ \/ ___/
+ / __/ / /_/ / / / / /__/ /_/ / /_/ / / / (__  )
+/_/    \__,_/_/ /_/\___/\__/_/\____/_/ /_/____/
+
+
+
+-  assign() is designed for CPUs
+
+-  Adding more overloads to assign() *will* cause conflicts...
+
+
+
+→  New "class" of assign function, cudaAssign(), based on
+   Thrust & cuBLAS
+
+
+
+                                 .13/13
+
+
+
+
+
+
+
+    __         __ _              ___               _
+   / /   ___  / /( )_____   ____/ (_)   _____     (_)___
+  / /   / _ \/ __/// ___/  / __  / / | / / _ \   / / __ \
+ / /___/  __/ /_  (__  )  / /_/ / /| |/ /  __/  / / / / /
+/_____/\___/\__/ /____/   \__,_/_/ |___/\___/  /_/_/ /_/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
