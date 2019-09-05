@@ -10,7 +10,7 @@ CXX ?= clang++
 CU  ?= clang++
 
 # Compile flags
-CXXFLAGS += -O3 -march=native
+CXXFLAGS += -O3 -march=corei7
 
 CXXFLAGS += -DBLAZE_USE_SHARED_MEMORY_PARALLELIZATION=1 \
             -DBLAZE_CUDA_MODE=1 -DBLAZE_BLAS_MODE=1 -DBLAZE_CUDA_USE_THRUST=1

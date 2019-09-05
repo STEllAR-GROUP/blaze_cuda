@@ -4,7 +4,6 @@
 //  \brief Header file for CUDA memory allocation and deallocation functionality
 //
 //  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
-//  Copyright (C) 2019 Jules Penuchot - All Rights Reserved
 //
 //  This file is part of the Blaze library. You can redistribute it and/or modify it under
 //  the terms of the New (Revised) BSD License. Redistribution and use in source and binary

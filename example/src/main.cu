@@ -6,19 +6,14 @@ int main( int, char const *[] )
 {
    namespace bz = blaze;
 
-   using mat_t = bz::CUDADynamicMatrix< float, blaze::rowMajor >;
-   using vec_t = bz::CUDADynamicVector< float, true >;
+   using mat_t = bz::DynamicMatrix< float >;
 
-   vec_t va( 10 ), vc( 5 );
-   mat_t mb( 10, 5 );
+   mat_t ma( 10, 5, 1.f ), mb( 5, 10, 1.f ), mc( 10, 10 );
 
-   auto svc = bz::subvector( vc, 0, 5 );
-   static_assert( !bz::IsCUDAAssignable_v< decltype(svc) > );
+   mc = ma * mb;
 
-   //decltype(vc*mb) a("123");
+   //bz::cudaAssign( mc, ma * mb );
+   //cudaDeviceSynchronize();
 
-   bz::cudaAssign( va, vc * mb );
-
-   std::cout << va << '\n';
-   std::cout << mb << '\n';
+   std::cout << mc << '\n';
 }
