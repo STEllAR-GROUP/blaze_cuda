@@ -12,17 +12,17 @@ The only requirement is to use `clang` in CUDA mode instead of `nvcc`. `nvcc` fa
 
 The `example` folder provides a simple `Makefile` that can be used as a reference for projects that use Blaze CUDA.
 
-## Roadmap (expected to change)
+## Installation
 
-* [X] Implementing a base CUDA allocated vector type
-* [X] Base assign function implementation for vector type
-* [X] Extending Blaze's type_trait library to integrate CUDAManagedVector into Blaze
-* [X] Adding IsCUDAEnabled conditional specializations to `DVecDVec*Expr`
-* [X] Adapting basic expression iterators for vectors
-* [X] Adapting functors to make them CUDA-compatible
-* [X] **cuBLAS**
-* [X] Cleanup: Refactor CUDADynamicVector's code (Indent, documentation, etc.)
-* [X] Extending functionality to matrices
-* [ ] Adapting fancier expressions (reductions, etc)
-* [ ] Getting Matrix/Vector operations to work
-* [ ] Extending functionality to tensors
+`sudo make install`
+
+*Uninstall target available as well*
+
+## Features
+
+* Dense Vectors
+* Dense Matrices (no CustomMatrix yet)
+* Element-wise operations for dense matrices & vectors
+* [WIP] Partial cuBLAS implementation for more complex operations
+
+[Blaze Tensor](https://github.com/stellar-group/blaze_tensor) will be supported in the future.
