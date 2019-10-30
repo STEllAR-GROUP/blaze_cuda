@@ -45,7 +45,6 @@
 #include <blaze/math/expressions/DenseMatrix.h>
 #include <blaze/math/expressions/DMatDMatAddExpr.h>
 #include <blaze/math/expressions/SparseMatrix.h>
-//#include <blaze/math/functors/SchurAssign.h>
 #include <blaze/math/StorageOrder.h>
 #include <blaze/math/typetraits/IsCUDAAssignable.h>
 #include <blaze/math/typetraits/IsDenseMatrix.h>
@@ -58,11 +57,9 @@
 #include <blaze/util/StaticAssert.h>
 #include <blaze/util/Types.h>
 
-#include <blaze_cuda/math/expressions/DMatDMatMultExpr.h>
-#include <blaze_cuda/math/expressions/DMatDMatAddExpr.h>
-
 #include <blaze_cuda/util/algorithms/CUDATransform.h>
 #include <blaze_cuda/util/CUDAErrorManagement.h>
+
 
 namespace blaze {
 
@@ -124,16 +121,16 @@ auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP 
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename MT1   // Type of the left-hand side dense matrix
-        , bool SO1       // Storage order of the left-hand side dense matrix
-        , typename MT2   // Type of the right-hand side sparse matrix
-        , bool SO2       // Storage order of the right-hand side sparse matrix
-        , typename OP >  // Type of the assignment operation
-inline auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const SparseMatrix<MT2,SO2>& rhs, OP op )
-{
-   BLAZE_FUNCTION_TRACE;
-   // TODO
-}
+//template< typename MT1   // Type of the left-hand side dense matrix
+//        , bool SO1       // Storage order of the left-hand side dense matrix
+//        , typename MT2   // Type of the right-hand side sparse matrix
+//        , bool SO2       // Storage order of the right-hand side sparse matrix
+//        , typename OP >  // Type of the assignment operation
+//inline auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const SparseMatrix<MT2,SO2>& rhs, OP op )
+//{
+//   BLAZE_FUNCTION_TRACE;
+//   // TODO
+//}
 /*! \endcond */
 //*************************************************************************************************
 
@@ -168,7 +165,8 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto cudaAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+inline auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -214,7 +212,8 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto cudaAddAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+inline auto cudaAddAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -259,7 +258,8 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto cudaSubAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+inline auto cudaSubAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -304,7 +304,8 @@ template< typename MT1  // Type of the left-hand side dense matrix
         , bool SO1      // Storage order of the left-hand side dense matrix
         , typename MT2  // Type of the right-hand side matrix
         , bool SO2 >    // Storage order of the right-hand side matrix
-inline auto cudaSchurAssign( Matrix<MT1,SO1>& lhs, const Matrix<MT2,SO2>& rhs )
+inline auto cudaSchurAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -350,7 +351,8 @@ template< typename MT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename MT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto cudaMultAssign( Matrix<MT1,TF1>& lhs, const Matrix<MT2,TF2>& rhs )
+inline auto cudaMultAssign( DenseMatrix<MT1,TF1>& lhs, const DenseMatrix<MT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
 
@@ -362,6 +364,74 @@ inline auto cudaMultAssign( Matrix<MT1,TF1>& lhs, const Matrix<MT2,TF2>& rhs )
 }
 /*! \endcond */
 //*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  smpAssign() OVERLOADS
+//
+//=================================================================================================
+
+template< typename MT1  // Type of the left-hand side dense matrix
+        , bool SO1      // Storage order of the left-hand side dense matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline auto smpAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+   cudaAssign( ~lhs, ~rhs );
+}
+
+
+template< typename MT1  // Type of the left-hand side dense matrix
+        , bool SO1      // Storage order of the left-hand side dense matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline auto smpAddAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+   cudaAddAssign( ~lhs, ~rhs );
+}
+
+
+template< typename MT1  // Type of the left-hand side dense matrix
+        , bool SO1      // Storage order of the left-hand side dense matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline auto smpSubAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+   cudaSubAssign( ~lhs, ~rhs );
+}
+
+
+template< typename MT1  // Type of the left-hand side dense matrix
+        , bool SO1      // Storage order of the left-hand side dense matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline auto smpSchurAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+   cudaSchurAssign( ~lhs, ~rhs );
+}
+
+
+template< typename MT1  // Type of the left-hand side dense matrix
+        , bool SO1      // Storage order of the left-hand side matrix
+        , typename MT2  // Type of the right-hand side matrix
+        , bool SO2 >    // Storage order of the right-hand side matrix
+inline auto smpMultAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+   cudaMultAssign( ~lhs, ~rhs );
+}
 
 
 
