@@ -382,6 +382,7 @@ inline auto smpAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rh
    -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
+
    cudaAssign( ~lhs, ~rhs );
 }
 
@@ -394,6 +395,7 @@ inline auto smpAddAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>&
    -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
+
    cudaAddAssign( ~lhs, ~rhs );
 }
 
@@ -406,6 +408,7 @@ inline auto smpSubAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>&
    -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
+
    cudaSubAssign( ~lhs, ~rhs );
 }
 
@@ -418,6 +421,7 @@ inline auto smpSchurAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2
    -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
+
    cudaSchurAssign( ~lhs, ~rhs );
 }
 
@@ -430,6 +434,7 @@ inline auto smpMultAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>
    -> EnableIf_t< IsCUDAAssignable_v<MT1> && IsCUDAAssignable_v<MT2> >
 {
    BLAZE_FUNCTION_TRACE;
+
    cudaMultAssign( ~lhs, ~rhs );
 }
 

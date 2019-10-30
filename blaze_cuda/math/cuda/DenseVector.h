@@ -44,17 +44,10 @@
 #include <blaze/math/constraints/SMPAssignable.h>
 #include <blaze/math/expressions/DenseVector.h>
 #include <blaze/math/expressions/SparseVector.h>
-#include <blaze/math/functors/AddAssign.h>
-#include <blaze/math/functors/Assign.h>
-#include <blaze/math/functors/DivAssign.h>
-#include <blaze/math/functors/MultAssign.h>
-#include <blaze/math/functors/SubAssign.h>
-#include <blaze/math/simd/SIMDTrait.h>
 #include <blaze/math/smp/SerialSection.h>
 #include <blaze/math/smp/Functions.h>
 #include <blaze/math/typetraits/IsDenseVector.h>
 #include <blaze/math/typetraits/IsCUDAAssignable.h>
-#include <blaze/math/typetraits/IsSIMDCombinable.h>
 #include <blaze/math/views/Subvector.h>
 #include <blaze/system/SMP.h>
 #include <blaze/util/algorithms/Min.h>
@@ -79,7 +72,7 @@ namespace blaze {
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Backend of the CUDA-based (compound) assignment of a dense vector to a dense vector.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side dense vector to be assigned.
@@ -100,7 +93,10 @@ template< typename VT1   // Type of the left-hand side dense vector
         , typename OP >  // Type of the assignment operation
 inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs, OP op )
 {
+   BLAZE_FUNCTION_TRACE;
+
    cuda_transform( (~lhs).begin(), (~lhs).end(), (~rhs).begin(), (~lhs).begin(), op );
+
    CUDA_ERROR_CHECK;
 }
 /*! \endcond */
@@ -110,7 +106,7 @@ inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& r
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Backend of the CUDA-based (compound) assignment of a sparse vector to a dense vector.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side sparse vector to be assigned.
@@ -124,16 +120,15 @@ inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& r
 // in erroneous results and/or in compilation errors. Instead of using this function use the
 // assignment operator.
 */
-template< typename VT1   // Type of the left-hand side dense vector
-        , bool TF1       // Transpose flag of the left-hand side dense vector
-        , typename VT2   // Type of the right-hand side sparse vector
-        , bool TF2       // Transpose flag of the right-hand side sparse vector
-        , typename OP >  // Type of the assignment operation
-void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP op )
-{
-   static_assert( TF1 || !TF1 , "not implemented" );
-   (void)lhs; (void)rhs; (void)op;
-}
+//template< typename VT1   // Type of the left-hand side dense vector
+//        , bool TF1       // Transpose flag of the left-hand side dense vector
+//        , typename VT2   // Type of the right-hand side sparse vector
+//        , bool TF2       // Transpose flag of the right-hand side sparse vector
+//        , typename OP >  // Type of the assignment operation
+//void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP op )
+//{
+//   (void)lhs; (void)rhs; (void)op;
+//}
 /*! \endcond */
 //*************************************************************************************************
 
@@ -146,42 +141,16 @@ void cudaAssign( DenseVector<VT1,TF1>& lhs, const SparseVector<VT2,TF2>& rhs, OP
 //
 //=================================================================================================
 
-//*************************************************************************************************
-/*! \cond BLAZE_INTERNAL */
-/*!\brief Implementation of the CUDA-based assignment to a dense vector.
-// \ingroup smp
-//
-// \param lhs The target left-hand side dense vector.
-// \param rhs The right-hand side sparse vector to be assigned.
-// \return void
-//
-// This function performs the CUDA-based assignment to a dense vector. Due to the
-// explicit application of the SFINAE principle, this function can only be selected by the
-// compiler in case both operands are SMP-assignable and the element types of both operands
-// are not SMP-assignable.\n
-// This function must \b NOT be called explicitly! It is used internally for the performance
-// optimized evaluation of expression templates. Calling this function explicitly might result
-// in erroneous results and/or in compilation errors. Instead of using this function use the
-// assignment operator.
-*/
-template< typename VT1  // Type of the left-hand side dense vector
-        , bool TF1      // Transpose flag of the left-hand side dense vector
-        , typename VT2  // Type of the right-hand side vector
-        , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
-   -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+template< typename VT1   // Type of the left-hand side dense vector
+        , bool TF1       // Transpose flag of the left-hand side dense vector
+        , typename VT2   // Type of the right-hand side dense vector
+        , bool TF2 >     // Transpose flag of the right-hand side dense vector
+inline auto cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
 
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT2> );
-
-   BLAZE_INTERNAL_ASSERT( (~lhs).size() == (~rhs).size(), "Invalid vector sizes" );
-
-   cudaAssign( ~lhs, ~rhs , [] __device__ ( auto const&, auto const& r ) { return r; } );
+   cudaAssign( ~lhs, ~rhs, [] __device__ ( auto const&, auto const& r ) { return r; } );
 }
-/*! \endcond */
-//*************************************************************************************************
 
 
 
@@ -195,7 +164,7 @@ inline auto smpAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based addition assignment to a dense vector.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side sparse vector to be added.
@@ -214,13 +183,9 @@ template< typename VT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpAddAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
-   -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+inline auto cudaAddAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
-
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT2> );
 
    BLAZE_INTERNAL_ASSERT( (~lhs).size() == (~rhs).size(), "Invalid vector sizes" );
 
@@ -241,7 +206,7 @@ inline auto smpAddAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based subtraction assignment to a dense vector.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side sparse vector to be subtracted.
@@ -260,13 +225,9 @@ template< typename VT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpSubAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
-   -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+inline auto cudaSubAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
-
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT2> );
 
    BLAZE_INTERNAL_ASSERT( (~lhs).size() == (~rhs).size(), "Invalid vector sizes" );
 
@@ -287,7 +248,7 @@ inline auto smpSubAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based multiplication assignment to a dense vector.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side dense vector to be multiplied.
@@ -306,13 +267,9 @@ template< typename VT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpMultAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
-   -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+inline auto cudaMultAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
-
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT2> );
 
    BLAZE_INTERNAL_ASSERT( (~lhs).size() == (~rhs).size(), "Invalid vector sizes" );
 
@@ -333,7 +290,7 @@ inline auto smpMultAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
 //*************************************************************************************************
 /*! \cond BLAZE_INTERNAL */
 /*!\brief Implementation of the CUDA-based division assignment to a dense vector.
-// \ingroup smp
+// \ingroup cuda
 //
 // \param lhs The target left-hand side dense vector.
 // \param rhs The right-hand side dense vector divisor.
@@ -352,13 +309,9 @@ template< typename VT1  // Type of the left-hand side dense vector
         , bool TF1      // Transpose flag of the left-hand side dense vector
         , typename VT2  // Type of the right-hand side vector
         , bool TF2 >    // Transpose flag of the right-hand side vector
-inline auto smpDivAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
-   -> EnableIf_t< IsDenseVector_v<VT1> && IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+inline auto cudaDivAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
 {
    BLAZE_FUNCTION_TRACE;
-
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT1> );
-   BLAZE_CONSTRAINT_MUST_NOT_BE_SMP_ASSIGNABLE( ElementType_t<VT2> );
 
    BLAZE_INTERNAL_ASSERT( (~lhs).size() == (~rhs).size(), "Invalid vector sizes" );
 
@@ -366,6 +319,76 @@ inline auto smpDivAssign( Vector<VT1,TF1>& lhs, const Vector<VT2,TF2>& rhs )
 }
 /*! \endcond */
 //*************************************************************************************************
+
+
+
+
+//=================================================================================================
+//
+//  smpAssign() OVERLOADS
+//
+//=================================================================================================
+
+template< typename VT1  // Type of the left-hand side dense vector
+        , bool TF1       // Transpose flag of the left-hand side dense vector
+        , typename VT2   // Type of the right-hand side dense vector
+        , bool TF2       // Transpose flag of the right-hand side dense vector
+        , typename OP >  // Type of the assignment operation
+inline auto smpAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   cudaAssign( ~lhs, ~rhs );
+}
+
+template< typename VT1  // Type of the left-hand side dense vector
+        , bool TF1      // Transpose flag of the left-hand side dense vector
+        , typename VT2  // Type of the right-hand side vector
+        , bool TF2 >    // Transpose flag of the right-hand side vector
+inline auto smpAddAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   cudaAddAssign( ~lhs, ~rhs );
+}
+
+template< typename VT1  // Type of the left-hand side dense vector
+        , bool TF1      // Transpose flag of the left-hand side dense vector
+        , typename VT2  // Type of the right-hand side vector
+        , bool TF2 >    // Transpose flag of the right-hand side vector
+inline auto smpSubAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   cudaSubAssign( ~lhs, ~rhs );
+}
+
+template< typename VT1  // Type of the left-hand side dense vector
+        , bool TF1      // Transpose flag of the left-hand side dense vector
+        , typename VT2  // Type of the right-hand side vector
+        , bool TF2 >    // Transpose flag of the right-hand side vector
+inline auto smpMultAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   cudaMultAssign( ~lhs, ~rhs );
+}
+
+template< typename VT1  // Type of the left-hand side dense vector
+        , bool TF1      // Transpose flag of the left-hand side dense vector
+        , typename VT2  // Type of the right-hand side vector
+        , bool TF2 >    // Transpose flag of the right-hand side vector
+inline auto smpDivAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& rhs )
+   -> EnableIf_t< IsCUDAAssignable_v<VT1> && IsCUDAAssignable_v<VT2> >
+{
+   BLAZE_FUNCTION_TRACE;
+
+   cudaDivAssign( ~lhs, ~rhs );
+}
 
 
 
