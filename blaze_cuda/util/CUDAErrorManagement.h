@@ -40,7 +40,7 @@
 
 #include <cuda_runtime.h>
 
-#define CUDA_ERROR_CHECK                                                      \
+#define BLAZE_CUDA_ERROR_CHECK                                                      \
 if( auto err = cudaGetLastError(); err != cudaSuccess )                    \
 {                                                                          \
    std::stringstream ss;                                                   \

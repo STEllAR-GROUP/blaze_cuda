@@ -178,7 +178,7 @@ inline auto cuda_reduce
       ( store_vec.begin(), &res, init, binop );
 
    cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   BLAZE_CUDA_ERROR_CHECK;
 
    return res;
 }

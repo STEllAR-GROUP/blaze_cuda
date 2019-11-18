@@ -97,7 +97,7 @@ inline void cudaAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>& r
 
    cuda_transform( (~lhs).begin(), (~lhs).end(), (~rhs).begin(), (~lhs).begin(), op );
 
-   CUDA_ERROR_CHECK;
+   BLAZE_CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -403,7 +403,7 @@ inline auto smpDivAssign( DenseVector<VT1,TF1>& lhs, const DenseVector<VT2,TF2>&
 /*! \cond BLAZE_INTERNAL */
 namespace {
 
-BLAZE_STATIC_ASSERT( BLAZE_CUDA_MODE );
+//BLAZE_STATIC_ASSERT( BLAZE_CUDA_MODE );
 
 }
 /*! \endcond */

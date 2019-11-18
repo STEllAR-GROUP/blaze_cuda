@@ -516,7 +516,7 @@ inline CUDADynamicVector<Type,TF>::CUDADynamicVector( size_t n, const Type& init
    } );
 
    cudaDeviceSynchronize();
-   CUDA_ERROR_CHECK;
+   BLAZE_CUDA_ERROR_CHECK;
 
    BLAZE_INTERNAL_ASSERT( isIntact(), "Invariant violation detected" );
 }

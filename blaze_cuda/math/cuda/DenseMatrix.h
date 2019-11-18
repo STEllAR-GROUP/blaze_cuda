@@ -98,7 +98,7 @@ auto cudaAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>& rhs, OP 
    for( auto i = size_t( 0 ); i < (~lhs).rows(); i++ ) {
       cuda_transform( (~lhs).begin(i), (~lhs).end(i), (~rhs).begin(i), (~lhs).begin(i), op );
    }
-   CUDA_ERROR_CHECK;
+   BLAZE_CUDA_ERROR_CHECK;
 }
 /*! \endcond */
 //*************************************************************************************************
@@ -451,7 +451,7 @@ inline auto smpMultAssign( DenseMatrix<MT1,SO1>& lhs, const DenseMatrix<MT2,SO2>
 /*! \cond BLAZE_INTERNAL */
 namespace {
 
-BLAZE_STATIC_ASSERT( BLAZE_CUDA_MODE );
+//BLAZE_STATIC_ASSERT( BLAZE_CUDA_MODE );
 
 }
 /*! \endcond */
