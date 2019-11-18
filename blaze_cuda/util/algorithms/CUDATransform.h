@@ -85,11 +85,15 @@ public:
    BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto
       operator-( ThrustInputIteratorAdapter const& other ) const noexcept
    {
-      return ThrustInputIteratorAdapter( it - other.it );
+      return it - other.it;
    }
 
    BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto operator+( ptrdiff_t inc ) const noexcept {
       return ThrustInputIteratorAdapter( IteratorType( it + inc ) );
+   }
+
+   BLAZE_ALWAYS_INLINE BLAZE_DEVICE_CALLABLE auto operator-( ptrdiff_t dec ) const noexcept {
+      return ThrustInputIteratorAdapter( IteratorType( it - dec ) );
    }
 };
 
