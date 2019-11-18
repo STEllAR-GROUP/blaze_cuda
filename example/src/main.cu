@@ -6,14 +6,23 @@ int main( int, char const *[] )
 {
    namespace bz = blaze;
 
-   using mat_t = bz::DynamicMatrix< float >;
+   using mat_t = bz::CUDADynamicMatrix< float >;
 
-   mat_t ma( 10, 5, 1.f ), mb( 5, 10, 1.f ), mc( 10, 10 );
+   // Matrices ----------------------------------------------------------------
 
-   mc = ma * mb;
+   mat_t ma( 10, 10, 1.f ), mb( 10, 10, 1.f ), mc( 10, 10 );
 
-   //bz::cudaAssign( mc, ma * mb );
-   //cudaDeviceSynchronize();
+   mc = ma + mb;
+
+   std::cout << mc << '\n';
+
+   // Submatrices -------------------------------------------------------------
+
+   //auto vma = bz::submatrix( ma, 0, 0, 5, 5 )
+   //   , vmb = bz::submatrix( mb, 0, 0, 5, 5 )
+   //   , vmc = bz::submatrix( mc, 0, 0, 5, 5 );
+
+   mc = ma + mb;
 
    std::cout << mc << '\n';
 }
